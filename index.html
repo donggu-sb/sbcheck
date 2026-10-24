@@ -286,7 +286,7 @@ body.nopii .pii{display:none!important}
       <p class="hint" style="margin:0 0 8px">항목 사진은 각 항목 옆 「사진」 버튼으로 찍고, 여러 장이면 다시 누릅니다. 전경·기타 사진과 먼저 찍어 둔 사진은 여기서 넣습니다. 사진은 앱 안에 보관되며(사진첩에는 남지 않음), 이름은 주소와 항목으로 붙습니다(예: 침산동100-1_05내력벽_1.jpg).</p>
       <div class="row">
         <select class="inp" id="phItem" style="flex:1;min-width:0"></select>
-        <label class="btn small" style="display:inline-block">촬영<input id="phFile" type="file" accept="image/*" capture="environment" hidden></label>
+        <label class="btn small" style="display:inline-block">촬영<input id="phFile" type="file" accept="image/*" multiple hidden></label>
         <label class="btn small" style="display:inline-block">사진첩에서 여러 장<input id="phMulti" type="file" accept="image/*" multiple hidden></label>
       </div>
       <div class="photos" id="phList"></div>
@@ -519,7 +519,7 @@ function buildItems(){
   var h="";
   ITEMS.forEach(function(it){
     if(it.g){h+='<div class="grp">'+esc(it.g)+'</div>';return}
-    h+='<div class="item" data-n="'+it.n+'"><div class="q"><span class="no">'+CIRC[it.n-1]+'</span><span>'+esc(it.t)+'</span><label class="cam" id="cam'+it.n+'">사진 <span class="k"></span><input class="camin" data-key="'+it.n+'" type="file" accept="image/*" capture="environment" hidden></label></div>'+
+    h+='<div class="item" data-n="'+it.n+'"><div class="q"><span class="no">'+CIRC[it.n-1]+'</span><span>'+esc(it.t)+'</span><label class="cam" id="cam'+it.n+'">사진 <span class="k"></span><input class="camin" data-key="'+it.n+'" type="file" accept="image/*" multiple hidden></label></div>'+
       '<div class="seg" role="group" aria-label="'+CIRC[it.n-1]+' 상태">'+["상","중","하","-"].map(function(v){return '<button type="button" data-v="'+v+'" aria-pressed="false">'+(v==="-"?"해당없음":v)+'</button>'}).join("")+'</div>'+
       '<input class="inp note" id="note'+it.n+'" placeholder="상세 내용(위치, 상태 등)"></div>';
   });
@@ -661,7 +661,7 @@ function exportPhotos(recs,msgEl){
 function saveMany(files,key){[].slice.call(files||[]).forEach(function(f){savePhoto(f,key)})}
 $("phFile").addEventListener("change",function(e){saveMany(e.target.files,$("phItem").value);e.target.value=""});
 $("phMulti").addEventListener("change",function(e){var n=e.target.files.length;saveMany(e.target.files,$("phItem").value);if(n>1)toast(n+"장을 넣는 중입니다");e.target.value=""});
-$("items").addEventListener("change",function(e){if(!e.target.classList.contains("camin"))return;savePhoto(e.target.files&&e.target.files[0],e.target.dataset.key);e.target.value=""});
+$("items").addEventListener("change",function(e){if(!e.target.classList.contains("camin"))return;if(e.target.files&&e.target.files.length)saveMany(e.target.files,e.target.dataset.key);e.target.value=""});
 
 
 /* ---------- 시 보고 양식(분기별 점검양식) xlsx ---------- */
@@ -732,7 +732,7 @@ function renderOpens(){
     '<label class="f">방법<select class="inp" data-of="how">'+["","천장 마감재 일부 해체","점검구 개방","벽 마감재 일부 해체","기타"].map(function(v){return '<option'+(o.how===v?' selected':'')+'>'+v+'</option>'}).join("")+'</select></label></div>'+
     '<div class="chips">'+OPEN_FIND.map(function(f){return '<button type="button" class="chip" data-ofind="'+esc(f)+'" aria-pressed="'+((o.find||[]).indexOf(f)>=0)+'">'+esc(f)+'</button>'}).join("")+'</div>'+
     '<input class="inp" data-of="memo" value="'+esc(o.memo||"")+'" placeholder="안쪽 상태 메모 (예: 슬래브 하부 균열 폭 0.3mm, 달대 부식)">'+
-    '<div class="row"><label class="btn small">해체 전 사진 '+(cnt("전")||"")+'<input type="file" accept="image/*" capture="environment" hidden data-op="전"></label><label class="btn small">안쪽 사진 '+(cnt("내부")||"")+'<input type="file" accept="image/*" capture="environment" hidden data-op="내부"></label><label class="btn small">복구 후 사진 '+(cnt("후")||"")+'<input type="file" accept="image/*" capture="environment" hidden data-op="후"></label></div>'+
+    '<div class="row"><label class="btn small">해체 전 사진 '+(cnt("전")||"")+'<input type="file" accept="image/*" hidden data-op="전"></label><label class="btn small">안쪽 사진 '+(cnt("내부")||"")+'<input type="file" accept="image/*" hidden data-op="내부"></label><label class="btn small">복구 후 사진 '+(cnt("후")||"")+'<input type="file" accept="image/*" hidden data-op="후"></label></div>'+
     '<div class="row" style="font-size:14px;gap:14px"><label class="row" style="gap:6px"><input type="checkbox" data-oc="consent"'+(o.consent?' checked':'')+'> 소유자·관리자 동의</label><label class="row" style="gap:6px"><input type="checkbox" data-oc="restored"'+(o.restored?' checked':'')+'> 원상 복구함</label>'+
     '<button type="button" class="btn small danger" data-odel="'+i+'" style="margin-left:auto">이 항목 삭제</button></div></div>'}).join("")||'<p class="hint">아직 해체 확인이 없습니다.</p>';
 }
