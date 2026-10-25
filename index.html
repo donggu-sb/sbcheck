@@ -141,10 +141,11 @@ body.nopii .pii{display:none!important}
   <!-- LIST VIEW -->
   <div id="vList">
     <div class="top">
-      <h1>사전점검 기록 <span class="sub" id="orgLabel"></span></h1>
+      <h1>사전점검 기록 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v1.8</span></h1>
       <button class="iconbtn" id="toSettings" type="button">설정·내보내기</button>
     </div>
     <div class="fsbar" id="fsBar" hidden><span id="fsTxt"></span> <button class="btn small" type="button" id="fsBtn">기록 폴더 지정</button></div>
+    <div class="row" style="margin:0 0 10px"><button class="btn small" type="button" id="impQuick">받은 파일 불러오기</button><span class="hint" style="margin:0">조사자·담당자에게 받은 .json 파일</span></div>
     <div class="notice" id="storageWarn" hidden><b>저장 불가</b> 이 브라우저에서는 기록이 저장되지 않습니다. 설치형 파일로 열거나, 작업 후 바로 내보내기 하세요.</div>
     <div class="guide" id="guide" hidden><b>처음 쓰시면</b>
       <ol><li>「설정·내보내기」에서 이름과 소속, 배정 기관을 적습니다. 기록마다 점검자와 함께 점검한 사람을 고쳐 적을 수 있습니다.</li>
@@ -355,7 +356,7 @@ body.nopii .pii{display:none!important}
         <button class="btn small" type="button" id="expDocs">점검표 문서 묶음 저장</button>
         <button class="btn small" type="button" id="expPkg">결과 묶음(사진·서명 포함) 저장</button>
         <button class="btn small" type="button" id="expJson">백업 파일 저장</button>
-        <label class="btn small" style="display:inline-block">백업 불러오기<input id="impJson" type="file" accept=".json,application/json" hidden></label>
+        <label class="btn small" style="display:inline-block">받은 파일·백업 불러오기<input id="impJson" type="file" accept=".json,application/json" hidden></label>
       </div>
       <p class="hint" id="expMsg"></p>
       <div style="margin-top:10px"><button class="btn small danger" type="button" id="purge">보낸 기록 이 휴대폰에서 지우기</button></div>
@@ -1016,7 +1017,7 @@ function fsSave(){if(!FS.ok)return Promise.resolve();if(FS.busy){FS.again=true;r
   .catch(function(e){FS.ok=false;fsSet("warn","기록 폴더에 저장하지 못했습니다("+(e&&e.name||e)+"). 다시 연결해 주세요.","다시 연결")})
   .then(function(){FS.busy=false;if(FS.again){FS.again=false;fsSchedule()}})}
 function fsLoad(){/* 폴더에 있던 기록을 앱에 합치고, 앱에 없는 사진·서명을 폴더에서 가져옴 */
-  return fsRead(FS.dir,"기록.json").then(function(f){return f.text()}).then(function(t){var d=JSON.parse(t),add=0,conf=[];if(S.sample){S.recs=[];S.sample=false}
+  return fsRead(FS.dir,"기록.json").then(function(f){return f.text()}).then(function(t){var d=JSON.parse(t),add=0,conf=[];if(d.sample)return {add:0,conf:[],none:true};if(S.sample){S.recs=[];S.sample=false}
       (d.recs||[]).forEach(function(r){norm(r);var ex=S.recs.findIndex(function(x){return x.k===r.k||(r.addr&&akey(x)===akey(r))});if(ex<0){S.recs.push(r);add++}else{var cf=mergeRec(S.recs[ex],r);if(cf.length)conf.push(label(S.recs[ex])+": "+cf.join(", "))}});
       ["org","insp","dept","gu"].forEach(function(f){if(!S[f]&&d[f])S[f]=d[f]});return {add:add,conf:conf}},function(){return {add:0,conf:[],none:true}})
   .then(function(res){return fsMediaDir().then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){keys.push(k)})});
@@ -1056,11 +1057,12 @@ function mergeRec(o,n){
   if(note.length)o.hist.push({by:S.insp||"",at:new Date().toISOString(),act:"다르게 적힌 칸(남기지 않은 쪽) "+note.join("; ")});
   if(newer)o.upd=n.upd;
   return cf}
+$("impQuick").addEventListener("click",function(){$("impJson").click()});
 $("impJson").addEventListener("change",function(e){var file=e.target.files[0];if(!file)return;readText(file,function(t){
   try{var d=JSON.parse(t);if(!d.recs)throw 0;var k=0,conf=[];if(S.sample){S.recs=[];S.sample=false}
     d.recs.forEach(function(r){norm(r);var ex=S.recs.findIndex(function(x){return x.k===r.k||(r.addr&&akey(x)===akey(r))});r.hist=r.hist||[];r.hist.push({by:S.insp||"",at:new Date().toISOString(),act:"받음"});if(ex<0){S.recs.push(r);k++}else{var cf=mergeRec(S.recs[ex],r);if(cf.length)conf.push(label(S.recs[ex])+": "+cf.join(", "));k++}});
     if(d.files)Object.keys(d.files).forEach(function(k){try{pPut(k,d2b(d.files[k]))}catch(e){}});
-    ["org","insp","dept","gu"].forEach(function(f){if(!S[f]&&d[f])S[f]=d[f]});persist();fillSet();$("expMsg").textContent="백업에서 "+k+"건을 반영했습니다."+(conf.length?" 서로 다르게 적힌 칸 "+conf.length+"건 — 최근 수정한 쪽을 남기고 다른 쪽 내용은 각 건물의 「주고받은 기록」에 남겼습니다: "+conf.join(" / "):"")}
+    ["org","insp","dept","gu"].forEach(function(f){if(!S[f]&&d[f])S[f]=d[f]});persist();fillSet();toast(k+"건을 불러왔습니다");renderList();$("expMsg").textContent="백업에서 "+k+"건을 반영했습니다."+(conf.length?" 서로 다르게 적힌 칸 "+conf.length+"건 — 최근 수정한 쪽을 남기고 다른 쪽 내용은 각 건물의 「주고받은 기록」에 남겼습니다: "+conf.join(" / "):"")}
   catch(err){$("expMsg").textContent="백업 파일을 읽지 못했습니다. 이 앱에서 저장한 .json 파일인지 확인해 주세요."}e.target.value=""})});
 $("mergeFiles").addEventListener("change",function(e){
   var files=[].slice.call(e.target.files);if(!files.length)return;var left=files.length,head=null,byId={},n=0,bad=[];
