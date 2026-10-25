@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>노후건축물 사전점검 기록</title>
+<title>대구시 소규모 노후 건축물 안전점검</title>
+<meta name="apple-mobile-web-app-title" content="안전점검">
+<meta name="application-name" content="안전점검">
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* Layout: one-column field form; sticky top bar, sticky bottom score strip; list → record → settings views */
@@ -35,6 +37,7 @@ button{cursor:pointer}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--line)}
 .top h1{font-size:17px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#vList .top h1{white-space:normal;word-break:keep-all;font-size:16px;line-height:1.3}
 .top .sub{font-size:12px;color:var(--muted);font-weight:400}
 .iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 12px;font-size:14px}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:12px 14px;font-size:15px;font-weight:600}
@@ -80,7 +83,7 @@ textarea{resize:vertical;min-height:64px}
 .item{padding:10px 0;border-bottom:1px solid var(--line)}
 .item:last-child{border-bottom:0}
 .item .q{display:flex;gap:8px;font-size:15px}
-.item .no{font-family:var(--mono);color:var(--accent);font-weight:700;min-width:1.6em}
+.item .no{flex:none;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:14px;line-height:1;margin-top:-2px}
 .item .w{font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
 .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
 .seg button{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px 0;font-size:15px;font-weight:700}
@@ -141,7 +144,7 @@ body.nopii .pii{display:none!important}
   <!-- LIST VIEW -->
   <div id="vList">
     <div class="top">
-      <h1>사전점검 기록 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v1.8</span></h1>
+      <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v1.9</span></h1>
       <button class="iconbtn" id="toSettings" type="button">설정·내보내기</button>
     </div>
     <div class="fsbar" id="fsBar" hidden><span id="fsTxt"></span> <button class="btn small" type="button" id="fsBtn">기록 폴더 지정</button></div>
@@ -520,7 +523,7 @@ function buildItems(){
   var h="";
   ITEMS.forEach(function(it){
     if(it.g){h+='<div class="grp">'+esc(it.g)+'</div>';return}
-    h+='<div class="item" data-n="'+it.n+'"><div class="q"><span class="no">'+CIRC[it.n-1]+'</span><span>'+esc(it.t)+'</span><label class="cam" id="cam'+it.n+'">사진 <span class="k"></span><input class="camin" data-key="'+it.n+'" type="file" accept="image/*" multiple hidden></label></div>'+
+    h+='<div class="item" data-n="'+it.n+'"><div class="q"><span class="no">'+it.n+'</span><span>'+esc(it.t)+'</span><label class="cam" id="cam'+it.n+'">사진 <span class="k"></span><input class="camin" data-key="'+it.n+'" type="file" accept="image/*" multiple hidden></label></div>'+
       '<div class="seg" role="group" aria-label="'+CIRC[it.n-1]+' 상태">'+["상","중","하","-"].map(function(v){return '<button type="button" data-v="'+v+'" aria-pressed="false">'+(v==="-"?"해당없음":v)+'</button>'}).join("")+'</div>'+
       '<input class="inp note" id="note'+it.n+'" placeholder="상세 내용(위치, 상태 등)"></div>';
   });
@@ -859,7 +862,7 @@ function docSection(r){
     return h+'</section>';
   });
 }
-function docPage(body){return '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>사전점검 안전점검표</title><style>'+
+function docPage(body){return '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>노후건축물 안전점검표</title><style>'+
   '@page{size:A4;margin:12mm}body{font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-size:10.5pt;color:#000;margin:0;padding:12px;background:#fff}'+
   '.bar{position:sticky;top:0;background:#fff;padding:6px 0;border-bottom:1px solid #999;margin-bottom:8px}.bar button{font:inherit;padding:6px 14px}@media print{.bar{display:none}body{padding:0}}'+
   '.doc{page-break-after:always;break-after:page;max-width:186mm;margin:0 auto}.doc:last-child{page-break-after:auto}h1{font-size:15pt;text-align:center;margin:0 0 8px}h2{font-size:11pt;margin:10px 0 4px}h2 small{font-weight:400;font-size:9pt}'+
