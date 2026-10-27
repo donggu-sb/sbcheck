@@ -152,7 +152,7 @@ body.nopii .pii{display:none!important}
   <!-- LIST VIEW -->
   <div id="vList">
     <div class="top">
-      <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v2.2</span></h1>
+      <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v2.3</span></h1>
       <button class="iconbtn" id="toSettings" type="button">설정·내보내기</button>
     </div>
     <div class="fsbar" id="fsBar" hidden><span id="fsTxt"></span> <button class="btn small" type="button" id="fsBtn">기록 폴더 지정</button></div>
@@ -268,10 +268,10 @@ body.nopii .pii{display:none!important}
       </div>
       <div id="y24Block">
       <div class="calc">
-        <div>하 ①~⑫<b id="c1">0</b>개</div>
-        <div>하 ⑬~⑲<b id="c2">0</b>개</div>
+        <div>하 ①~⑫<b id="c1">0</b>× 1.0</div>
+        <div>하 ⑬~⑲<b id="c2">0</b>× 0.8</div>
         <div>해당없음<b id="c3">0</b>개소</div>
-        <div>하 합계<b id="c4">0</b>개</div>
+        <div>환산점수<b id="c4">0</b>점</div>
       </div>
       <div class="scale" id="scale"></div>
       <p class="hint" id="unfilled" style="margin:8px 0 0"></p>
@@ -351,7 +351,7 @@ body.nopii .pii{display:none!important}
     <section class="block">
       <h2>점검자·배정 기관</h2>
       <div class="grid2">
-        <label class="f" style="grid-column:1/-1">점검 구분<select id="s_form"><option value="k26">긴급점검 — 천장 탈락사고 관련 안전점검 체크리스트 (20개 항목, 양호·보통·미흡)</option><option value="y24">사전안전점검 — 대구시 소규모 노후건축물 안전점검표 (19개 항목, 상·중·하, 등급)</option></select></label>
+        <label class="f" style="grid-column:1/-1">점검 구분<select id="s_form"><option value="k26">긴급점검 — 천장 탈락사고 관련 안전점검 체크리스트 (20개 항목, 양호·보통·미흡)</option><option value="y24">사전안전점검 — 소규모 노후 건축물등 사전점검 안전점검표(2026) (19개 항목, 상·중·하, 환산점수 등급)</option></select></label>
         <label class="f">자치구<select id="s_gu"><option value="">선택</option><option>중구</option><option>동구</option><option>서구</option><option>남구</option><option>북구</option><option>수성구</option><option>달서구</option><option>달성군</option><option>군위군</option></select></label>
         <label class="f">배정 기관<input id="s_org" placeholder="예: ○○구청 건축과"></label>
         <label class="f">점검자 구분<select id="s_role"><option value="ext">외부 전문가</option><option value="off">구·군 공무원</option></select></label>
@@ -410,7 +410,7 @@ body.nopii .pii{display:none!important}
       <button class="btn small danger" type="button" id="resetAll">모든 기록 지우기</button>
       <div class="confirm" id="resetConfirm" hidden>이 휴대폰에 저장된 대상 목록과 점검 기록을 모두 지웁니다. 먼저 내보내기를 했는지 확인하세요.
         <div class="row" style="margin-top:8px"><button class="btn small danger" type="button" id="resetYes">모두 지우기</button><button class="btn small" type="button" id="resetNo">취소</button></div></div>
-      <p class="hint" style="margin-top:12px">기준: 긴급점검은 「천장 탈락사고 관련 안전점검 체크리스트」 20개 항목(양호·보통·미흡·해당없음, 등급 없음), 사전안전점검은 「대구시 소규모 노후건축물 안전점검표」(2024년 양식) 19개 항목('하' 개수로 등급: 우수 0~1 · 양호 2~4 · 보통 5~7 · 미흡 8~12 · 불량 13개 이상). 점검 구분은 「설정·내보내기」에서 바꿉니다. 기록은 이 기기에만 저장되며 어디로도 전송되지 않습니다.</p>
+      <p class="hint" style="margin-top:12px">기준: 긴급점검은 「천장 탈락사고 관련 안전점검 체크리스트」 20개 항목(양호·보통·미흡·해당없음, 등급 없음), 사전안전점검은 「소규모 노후 건축물등 사전점검 안전점검표」(2026) 19개 항목(최종 환산점수 = ①~⑫ 하 × 1.0 + ⑬~⑲ 하 × 0.8 → 우수 1.5점 이하 · 양호 ~5.0 · 보통 ~9.0 · 미흡 ~14.0 · 불량 14.1점 이상). 점검 구분은 「설정·내보내기」에서 바꿉니다. 기록은 이 기기에만 저장되며 어디로도 전송되지 않습니다.</p>
     </section>
   </div>
 </div>
@@ -468,7 +468,7 @@ var ITEMS26=[
 var FORMS={k26:{N:20,vals:["양호","보통","미흡","-"],bad:"미흡",items:ITEMS26,
     hint:"양호 · 보통 · 미흡 · 해당없음(—). 마감재로 가려진 부재는 점검구나 일부 해체로 확인하고, ⑯ 천장 마감재(석고보드 등)는 뒤틀림·균열·처짐을 확인합니다."},
   y24:{N:19,vals:["상","중","하","-"],bad:"하",items:ITEMS24,
-    hint:"상 양호 · 중 보통 · 하 나쁨 · 해당없음(—). 마감재로 직접 확인할 수 없으면 간접 징후로 판단하고, 점검구가 있으면 구조체를 확인합니다."}};
+    hint:"상 양호 · 중 보통 · 하 나쁨 · 해당없음(—). 마감재로 직접 확인할 수 없으면 균열·누수 흔적·변색 등 간접 징후로 판단하고, 점검구(천장텍스 등)가 있으면 반드시 구조체를 확인합니다. 마감재 결함이 심각하면 정밀점검·진단 의견을 냅니다."}};
 var FM=FORMS.k26,NI=20;
 function formKey(){return S&&S.form==="y24"?"y24":"k26"}
 function setForm(){FM=FORMS[formKey()];ITEMS=FM.items;NI=FM.N;if(typeof buildItems==="function"&&$("items"))buildItems();if($("itemHint"))$("itemHint").textContent=FM.hint}
@@ -478,7 +478,7 @@ function to26(r){if(r.form==="k26")return;var M={"상":"양호","중":"보통","
   Object.keys(r.notes||{}).forEach(function(k){var n=+k;nt[n>=16?n+1:n]=r.notes[k]});
   (r.marks||[]).forEach(function(m){if(typeof m.n==="number"&&m.n>=16)m.n=m.n+1});
   r.items=it;r.notes=nt;r.form="k26"}
-var GRADES=[["우수",1],["양호",4],["보통",7],["미흡",12],["불량",Infinity]];
+var GRADES=[["우수",1.5],["양호",5.0],["보통",9.0],["미흡",14.0],["불량",Infinity]];
 var STATUS={new:"미착수",pre:"사전 확인",draft:"작성중",done:"완료",noaccess:"출입 불가"};
 var KEY="sbcheck.v1";
 
@@ -512,7 +512,7 @@ function calc(r){
   var a=0,b=0,na=0,filled=0;
   var mid=0,bad=[];
   for(var n=1;n<=NI;n++){var v=r.items[n];if(!v)continue;filled++;if(v==="-")na++;else if(v===FM.bad){bad.push(n);if(n<=12)a++;else b++}else if(v==="보통")mid++}
-  var sc=a+b, g="";if(formKey()==="k26")return {a:a,b:b,na:na,filled:filled,score:sc,grade:"",mid:mid,bad:bad};
+  var sc=Math.round((a*1.0+b*0.8)*10)/10, g="";if(formKey()==="k26")return {a:a,b:b,na:na,filled:filled,score:sc,grade:"",mid:mid,bad:bad};
   for(var i=0;i<GRADES.length;i++){if(sc<=GRADES[i][1]){g=GRADES[i][0];break}}
   return {a:a,b:b,na:na,filled:filled,score:sc,grade:g};
 }
@@ -526,7 +526,7 @@ function summary(r,c){
   if(formKey()==="k26"){var ln=c.bad.map(function(n){return CIRC[n-1]+" "+(ITEMS.find(function(x){return x.n===n})||{}).s+(r.notes[n]?"("+r.notes[n]+")":"")});
     return c.bad.length?"점검 결과 '미흡' "+c.bad.length+"개 항목: "+ln.join(", ")+".":"점검 결과 '미흡' 항목 없음(특이사항 없음).";}
   var f=finalGrade(r,c);
-  var s="점검결과 '하' 등급 "+(c.a+c.b)+"개소(①~⑫ "+c.a+", ⑬~⑲ "+c.b+"), 해당없음 "+c.na+"개소로, '하' 개수 기준 등급은 '"+c.grade+"'이다.";
+  var s="점검결과 '하' 등급 "+(c.a+c.b)+"개소(①~⑫ "+c.a+", ⑬~⑲ "+c.b+"), 해당없음 "+c.na+"개소, 최종 환산점수 "+c.score.toFixed(1)+"점으로 기준 등급은 '"+c.grade+"'이다.";
   if(r.grade&&r.grade!==c.grade) s+=" 다만 "+(r.reason?r.reason.replace(/[.。\s]+$/,""):"(사유 미기재)")+" 점검등급을 '"+f+"'(으)로 평가함.";
   else s+=" 점검등급을 '"+f+"'(으)로 평가함.";
   return s;
@@ -603,7 +603,7 @@ function refreshRec(){
   $("sumLbl").textContent=k26?"점검 총평 (향후 조치사항 및 참고할 사항 등)":"총평 추가 의견 (향후 추가 안전진단 등 참고 사항)";
   if(k26){$("k1").textContent=c.bad.length;$("k2").textContent=c.mid;$("k3").textContent=c.na;$("k4").textContent=c.filled;$("k26unfilled").textContent=c.filled<NI?"아직 고르지 않은 항목 "+(NI-c.filled)+"개":"20개 항목 모두 기록됨"}
   $("c1").textContent=c.a;$("c2").textContent=c.b;$("c3").textContent=c.na;$("c4").textContent=c.score;
-  var lim=["0~1개","2~4개","5~7개","8~12개","13개 이상"];
+  var lim=["1.5점 이하","1.6~5.0점","5.1~9.0점","9.1~14.0점","14.1점 이상"];
   $("scale").innerHTML=GRADES.map(function(g,i){return '<div class="'+(c.filled&&c.grade===g[0]?"on":"")+'">'+g[0]+'<br>'+lim[i]+'</div>'}).join("");
   $("unfilled").textContent=c.filled<NI?"아직 고르지 않은 항목 "+(NI-c.filled)+"개":NI+"개 항목 모두 기록됨";
   var diff=!!cur.grade&&cur.grade!==c.grade;$("reasonWrap").hidden=!diff;
@@ -743,7 +743,7 @@ function buildReportXlsx(data){
   var d=new Date(),today=d.getFullYear()+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0")+".";
   var H4=["건축물 개요","","","","","","","","점검 개요","","","","","점검 결과","","","","구.군\n조치사항","비고"];
   var H5=["","","","","","","","","점검일자","점검자 정보","","","","","","","","",""];
-  var H6=["연번","자치구","지번 주소","사용승인일","구조","용도","층수","","","구.군 공무원\n현장점검 참여 여부","외부 전문가","","","점검등급","정밀안전점검\n(건축물관리점검기관 점검) 필요 ","정밀안전진단\n필요 여부","주요의견\n(특이사항)","",""];
+  var H6=["연번","자치구","지번 주소","사용승인일","구조","용도","층수","","","구.군 공무원\n현장점검 참여 여부","외부 전문가","","","점검등급","정밀안전점검\n(건축물관리점검기관 점검) 필요 여부","정밀안전진단\n필요 여부","주요의견\n(특이사항)","",""];
   var H7=["","","","","","","지상","지하","","","성명","분야","市 자문단 해당 여부","","","","","",""];
   var rows=[],r=function(n,arr,st,ht){rows.push('<row r="'+n+'"'+(ht?' ht="'+ht+'" customHeight="1"':'')+'>'+arr.map(function(v,i){return cellX(n,i,v,typeof st==="function"?st(i):st)}).join("")+'</row>')};
   r(2,["2026년 소규모 노후 건축물 안전점검"].concat(Array(18).fill("")),4,28);
@@ -918,23 +918,23 @@ function docSection(r){
     var st=String(r.struct||""),sk={rc1:/라멘/.test(st),rc2:/벽식/.test(st),jo:/조적|벽돌|블록|블럭/.test(st),st:/철골/.test(st),wd:/목조|목구조/.test(st)};var oth=!(sk.rc1||sk.rc2||sk.jo||sk.st||sk.wd)&&st;
     var it=r.ivtype||"",ivk=function(x){return ck(it===x)};
     var k26=formKey()==="k26";
-    var h='<section class="doc"><h1>'+(k26?'점검 체크리스트':'대구시 소규모 노후건축물 안전점검표')+'</h1>'+(k26?'<p class="c" style="text-align:center;margin:-4px 0 8px;font-size:9.5pt">관음동 건축물 천장 탈락사고 관련 안전점검</p>':'')+
+    var h='<section class="doc"><h1>'+(k26?'점검 체크리스트':'소규모 노후 건축물등 사전점검 안전점검표')+'</h1>'+(k26?'<p class="c" style="text-align:center;margin:-4px 0 8px;font-size:9.5pt">관음동 건축물 천장 탈락사고 관련 안전점검</p>':'')+
     '<h2>■ 점검개요</h2><table class="ov"><tr><th>시설물명</th><td colspan="2">'+E(r.name)+'</td><th rowspan="3">점검자</th><th>성명</th><td>'+E(r.ext||"")+' '+sig(s1)+'</td></tr>'+
     '<tr><th>규모(층수)</th><td colspan="2">지상 '+E(r.up||"")+'층 / 지하 '+E(r.down||"0")+'층</td><th>소속</th><td>'+E(r.extf||"")+'</td></tr>'+
     '<tr><th>조사일시</th><td colspan="2">'+E(r.date||"")+'</td><th>연락처</th><td></td></tr>'+
-    '<tr><th>'+(k26?'주 용 도':'용도')+'</th><td colspan="2">'+E(r.use)+'</td><th rowspan="3">점검자</th><th>성명</th><td>'+E(r.offname||"")+' '+sig(s2)+'</td></tr>'+
+    '<tr><th>'+'주 용 도'+'</th><td colspan="2">'+E(r.use)+'</td><th rowspan="3">점검자</th><th>성명</th><td>'+E(r.offname||"")+' '+sig(s2)+'</td></tr>'+
     '<tr><th>사용승인일</th><td colspan="2">'+E(r.appr)+'</td><th>소속</th><td>'+E(S.org||S.gu||"")+'</td></tr>'+
-    '<tr><th>'+(k26?'관 리 자':'관리주체')+'</th><td>'+E(r.mgr||"")+'</td><td>연락처 '+E(r.mgrtel||"")+'</td><th>연락처</th><td></td></tr>'+
+    '<tr><th>'+'관 리 자'+'</th><td>'+E(r.mgr||"")+'</td><td>연락처 '+E(r.mgrtel||"")+'</td><th>연락처</th><td></td></tr>'+
     '<tr><th>구조형식</th><td colspan="5">RC라멘조 '+ck(sk.rc1)+' / RC벽식 '+ck(sk.rc2)+' / 조적조 '+ck(sk.jo)+' / 철골조 '+ck(sk.st)+' / 목조 '+ck(sk.wd)+' / 기타('+E(oth||"")+')</td></tr>'+
-    '<tr><th>'+(k26?'건축물 위치':'주소')+'</th><td colspan="5">'+E(r.addr)+(r.dong?" "+E(r.dong):"")+'</td></tr></table>'+
+    '<tr><th>'+'건축물 위치'+'</th><td colspan="5">'+E(r.addr)+(r.dong?" "+E(r.dong):"")+'</td></tr></table>'+
     (k26?'':'<h2>■ 사용자 의견 청취 <small>(구조체 이상 발생음, 잦은 진동, 슬래브 부분 침하, 출입문 개폐 불량, 마감재 어긋남 등)</small></h2><table class="qa"><tr><th>면담자</th><td>성명 : '+E(r.iv||"")+' &nbsp; (관리자 '+ivk("관리자")+', 소유자 '+ivk("소유자")+', 세입자 '+ivk("세입자")+', 기타('+E(/^(관리자|소유자|세입자)$/.test(it)?"":it)+'))</td></tr>'+
     '<tr><th rowspan="4">질의내용</th><td>1) 최근 안전 우려가 있는 현상과 부위가 있는가?<br>'+E(r.q1||"")+'</td></tr><tr><td>2) 최근 하중 증가요인이 있는가?<br>'+E(r.q2||"")+'</td></tr>'+
     '<tr><td>3) 그간 점검실시 현황과 결과는?<br>'+E(r.q3||"")+'</td></tr><tr><td>4) 기타 의견<br>'+E(r.q4||"")+'</td></tr></table>')+
     (k26?'<h2>■ 점검현황 <small>(상태 등급 : 양호 / 보통 / 미흡 / 해당없음)</small></h2><table class="items"><tr><th>점 검 항 목</th><th style="width:4.5em">상태</th><th>상세 내용(지적사항 등)</th></tr>'+rows+'</table>'+
      '<table><tr><td class="sum"><b>점검 총평</b> <small>(향후 조치사항 및 참고할 사항 등)</small><br>'+E(summary(r,c))+(r.sum?'<br>'+E(r.sum):'')+(r.act?'<br>조치: '+E(r.act)+(r.actst?' ('+E(r.actst)+')':''):'')+(r.memo?'<br>'+E(r.memo):'')+'</td></tr></table>':
-    '<h2>■ 점검현황 <small>(※ 상태 등급 : 상 – 양호한 상태, 중 - 보통 상태, 하 – 나쁜 상태)</small></h2><table class="items"><tr><th>점 검 항 목</th><th style="width:4.5em">상태</th><th>상세 내용(위치, 상태 등)</th></tr>'+rows+'</table>'+
-    '<table><tr><td class="sum"><b>점검 총평</b> <small>(향후 추가 안전진단 등 참고할 사항 등)</small><br>'+E(summary(r,c))+(r.sum?'<br>'+E(r.sum):'')+'</td><td class="grade"><div>점검등급<br><small>5단계</small></div><b>'+E(f)+'</b></td></tr></table>'+
-    '<p class="note">※ 1)-가의 항목 중 외장재 및 마감재로 인해 확인이 불가할 때는 관리주체의 협조를 통해 외장재 및 마감재 일부를 제거하고 조사하는 방안을 검토한다. 외장재 및 마감재 제거가 어려워 육안으로 직접 확인하지 못했을 경우에는 평가결과를 ‘중’ 이하로 판정 하여야 한다.(확인 불가 부재 : ‘상’ 평가 불가)<br>※ 각 항목별 해당 사항이 없으면 해당없음으로 표기</p>'+
+    '<h2>■ 점검현황 <small>(상태 등급 : 상 - 양호한 상태, 중 - 보통 상태, 하 - 나쁜 상태 / 해당없음)</small></h2><table class="items"><tr><th>점 검 항 목</th><th style="width:4.5em">상태</th><th>상세 내용(위치, 상태 등)</th></tr>'+rows+'</table>'+
+    '<table><tr><td class="sum"><b>점검 총평</b> <small>(향후 추가 안전진단 등 참고할 사항 등)</small><br>'+E(summary(r,c))+(r.sum?'<br>'+E(r.sum):'')+'</td><td class="grade"><div>점검등급<br><small>5단계</small></div><b>'+E(f)+'</b><div style="font-size:8.5pt">환산 '+(c.filled?c.score.toFixed(1)+'점':'')+'</div></td></tr></table>'+
+    '<p class="note">※ 점검 시 유의사항 1. 항목별 해당 사항이 없으면 ‘해당없음’으로 표기<br>2. 외장재 및 내부 마감재로 인해 주요 구조체(보, 기둥 등)의 직접 확인이 불가한 경우, 마감 표면의 균열, 누수 흔적, 변색 등 간접 징후를 통해 구조 결함 여부를 판단하며, 점검구(천장텍스 마감 등)으로 점검이 가능한 경우 반드시 구조체 상태 확인 필요함<br>3. 육안으로 확인이 불가하더라도 마감재 결함이 심각하여 구조적 안전성이 우려될 경우, 본 점검(정밀안전점검, 정밀안전진단) 필요 의견을 제시함</p>'+
     '<table><tr><th colspan="3">정밀안전점검 또는 정밀안전진단 필요 여부 (☑)</th></tr><tr><td class="c">정밀안전점검 필요 '+ck(pr==="정밀안전점검 필요")+'<br><small>(건축물관리점검기관의 점검 필요)</small></td><td class="c">정밀안전진단 필요 '+ck(pr==="정밀안전진단 필요")+'</td><td class="c">불필요 '+ck(pr==="불필요")+'</td></tr><tr><td colspan="3">[ 비고 ] '+E(r.memo||"")+(r.grade&&r.grade!==c.grade?' / 등급 조정 사유: '+E(r.reason||""):'')+'</td></tr></table>'+
     '<p class="note">※ 점검결과 등급이 우수 ~ 보통 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 할 수 있음<br>※ 점검결과 등급이 미흡 ~ 불량 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 하지 않을 수 있음</p>');
     if((r.opens||[]).length)h+='<h2>■ 마감재 해체 확인</h2><table><tr><th>번호</th><th>위치</th><th>방법</th><th>안쪽 상태</th><th>메모</th><th>동의</th><th>복구</th></tr>'+r.opens.map(function(o,i){return '<tr><td class="c">'+(i+1)+'</td><td>'+E(o.loc||"")+'</td><td>'+E(o.how||"")+'</td><td>'+E((o.find||[]).join(", "))+'</td><td>'+E(o.memo||"")+'</td><td class="c">'+(o.consent?"○":"")+'</td><td class="c">'+(o.restored?"○":"")+'</td></tr>'}).join("")+'</table>';
@@ -943,12 +943,13 @@ function docSection(r){
     var slot=function(t){return '<figure><figcaption class="ph">'+t+'</figcaption><div class="empty"></div></figure>'},fig=ph.map(function(p){return '<figure><figcaption class="ph">'+(/_전경_/.test(p.n)?(k26?'점검 전경':'전경'):(k26?'지적사항':'구조안전 결함'))+'</figcaption><img src="'+p.u+'"><figcaption>'+E(photoLabel(p.n))+'</figcaption></figure>'});
     if(!(ph[0]&&/_전경_/.test(ph[0].n)))fig.unshift(slot(k26?'점검 전경':'전경'));while(fig.length<6)fig.push(slot(k26?'지적사항':'구조안전 결함'));
     h+='<div class="pb"></div><h2>■ 현황 및 점검 사진 <small>(추가 사진 첨부가능)</small></h2><div class="pg">'+fig.join("")+'</div>';
-    if(!k26)h+='<div class="pb"></div><h2>등급선정기준</h2><table class="gd"><tr><th>등 급</th><th>기 준</th><th>안전등급</th><th>‘하’의 비율 범위</th><th>정밀안전점검 및 정밀안전진단 기준</th></tr>'+
-      '<tr><td class="c">우수</td><td>기준에 부합하는 안전성 확보</td><td class="c">우수(6%)</td><td class="c">0~1개</td><td class="c" rowspan="3">불필요</td></tr>'+
-      '<tr><td class="c">양호</td><td>일부 부재 경미한 결함 발생, 기능에는 지장 없으며 일부 보수 필요</td><td class="c">양호(22%)</td><td class="c">2~4개</td></tr>'+
-      '<tr><td class="c">보통</td><td>광범위한 부재 결함 발생, 안전에는 지장 없으며, 간단한 보수·보강 필요</td><td class="c">보통(39%)</td><td class="c">5~7개</td></tr>'+
-      '<tr><td class="c">미흡</td><td>심각한 결함에 대한 긴급한 보수 보강이 필요하며(정밀안전점검 등 실시), 안전등급 결정 등 관리가 필요</td><td class="c">미흡(61%)</td><td class="c">8~12개</td><td class="c">정밀안전점검 필요</td></tr>'+
-      '<tr><td class="c">불량</td><td>심각한 결함으로 인하여 시설물의 안전에 위험이 있어 사용제한·금지 여부에 대한 정밀안전진단이 필요</td><td class="c">불량(100%)</td><td class="c">13개 이상</td><td class="c">정밀안전진단 필요</td></tr></table><p class="note">※ 총 항목 19개 중 ‘하’등급의 개수로 등급을 지정</p>';
+    if(!k26)h+='<div class="pb"></div><h2>점검등급선정 기준</h2><table class="gd"><tr><th>등 급</th><th>기 준</th><th>안전등급</th><th>최종 환산 점수</th><th>정밀안전점검 및 정밀안전진단 기준</th></tr>'+
+      '<tr><td class="c">우 수</td><td>기준에 부합하는 안전성 확보</td><td class="c">우수(10%)</td><td class="c">1.5점 이하</td><td class="c" rowspan="3">불필요</td></tr>'+
+      '<tr><td class="c">양 호</td><td>일부 부재 경미한 결함 발생, 기능에는 지장 없으며 일부 보수 필요</td><td class="c">양호(30%)</td><td class="c">1.6점~5.0점 이하</td></tr>'+
+      '<tr><td class="c">보 통</td><td>광범위한 부재 결함 발생, 안전에는 지장 없으며, 간단한 보수·보강 필요</td><td class="c">보통(50%)</td><td class="c">5.1점~9.0점 이하</td></tr>'+
+      '<tr><td class="c">미 흡</td><td>심각한 결함에 대한 긴급한 보수 보강이 필요하며(정밀안전점검 등 실시), 안전등급 결정 등 관리가 필요</td><td class="c">미흡(75%)</td><td class="c">9.1점~14.0점 이하</td><td class="c">정밀안전점검 필요</td></tr>'+
+      '<tr><td class="c">불 량</td><td>심각한 결함으로 인하여 시설물의 안전에 위험이 있어 사용 제한 · 금지 여부에 대한 정밀안전진단이 필요</td><td class="c">불량(100%)</td><td class="c">14.1점 이상</td><td class="c">정밀안전진단 필요</td></tr></table>'+
+      '<p class="note">※ 최종 환산 점수 = 주요구조체·부대시설 점수 + 비구조체 점수<br>- 주요구조체·부대시설 점수: ① ~ ⑫번 항목 중 하 개수 × 1.0<br>- 비구조체 점수: ⑬ ~ ⑲번 항목 중 하 개수 × 0.8</p>';
     return h+'</section>';
   });
 }
@@ -1071,7 +1072,7 @@ function header(){
     "면담자","면담자구분","의견1_안전우려","의견2_하중증가","의견3_점검이력","의견4_기타"];
   for(var n=1;n<=NI;n++)h.push("항목"+String(n).padStart(2,"0"));
   for(n=1;n<=NI;n++)h.push("상세"+String(n).padStart(2,"0"));
-  return h.concat(["해당없음수","하_1_12","하_13_19","하합계","기준등급","최종등급","등급조정사유","정밀점검의견","총평","총평추가","비고","마감재해체확인","사진","수정시각","조치내용","조치여부","점검인원","점검구분"]);
+  return h.concat(["해당없음수","하_1_12","하_13_19","환산점수","기준등급","최종등급","등급조정사유","정밀점검의견","총평","총평추가","비고","마감재해체확인","사진","수정시각","조치내용","조치여부","점검인원","점검구분"]);
 }
 function rowOf(r){
   var c=calc(r),done=r.status==="done"||r.status==="draft";
