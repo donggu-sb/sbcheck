@@ -129,6 +129,7 @@ pre.out{white-space:pre-wrap;word-break:break-all;font-family:var(--mono);font-s
 .dwglist{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}
 .modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}
 .modal .in{background:var(--surface);border-radius:var(--r);padding:14px;width:100%;max-width:560px}
+.gchoice .btn[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
 .formsel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}.formsel button{font:inherit;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card,#fff);color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:2px}.formsel button b{font-size:16px}.formsel button small{font-size:12px;opacity:.75}.formsel button[aria-pressed="true"]{border:2px solid var(--accent);background:var(--accent);color:#fff}.formsel button[aria-pressed="true"] small{opacity:.9}
 .fsbar{margin:0 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.fsbar.on{border-color:#007A6D}.fsbar.warn{border-color:#C2352B}
 .modal canvas{width:100%;height:220px;background:#fff;border:1px solid var(--line);border-radius:8px;touch-action:none;display:block}
@@ -152,7 +153,7 @@ body.nopii .pii{display:none!important}
   <!-- LIST VIEW -->
   <div id="vList">
     <div class="top">
-      <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v2.3</span></h1>
+      <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v2.4</span></h1>
       <button class="iconbtn" id="toSettings" type="button">설정·내보내기</button>
     </div>
     <div class="fsbar" id="fsBar" hidden><span id="fsTxt"></span> <button class="btn small" type="button" id="fsBtn">기록 폴더 지정</button></div>
@@ -275,17 +276,21 @@ body.nopii .pii{display:none!important}
       </div>
       <div class="scale" id="scale"></div>
       <p class="hint" id="unfilled" style="margin:8px 0 0"></p>
+      <div class="gchoice" style="margin-top:12px">
+        <p id="gradeLine" style="margin:0 0 8px;font-size:15px"></p>
+        <div class="row" style="gap:8px"><button class="btn small" type="button" id="gKeep">이 등급으로 기재</button><button class="btn small" type="button" id="gEdit">등급 수정</button></div>
+      </div>
       <div class="grid2" style="margin-top:12px">
-        <label class="f">점검등급(최종)
+        <label class="f" id="gradeWrap" hidden>수정할 점검등급
           <select id="f_grade"><option value="">기준 등급 따름</option><option>우수</option><option>양호</option><option>보통</option><option>미흡</option><option>불량</option></select></label>
         <label class="f">정밀안전점검·진단 의견
           <select id="f_prec"><option value="">기준 따름</option><option>불필요</option><option>정밀안전점검 필요</option><option>정밀안전진단 필요</option></select></label>
       </div>
-      <label class="f" id="reasonWrap" style="margin-top:10px" hidden>기준 등급과 다르게 정한 사유 (필수)<textarea id="f_reason" rows="2" placeholder="예: 대부분 비구조체 결함으로 확인되어"></textarea></label>
+      <label class="f" id="reasonWrap" style="margin-top:10px" hidden>등급을 수정한 사유 (필수, 총평 첫 줄에 들어갑니다)<textarea id="f_reason" rows="2" placeholder="예: 대부분 비구조체 및 기타 사항으로 확인되어"></textarea></label>
       <p class="hint" id="precNote" hidden style="margin-top:6px">점검표 ※: 등급과 다르게 정밀안전점검·진단 의견을 낼 수 있습니다. 비고에 근거를 적어 주세요.</p>
       </div>
-      <label class="f" style="margin-top:12px">점검 총평 (자동 문장)<textarea id="autoSum" rows="5" readonly></textarea></label>
-      <label class="f" style="margin-top:10px"><span id="sumLbl">총평 추가 의견 (향후 추가 안전진단 등 참고 사항)</span><textarea id="f_sum" rows="3"></textarea></label>
+      <label class="f" style="margin-top:12px"><span id="autoLbl">점검 총평 첫 줄 (등급을 기재·수정하면 자동으로 만들어짐)</span><textarea id="autoSum" rows="4" readonly></textarea></label>
+      <label class="f" style="margin-top:10px"><span id="sumLbl">점검 총평 (정성적 의견: 주요 결함, 향후 추가 안전진단 등 참고할 사항)</span><textarea id="f_sum" rows="3"></textarea></label>
       <label class="f" style="margin-top:10px">비고<textarea id="f_memo" rows="2"></textarea></label>
     </section>
 
@@ -502,7 +507,7 @@ function sample(){
 }
 S=load()||sample();
 S.recs.forEach(norm);
-function norm(r){if(!r.k)r.k="k"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);r.dong=r.dong||"";r.items=r.items||{};r.notes=r.notes||{};r.photos=r.photos||[];r.status=r.status||"new";r.upd=r.upd||"";if(!r.form){var v=Object.keys(r.items).map(function(k){return r.items[k]});r.form=v.some(function(x){return x==="상"||x==="중"||x==="하"})?"y24":(S&&S.form==="y24"?"y24":"k26")}if(r.form==="y24"&&formKey()==="k26"&&S&&S.sample)to26(r)}
+function norm(r){if(!r.k)r.k="k"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);r.dong=r.dong||"";r.items=r.items||{};r.notes=r.notes||{};r.photos=r.photos||[];r.status=r.status||"new";r.upd=r.upd||"";if(!r.gconf&&r.grade)r.gconf="edit";else if(!r.gconf&&r.status==="done")r.gconf="keep";if(!r.form){var v=Object.keys(r.items).map(function(k){return r.items[k]});r.form=v.some(function(x){return x==="상"||x==="중"||x==="하"})?"y24":(S&&S.form==="y24"?"y24":"k26")}if(r.form==="y24"&&formKey()==="k26"&&S&&S.sample)to26(r)}
 
 /* ---------- helpers ---------- */
 function $(id){return document.getElementById(id)}
@@ -520,16 +525,16 @@ function nz(x){return String(x||"").replace(/\s+/g,"").replace(/^대구광역시
 function akey(r){return r.bid?"id:"+String(r.bid).replace(/\D/g,""):nz(r.addr)+"|"+nz(r.dong)}
 function label(r){return (r.addr||"주소 미입력")+(r.dong?" "+r.dong:"")}
 function precDefault(g){return g==="불량"?"정밀안전진단 필요":g==="미흡"?"정밀안전점검 필요":"불필요"}
-function finalGrade(r,c){return r.grade||c.grade}
+function finalGrade(r,c){return (r.gconf==="edit"&&r.grade)||c.grade}
 function summary(r,c){
   if(!c.filled) return "";
   if(formKey()==="k26"){var ln=c.bad.map(function(n){return CIRC[n-1]+" "+(ITEMS.find(function(x){return x.n===n})||{}).s+(r.notes[n]?"("+r.notes[n]+")":"")});
     return c.bad.length?"점검 결과 '미흡' "+c.bad.length+"개 항목: "+ln.join(", ")+".":"점검 결과 '미흡' 항목 없음(특이사항 없음).";}
   var f=finalGrade(r,c);
-  var s="점검결과 '하' 등급 "+(c.a+c.b)+"개소(①~⑫ "+c.a+", ⑬~⑲ "+c.b+"), 해당없음 "+c.na+"개소, 최종 환산점수 "+c.score.toFixed(1)+"점으로 기준 등급은 '"+c.grade+"'이다.";
-  if(r.grade&&r.grade!==c.grade) s+=" 다만 "+(r.reason?r.reason.replace(/[.。\s]+$/,""):"(사유 미기재)")+" 점검등급을 '"+f+"'(으)로 평가함.";
-  else s+=" 점검등급을 '"+f+"'(으)로 평가함.";
-  return s;
+  if(!r.gconf) return "";
+  var base="점검 결과 '하' 등급 "+(c.a+c.b)+"개(①~⑫ "+c.a+", ⑬~⑲ "+c.b+"), 최종 환산점수 "+c.score.toFixed(1)+"점으로 '"+c.grade+"' 선정";
+  if(r.gconf==="edit"&&r.grade&&r.grade!==c.grade) return base+"되었으나 "+(r.reason?r.reason.replace(/[.。\s]+$/,""):"(사유 미기재)")+" 점검등급을 '"+f+"'(으)로 평가함.";
+  return base+"되어 점검등급을 '"+f+"'(으)로 평가함.";
 }
 
 /* ---------- list view ---------- */
@@ -600,15 +605,19 @@ function refreshRec(){
   document.querySelectorAll(".item").forEach(function(el){var n=el.dataset.n,v=cur.items[n]||"";el.querySelectorAll(".seg button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.v===v))})});
   var c=calc(cur),k26=formKey()==="k26";
   $("k26Block").hidden=!k26;$("y24Block").hidden=k26;$("gradeH").textContent=k26?"점검 결과·조치":"판정";
-  $("sumLbl").textContent=k26?"점검 총평 (향후 조치사항 및 참고할 사항 등)":"총평 추가 의견 (향후 추가 안전진단 등 참고 사항)";
+  $("sumLbl").textContent=k26?"점검 총평 (향후 조치사항 및 참고할 사항 등)":"점검 총평 (정성적 의견: 주요 결함, 향후 추가 안전진단 등 참고할 사항)";
   if(k26){$("k1").textContent=c.bad.length;$("k2").textContent=c.mid;$("k3").textContent=c.na;$("k4").textContent=c.filled;$("k26unfilled").textContent=c.filled<NI?"아직 고르지 않은 항목 "+(NI-c.filled)+"개":"20개 항목 모두 기록됨"}
   $("c1").textContent=c.a;$("c2").textContent=c.b;$("c3").textContent=c.na;$("c4").textContent=c.score;
   var lim=["1.5점 이하","1.6~5.0점","5.1~9.0점","9.1~14.0점","14.1점 이상"];
   $("scale").innerHTML=GRADES.map(function(g,i){return '<div class="'+(c.filled&&c.grade===g[0]?"on":"")+'">'+g[0]+'<br>'+lim[i]+'</div>'}).join("");
   $("unfilled").textContent=c.filled<NI?"아직 고르지 않은 항목 "+(NI-c.filled)+"개":NI+"개 항목 모두 기록됨";
-  var diff=!!cur.grade&&cur.grade!==c.grade;$("reasonWrap").hidden=!diff;
+  var ed=cur.gconf==="edit";$("gradeWrap").hidden=!ed;
+  $("gradeLine").innerHTML=c.filled?'기준 등급 <b>'+esc(c.grade)+'</b> (최종 환산점수 '+c.score.toFixed(1)+'점)'+(cur.gconf?(ed?' → 수정: <b>'+esc(cur.grade||"등급 선택")+'</b>':' → 그대로 기재'):' · 아래에서 기재 또는 수정을 고르세요'):'항목을 기록하면 기준 등급이 계산됩니다.';
+  $("gKeep").setAttribute("aria-pressed",String(cur.gconf==="keep"));$("gEdit").setAttribute("aria-pressed",String(ed));
+  if(!k26)$("autoLbl").textContent=cur.gconf?"점검 총평 첫 줄 (자동)":"점검 총평 첫 줄 (등급을 기재·수정하면 자동으로 만들어짐)";else $("autoLbl").textContent="점검 결과 (자동)";
+  var diff=ed&&!!cur.grade&&cur.grade!==c.grade;$("reasonWrap").hidden=!ed;
   var pd=precDefault(finalGrade(cur,c));$("precNote").hidden=!(cur.prec&&cur.prec!==pd);
-  $("f_grade").options[0].textContent="기준 등급 따름"+(c.filled?" ("+c.grade+")":"");
+  $("f_grade").options[0].textContent="등급 선택";
   $("f_prec").options[0].textContent="기준 따름 ("+pd+")";
   $("autoSum").value=summary(cur,c);
   var q=encodeURIComponent((cur.road||((S.gu&&cur.addr&&cur.addr.indexOf("대구")<0?"대구 "+S.gu+" ":"")+(cur.addr||""))).trim());
@@ -643,6 +652,8 @@ $("vRec").addEventListener("input",function(e){
   touch();refreshRec();
 });
 $("vRec").addEventListener("submit",function(e){e.preventDefault()});
+$("gKeep").addEventListener("click",function(){if(!cur)return;cur.gconf="keep";cur.grade="";cur.reason="";$("f_grade").value="";$("f_reason").value="";if(cur.status==="new"||cur.status==="pre")cur.status="draft";touch();refreshRec()});
+$("gEdit").addEventListener("click",function(){if(!cur)return;cur.gconf="edit";if(cur.status==="new"||cur.status==="pre")cur.status="draft";touch();refreshRec();$("f_grade").focus()});
 var saveT;function touch(){cur.upd=new Date().toISOString();clearTimeout(saveT);saveT=setTimeout(persist,300)}
 function saveNow(msg){clearTimeout(saveT);persist();toast(msg)}
 $("preDone").addEventListener("click",function(){if(!cur.prechk&&S.insp)cur.prechk=S.insp;$("f_prechk").value=cur.prechk||"";if(cur.status==="new")cur.status="pre";cur.upd=new Date().toISOString();saveNow("사전 확인 완료로 저장했습니다")});
@@ -653,7 +664,9 @@ $("saveDone").addEventListener("click",function(){
   if(!(cur.addr||"").trim())miss.push("건축물 위치");
   if(c.filled<NI)miss.push("점검 항목 "+(NI-c.filled)+"개");
   if(!cur.date)miss.push("조사일시");
-  if(formKey()==="y24"&&cur.grade&&cur.grade!==c.grade&&!(cur.reason||"").trim())miss.push("등급 조정 사유");
+  if(formKey()==="y24"&&!cur.gconf)miss.push("점검등급 기재 또는 수정 선택");
+  if(formKey()==="y24"&&cur.gconf==="edit"&&!cur.grade)miss.push("수정할 점검등급");
+  if(formKey()==="y24"&&cur.gconf==="edit"&&cur.grade&&cur.grade!==c.grade&&!(cur.reason||"").trim())miss.push("등급 수정 사유");
   if(miss.length){$("doneWarn").textContent="완료하려면 다음을 채워 주세요: "+miss.join(", ");$("doneWarn").hidden=false;return}
   $("doneWarn").hidden=true;cur.status="done";cur.prec=cur.prec||"";cur.upd=new Date().toISOString();saveNow("점검 완료로 저장했습니다");
 });
