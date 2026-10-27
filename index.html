@@ -90,6 +90,9 @@ textarea{resize:vertical;min-height:64px}
 .seg button[aria-pressed="true"][data-v="상"]{background:var(--ok);color:var(--accent-ink);border-color:var(--ok)}
 .seg button[aria-pressed="true"][data-v="중"]{background:var(--mid);color:var(--accent-ink);border-color:var(--mid)}
 .seg button[aria-pressed="true"][data-v="하"]{background:var(--bad);color:var(--accent-ink);border-color:var(--bad)}
+.seg button[aria-pressed="true"][data-v="양호"]{background:var(--ok);color:var(--accent-ink);border-color:var(--ok)}
+.seg button[aria-pressed="true"][data-v="보통"]{background:var(--mid);color:var(--accent-ink);border-color:var(--mid)}
+.seg button[aria-pressed="true"][data-v="미흡"]{background:var(--bad);color:var(--accent-ink);border-color:var(--bad)}
 .seg button[aria-pressed="true"][data-v="-"]{background:var(--na);color:var(--accent-ink);border-color:var(--na)}
 .cam{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 10px;font-size:13px;font-weight:600;white-space:nowrap;align-self:flex-start;cursor:pointer}
 .cam.hot{background:var(--bad);color:var(--accent-ink);border-color:var(--bad)}
@@ -122,6 +125,7 @@ pre.out{white-space:pre-wrap;word-break:break-all;font-family:var(--mono);font-s
 .dwglist{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}
 .modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}
 .modal .in{background:var(--surface);border-radius:var(--r);padding:14px;width:100%;max-width:560px}
+.formsel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}.formsel button{font:inherit;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card,#fff);color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:2px}.formsel button b{font-size:16px}.formsel button small{font-size:12px;opacity:.75}.formsel button[aria-pressed="true"]{border:2px solid var(--accent);background:var(--accent);color:#fff}.formsel button[aria-pressed="true"] small{opacity:.9}
 .fsbar{margin:0 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.fsbar.on{border-color:#007A6D}.fsbar.warn{border-color:#C2352B}
 .modal canvas{width:100%;height:220px;background:#fff;border:1px solid var(--line);border-radius:8px;touch-action:none;display:block}
 .sigs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
@@ -144,16 +148,17 @@ body.nopii .pii{display:none!important}
   <!-- LIST VIEW -->
   <div id="vList">
     <div class="top">
-      <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v1.9</span></h1>
+      <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v2.0</span></h1>
       <button class="iconbtn" id="toSettings" type="button">설정·내보내기</button>
     </div>
     <div class="fsbar" id="fsBar" hidden><span id="fsTxt"></span> <button class="btn small" type="button" id="fsBtn">기록 폴더 지정</button></div>
+    <div class="formsel" id="formSel" role="group" aria-label="점검 구분"><button type="button" data-form="k26"><b>긴급점검</b><small>천장 탈락사고 · 20항목</small></button><button type="button" data-form="y24"><b>사전안전점검</b><small>안전점검표 · 19항목·등급</small></button></div>
     <div class="row" style="margin:0 0 10px"><button class="btn small" type="button" id="impQuick">받은 파일 불러오기</button><span class="hint" style="margin:0">조사자·담당자에게 받은 .json 파일</span></div>
     <div class="notice" id="storageWarn" hidden><b>저장 불가</b> 이 브라우저에서는 기록이 저장되지 않습니다. 설치형 파일로 열거나, 작업 후 바로 내보내기 하세요.</div>
     <div class="guide" id="guide" hidden><b>처음 쓰시면</b>
       <ol><li>「설정·내보내기」에서 이름과 소속, 배정 기관을 적습니다. 기록마다 점검자와 함께 점검한 사람을 고쳐 적을 수 있습니다.</li>
-      <li>담당 공무원에게 받은 배정 파일을 「백업 불러오기」로 엽니다. 대장 정보와 사전 확인 메모가 함께 들어옵니다. 파일이 없으면 「+ 직접 추가」로 건물을 넣습니다.</li>
-      <li>건물마다 19개 항목을 고르고, 「하」 항목은 사진을 찍습니다.</li>
+      <li>담당 공무원에게 받은 배정 파일을 「받은 파일 불러오기」로 엽니다. 대장 정보와 사전 확인 메모가 함께 들어옵니다. 파일이 없으면 「+ 직접 추가」로 건물을 넣습니다.</li>
+      <li>건물마다 점검 항목을 고르고, 「미흡」(사전안전점검은 「하」) 항목은 사진을 찍습니다.</li>
       <li>하루가 끝나면 결과 CSV와 사진 묶음을 담당 기관에 보내고, 보낸 기록은 이 휴대폰에서 지웁니다.</li></ol></div>
     <div class="notice" id="sampleNote" hidden><b>예시 자료</b> 화면의 건물은 사용법을 보여 주는 예시입니다. 설정에서 실제 대상 목록(CSV)을 불러오면 바뀝니다.</div>
     <div class="prog">
@@ -242,12 +247,22 @@ body.nopii .pii{display:none!important}
 
     <section class="block">
       <h2>점검현황</h2>
-      <p class="hint" style="margin:0 0 8px">상 양호 · 중 보통 · 하 나쁨 · 해당없음(—). 마감재로 직접 확인할 수 없으면 간접 징후로 판단하고, 점검구가 있으면 구조체를 확인합니다.</p>
+      <p class="hint" id="itemHint" style="margin:0 0 8px">상 양호 · 중 보통 · 하 나쁨 · 해당없음(—). 마감재로 직접 확인할 수 없으면 간접 징후로 판단하고, 점검구가 있으면 구조체를 확인합니다.</p>
       <div id="items"></div>
     </section>
 
     <section class="block">
-      <h2>판정</h2>
+      <h2 id="gradeH">판정</h2>
+      <div id="k26Block" hidden>
+        <div class="calc"><div>미흡<b id="k1">0</b>개</div><div>보통<b id="k2">0</b>개</div><div>해당없음<b id="k3">0</b>개</div><div>기록<b id="k4">0</b>/20</div></div>
+        <p class="hint" id="k26unfilled" style="margin:8px 0 0"></p>
+        <label class="f" style="margin-top:12px">조치내용 (지적사항에 대한 조치 또는 향후 조치계획)<textarea id="f_act" rows="2" placeholder="예: 천장 처짐 부위 임시 고정, 관리주체에 보수 안내"></textarea></label>
+        <div class="grid2" style="margin-top:10px">
+          <label class="f">조치 여부<select id="f_actst"><option value="">선택</option><option>조치완료</option><option>미조치</option></select></label>
+          <label class="f">점검인원 (명)<input id="f_crew" inputmode="numeric" placeholder="예: 2"></label>
+        </div>
+      </div>
+      <div id="y24Block">
       <div class="calc">
         <div>하 ①~⑫<b id="c1">0</b>개</div>
         <div>하 ⑬~⑲<b id="c2">0</b>개</div>
@@ -264,8 +279,9 @@ body.nopii .pii{display:none!important}
       </div>
       <label class="f" id="reasonWrap" style="margin-top:10px" hidden>기준 등급과 다르게 정한 사유 (필수)<textarea id="f_reason" rows="2" placeholder="예: 대부분 비구조체 결함으로 확인되어"></textarea></label>
       <p class="hint" id="precNote" hidden style="margin-top:6px">점검표 ※: 등급과 다르게 정밀안전점검·진단 의견을 낼 수 있습니다. 비고에 근거를 적어 주세요.</p>
+      </div>
       <label class="f" style="margin-top:12px">점검 총평 (자동 문장)<textarea id="autoSum" rows="5" readonly></textarea></label>
-      <label class="f" style="margin-top:10px">총평 추가 의견 (향후 추가 안전진단 등 참고 사항)<textarea id="f_sum" rows="3"></textarea></label>
+      <label class="f" style="margin-top:10px"><span id="sumLbl">총평 추가 의견 (향후 추가 안전진단 등 참고 사항)</span><textarea id="f_sum" rows="3"></textarea></label>
       <label class="f" style="margin-top:10px">비고<textarea id="f_memo" rows="2"></textarea></label>
     </section>
 
@@ -331,6 +347,7 @@ body.nopii .pii{display:none!important}
     <section class="block">
       <h2>점검자·배정 기관</h2>
       <div class="grid2">
+        <label class="f" style="grid-column:1/-1">점검 구분<select id="s_form"><option value="k26">긴급점검 — 천장 탈락사고 관련 안전점검 체크리스트 (20개 항목, 양호·보통·미흡)</option><option value="y24">사전안전점검 — 대구시 소규모 노후건축물 안전점검표 (19개 항목, 상·중·하, 등급)</option></select></label>
         <label class="f">자치구<select id="s_gu"><option value="">선택</option><option>중구</option><option>동구</option><option>서구</option><option>남구</option><option>북구</option><option>수성구</option><option>달서구</option><option>달성군</option><option>군위군</option></select></label>
         <label class="f">배정 기관<input id="s_org" placeholder="예: ○○구청 건축과"></label>
         <label class="f">점검자 구분<select id="s_role"><option value="ext">외부 전문가</option><option value="off">구·군 공무원</option></select></label>
@@ -389,7 +406,7 @@ body.nopii .pii{display:none!important}
       <button class="btn small danger" type="button" id="resetAll">모든 기록 지우기</button>
       <div class="confirm" id="resetConfirm" hidden>이 휴대폰에 저장된 대상 목록과 점검 기록을 모두 지웁니다. 먼저 내보내기를 했는지 확인하세요.
         <div class="row" style="margin-top:8px"><button class="btn small danger" type="button" id="resetYes">모두 지우기</button><button class="btn small" type="button" id="resetNo">취소</button></div></div>
-      <p class="hint" style="margin-top:12px">기준: 「대구시 소규모 노후건축물 안전점검표」(2024년 양식) 19개 항목, 총 19개 중 하 등급 개수로 등급 지정 — 우수 0~1개 · 양호 2~4개 · 보통 5~7개 · 미흡 8~12개 · 불량 13개 이상. 기록은 이 기기에만 저장되며 어디로도 전송되지 않습니다.</p>
+      <p class="hint" style="margin-top:12px">기준: 긴급점검은 「천장 탈락사고 관련 안전점검 체크리스트」 20개 항목(양호·보통·미흡·해당없음, 등급 없음), 사전안전점검은 「대구시 소규모 노후건축물 안전점검표」(2024년 양식) 19개 항목('하' 개수로 등급: 우수 0~1 · 양호 2~4 · 보통 5~7 · 미흡 8~12 · 불량 13개 이상). 점검 구분은 「설정·내보내기」에서 바꿉니다. 기록은 이 기기에만 저장되며 어디로도 전송되지 않습니다.</p>
     </section>
   </div>
 </div>
@@ -434,7 +451,29 @@ var ITEMS=[
  {n:18,s:"피난소화",t:"피난통로 사용성, 스프링클러 등 소화 기구 존재 여부"},
  {n:19,s:"루프드레인",t:"옥상 ROOF DRAIN의 상태"}
 ];
-var CIRC="①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲";
+var CIRC="①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
+var ITEMS24=ITEMS;
+var ITEMS26=[
+ {g:"주요구조체 · 1) 건축물의 주요 구조체의 안전을 해치는 사항 · 가. 주요 부재의 구조적 균열과 변형 및 부등침하"}].concat(ITEMS24.slice(1,9),
+ [{g:"부대시설 · 나. 주변 축대, 옹벽, 담장, 파라펫의 안전상태"}],ITEMS24.slice(10,14),
+ [{g:"비구조체 · 2) 건축물의 비구조체 결함 사항"},{n:13,s:"창호",t:"창과 문틀의 뒤틀림과 여닫기 곤란 상태 여부"},{n:14,s:"비구조마감",t:"비구조체 마감등 손상(균열, 누수, 백화) 여부"},
+  {n:15,s:"외벽마감탈락",t:"외벽 및 비구조체 마감(타일, 드라이비트, 치장벽돌, 석재마감 등) 탈락 및 들뜸 여부"},
+  {g:"3) 기타 사항"},{n:16,s:"천장마감재",t:"건축물 내부 천장 마감재(석고보드 등)뒤틀림, 균열손상 여부"},
+  {n:17,s:"과적",t:"옥상 및 실내의 하중(물건) 과적 여부"},{n:18,s:"돌출물",t:"돌출물(간판, 안테나 등)의 탈락 현상"},
+  {n:19,s:"피난소화",t:"피난통로 사용성, 스프링클러 등 소화 기구 존재 여부"},{n:20,s:"루프드레인",t:"옥상 ROOF DRAIN의 상태"}]);
+var FORMS={k26:{N:20,vals:["양호","보통","미흡","-"],bad:"미흡",items:ITEMS26,
+    hint:"양호 · 보통 · 미흡 · 해당없음(—). 마감재로 가려진 부재는 점검구나 일부 해체로 확인하고, ⑯ 천장 마감재(석고보드 등)는 뒤틀림·균열·처짐을 확인합니다."},
+  y24:{N:19,vals:["상","중","하","-"],bad:"하",items:ITEMS24,
+    hint:"상 양호 · 중 보통 · 하 나쁨 · 해당없음(—). 마감재로 직접 확인할 수 없으면 간접 징후로 판단하고, 점검구가 있으면 구조체를 확인합니다."}};
+var FM=FORMS.k26,NI=20;
+function formKey(){return S&&S.form==="y24"?"y24":"k26"}
+function setForm(){FM=FORMS[formKey()];ITEMS=FM.items;NI=FM.N;if(typeof buildItems==="function"&&$("items"))buildItems();if($("itemHint"))$("itemHint").textContent=FM.hint}
+/* 2024 양식 기록 → 2026 양식 변환: 상·중·하 → 양호·보통·미흡, ⑯~⑲ → ⑰~⑳ */
+function to26(r){if(r.form==="k26")return;var M={"상":"양호","중":"보통","하":"미흡","-":"-"},it={},nt={};
+  Object.keys(r.items||{}).forEach(function(k){var n=+k;it[n>=16?n+1:n]=M[r.items[k]]||r.items[k]});
+  Object.keys(r.notes||{}).forEach(function(k){var n=+k;nt[n>=16?n+1:n]=r.notes[k]});
+  (r.marks||[]).forEach(function(m){if(typeof m.n==="number"&&m.n>=16)m.n=m.n+1});
+  r.items=it;r.notes=nt;r.form="k26"}
 var GRADES=[["우수",1],["양호",4],["보통",7],["미흡",12],["불량",Infinity]];
 var STATUS={new:"미착수",pre:"사전 확인",draft:"작성중",done:"완료",noaccess:"출입 불가"};
 var KEY="sbcheck.v1";
@@ -459,7 +498,7 @@ function sample(){
 }
 S=load()||sample();
 S.recs.forEach(norm);
-function norm(r){if(!r.k)r.k="k"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);r.dong=r.dong||"";r.items=r.items||{};r.notes=r.notes||{};r.photos=r.photos||[];r.status=r.status||"new";r.upd=r.upd||""}
+function norm(r){if(!r.k)r.k="k"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);r.dong=r.dong||"";r.items=r.items||{};r.notes=r.notes||{};r.photos=r.photos||[];r.status=r.status||"new";r.upd=r.upd||"";if(!r.form){var v=Object.keys(r.items).map(function(k){return r.items[k]});r.form=v.some(function(x){return x==="상"||x==="중"||x==="하"})?"y24":(S&&S.form==="y24"?"y24":"k26")}if(r.form==="y24"&&formKey()==="k26"&&S&&S.sample)to26(r)}
 
 /* ---------- helpers ---------- */
 function $(id){return document.getElementById(id)}
@@ -467,8 +506,9 @@ function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return
 function toast(m){var t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true},2200)}
 function calc(r){
   var a=0,b=0,na=0,filled=0;
-  for(var n=1;n<=19;n++){var v=r.items[n];if(!v)continue;filled++;if(v==="-")na++;else if(v==="하"){if(n<=12)a++;else b++}}
-  var sc=a+b, g="";
+  var mid=0,bad=[];
+  for(var n=1;n<=NI;n++){var v=r.items[n];if(!v)continue;filled++;if(v==="-")na++;else if(v===FM.bad){bad.push(n);if(n<=12)a++;else b++}else if(v==="보통")mid++}
+  var sc=a+b, g="";if(formKey()==="k26")return {a:a,b:b,na:na,filled:filled,score:sc,grade:"",mid:mid,bad:bad};
   for(var i=0;i<GRADES.length;i++){if(sc<=GRADES[i][1]){g=GRADES[i][0];break}}
   return {a:a,b:b,na:na,filled:filled,score:sc,grade:g};
 }
@@ -479,6 +519,8 @@ function precDefault(g){return g==="불량"?"정밀안전진단 필요":g==="미
 function finalGrade(r,c){return r.grade||c.grade}
 function summary(r,c){
   if(!c.filled) return "";
+  if(formKey()==="k26"){var ln=c.bad.map(function(n){return CIRC[n-1]+" "+(ITEMS.find(function(x){return x.n===n})||{}).s+(r.notes[n]?"("+r.notes[n]+")":"")});
+    return c.bad.length?"점검 결과 '미흡' "+c.bad.length+"개 항목: "+ln.join(", ")+".":"점검 결과 '미흡' 항목 없음(특이사항 없음).";}
   var f=finalGrade(r,c);
   var s="점검결과 '하' 등급 "+(c.a+c.b)+"개소(①~⑫ "+c.a+", ⑬~⑲ "+c.b+"), 해당없음 "+c.na+"개소로, '하' 개수 기준 등급은 '"+c.grade+"'이다.";
   if(r.grade&&r.grade!==c.grade) s+=" 다만 "+(r.reason?r.reason.replace(/[.。\s]+$/,""):"(사유 미기재)")+" 점검등급을 '"+f+"'(으)로 평가함.";
@@ -493,21 +535,23 @@ function renderList(){
   $("orgLabel").textContent=S.org?("· "+S.org+(S.insp?" "+S.insp:"")):"";
   $("sampleNote").hidden=!S.sample;
   $("storageWarn").hidden=canStore;
-  var cnt={new:0,pre:0,draft:0,done:0,noaccess:0};S.recs.forEach(function(r){cnt[r.status]++});
-  $("nAll").textContent=S.recs.length;$("nDone").textContent=cnt.done;$("nDraft").textContent=cnt.draft;$("nNo").textContent=cnt.noaccess;$("nNew").textContent=cnt.new;$("nPre").textContent=cnt.pre;
-  var tot=S.recs.length||1;
+  document.querySelectorAll("#formSel button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.form===formKey()))});
+  var RR=RECS(),cnt={new:0,pre:0,draft:0,done:0,noaccess:0};RR.forEach(function(r){cnt[r.status]++});
+  $("nAll").textContent=RR.length;$("nDone").textContent=cnt.done;$("nDraft").textContent=cnt.draft;$("nNo").textContent=cnt.noaccess;$("nNew").textContent=cnt.new;$("nPre").textContent=cnt.pre;
+  var tot=RR.length||1;
   $("bar").innerHTML='<i style="width:'+(cnt.done/tot*100)+'%;background:var(--ok)"></i><i style="width:'+(cnt.draft/tot*100)+'%;background:var(--mid)"></i><i style="width:'+(cnt.noaccess/tot*100)+'%;background:var(--bad)"></i><i style="width:'+(cnt.pre/tot*100)+'%;background:var(--accent);opacity:.45"></i>';
   var fs=[["all","전체"],["new","미착수"],["pre","사전 확인"],["draft","작성중"],["done","완료"],["noaccess","출입 불가"]];
   $("filters").innerHTML=fs.map(function(f){return '<button type="button" class="chip" data-f="'+f[0]+'" aria-pressed="'+(filter===f[0])+'">'+f[1]+'</button>'}).join("");
   var q=$("q").value.trim().toLowerCase();
-  var rows=S.recs.filter(function(r){return (filter==="all"||r.status===filter)&&(!q||[r.id,r.bid,r.addr,r.road,r.dong,r.name,r.use,r.asg].join(" ").toLowerCase().indexOf(q)>=0)});
+  var rows=RR.filter(function(r){return (filter==="all"||r.status===filter)&&(!q||[r.id,r.bid,r.addr,r.road,r.dong,r.name,r.use,r.asg].join(" ").toLowerCase().indexOf(q)>=0)});
   $("list").innerHTML=rows.length?rows.map(function(r){
-    var c=calc(r),g=(r.status==="done"||r.status==="draft")&&c.filled?finalGrade(r,c):"";
+    var c=calc(r),g=(r.status==="done"||r.status==="draft")&&c.filled?(formKey()==="k26"?(c.bad.length?"미흡 "+c.bad.length:"특이사항 없음"):finalGrade(r,c)):"";
     return '<button type="button" class="card" data-k="'+esc(r.k)+'"><span class="t">'+esc(label(r))+(r.name?' · '+esc(r.name):'')+'</span>'+
       '<span class="s"><span class="pill st-'+r.status+'">'+STATUS[r.status]+'</span>'+(g?'<span class="g g-'+g+'">'+g+'</span>':'')+'</span>'+
-      '<span class="m">'+esc(r.use||"용도 미상")+(r.appr?' · '+esc(r.appr):'')+(r.area?' · '+esc(r.area)+'㎡':'')+(r.status==="draft"?' · '+c.filled+'/19 항목':'')+(r.status==="noaccess"&&r.noreason?' · '+esc(r.noreason):'')+(r.visit?' · 방문 '+esc(r.visit.replace("T"," ").slice(5)):'')+(r.asg?' · 배정 '+esc(r.asg):'')+((r.dwgs||[]).length?' · 도면 '+r.dwgs.length:'')+(r.pre?' · 사전 메모 있음':'')+'</span></button>';
+      '<span class="m">'+esc(r.use||"용도 미상")+(r.appr?' · '+esc(r.appr):'')+(r.area?' · '+esc(r.area)+'㎡':'')+(r.status==="draft"?' · '+c.filled+'/'+NI+' 항목':'')+(r.status==="noaccess"&&r.noreason?' · '+esc(r.noreason):'')+(r.visit?' · 방문 '+esc(r.visit.replace("T"," ").slice(5)):'')+(r.asg?' · 배정 '+esc(r.asg):'')+((r.dwgs||[]).length?' · 도면 '+r.dwgs.length:'')+(r.pre?' · 사전 메모 있음':'')+'</span></button>';
   }).join(""):'<p class="hint">조건에 맞는 건물이 없습니다.</p>';
 }
+$("formSel").addEventListener("click",function(e){var b=e.target.closest("[data-form]");if(!b||b.dataset.form===formKey())return;S.form=b.dataset.form;setForm();persist();renderList();toast((S.form==="k26"?"긴급점검":"사전안전점검")+" 목록입니다")});
 $("filters").addEventListener("click",function(e){var b=e.target.closest("[data-f]");if(!b)return;filter=b.dataset.f;renderList()});
 $("q").addEventListener("input",renderList);
 $("list").addEventListener("click",function(e){var b=e.target.closest("[data-k]");if(b)openRec(b.dataset.k)});
@@ -515,23 +559,24 @@ $("addNew").addEventListener("click",function(){
   var r=norm2({status:"new"});S.recs.unshift(r);persist();openRec(r.k);setTimeout(function(){$("f_addr").focus()},50);
 });
 function norm2(r){norm(r);return r}
+function RECS(){var f=formKey();return S.recs.filter(function(r){return (r.form||"k26")===f})}
 
 /* ---------- record view ---------- */
 var FMAP={f_id:"id",f_date:"date",f_name:"name",f_addr:"addr",f_dong:"dong",f_visit:"visit",f_mgrtel2:"mgrtel",f_calls:"calls",f_ship:"ship",f_offname:"offname",f_bid:"bid",f_uno:"uno",f_road:"road",f_pre:"pre",f_asg:"asg",f_prechk:"prechk",f_ext:"ext",f_extf:"extf",f_co:"co",f_use:"use",f_appr:"appr",f_up:"up",f_down:"down",f_area:"area",f_struct:"struct",f_mgr:"mgr",f_mgrtel:"mgrtel",
-  f_iv:"iv",f_ivtype:"ivtype",f_q1:"q1",f_q2:"q2",f_q3:"q3",f_q4:"q4",f_grade:"grade",f_prec:"prec",f_reason:"reason",f_sum:"sum",f_memo:"memo",f_noreason:"noreason"};
+  f_iv:"iv",f_ivtype:"ivtype",f_q1:"q1",f_q2:"q2",f_q3:"q3",f_q4:"q4",f_grade:"grade",f_prec:"prec",f_reason:"reason",f_sum:"sum",f_memo:"memo",f_noreason:"noreason",f_act:"act",f_actst:"actst",f_crew:"crew"};
 function buildItems(){
   var h="";
   ITEMS.forEach(function(it){
     if(it.g){h+='<div class="grp">'+esc(it.g)+'</div>';return}
     h+='<div class="item" data-n="'+it.n+'"><div class="q"><span class="no">'+it.n+'</span><span>'+esc(it.t)+'</span><label class="cam" id="cam'+it.n+'">사진 <span class="k"></span><input class="camin" data-key="'+it.n+'" type="file" accept="image/*" multiple hidden></label></div>'+
-      '<div class="seg" role="group" aria-label="'+CIRC[it.n-1]+' 상태">'+["상","중","하","-"].map(function(v){return '<button type="button" data-v="'+v+'" aria-pressed="false">'+(v==="-"?"해당없음":v)+'</button>'}).join("")+'</div>'+
-      '<input class="inp note" id="note'+it.n+'" placeholder="상세 내용(위치, 상태 등)"></div>';
+      '<div class="seg" role="group" aria-label="'+CIRC[it.n-1]+' 상태">'+FM.vals.map(function(v){return '<button type="button" data-v="'+v+'" aria-pressed="false">'+(v==="-"?"해당없음":v)+'</button>'}).join("")+'</div>'+
+      '<input class="inp note" id="note'+it.n+'" placeholder="'+(formKey()==="k26"?"상세 내용(지적사항 등)":"상세 내용(위치, 상태 등)")+'"></div>';
   });
   $("items").innerHTML=h;
   var opts='<option value="전경">전경 (건물 전체)</option><option value="기타">기타</option>';ITEMS.forEach(function(it){if(it.n)opts+='<option value="'+it.n+'">'+CIRC[it.n-1]+' '+it.s+'</option>'});
   $("phItem").innerHTML=opts;
 }
-buildItems();
+setForm();
 function openRec(id){
   cur=S.recs.find(function(r){return r.k===id});if(!cur)return;
   if(!cur.date)cur.date=(cur.visit||"").slice(0,10)||new Date().toISOString().slice(0,10);
@@ -541,7 +586,7 @@ function openRec(id){
   if(cur.off==null)cur.off=S.role==="off"?true:!!S.lastOff;
   if(cur.co==null)cur.co=S.lastCo||"";
   Object.keys(FMAP).forEach(function(k){$(k).value=cur[FMAP[k]]||""});
-  for(var n=1;n<=19;n++){$("note"+n).value=cur.notes[n]||""}
+  for(var n=1;n<=NI;n++){$("note"+n).value=cur.notes[n]||""}
   $("f_adv").checked=!!cur.adv;$("f_off").checked=!!cur.off;curD=0;dwgZoomed=false;renderOpens();renderDwg();renderSig();
   $("noWrap").hidden=cur.status!=="noaccess";$("doneWarn").hidden=true;$("delConfirm").hidden=true;
   show("rec");refreshRec();window.scrollTo(0,0);
@@ -549,11 +594,14 @@ function openRec(id){
 function refreshRec(){
   if(!cur)return;
   document.querySelectorAll(".item").forEach(function(el){var n=el.dataset.n,v=cur.items[n]||"";el.querySelectorAll(".seg button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.v===v))})});
-  var c=calc(cur);
+  var c=calc(cur),k26=formKey()==="k26";
+  $("k26Block").hidden=!k26;$("y24Block").hidden=k26;$("gradeH").textContent=k26?"점검 결과·조치":"판정";
+  $("sumLbl").textContent=k26?"점검 총평 (향후 조치사항 및 참고할 사항 등)":"총평 추가 의견 (향후 추가 안전진단 등 참고 사항)";
+  if(k26){$("k1").textContent=c.bad.length;$("k2").textContent=c.mid;$("k3").textContent=c.na;$("k4").textContent=c.filled;$("k26unfilled").textContent=c.filled<NI?"아직 고르지 않은 항목 "+(NI-c.filled)+"개":"20개 항목 모두 기록됨"}
   $("c1").textContent=c.a;$("c2").textContent=c.b;$("c3").textContent=c.na;$("c4").textContent=c.score;
   var lim=["0~1개","2~4개","5~7개","8~12개","13개 이상"];
   $("scale").innerHTML=GRADES.map(function(g,i){return '<div class="'+(c.filled&&c.grade===g[0]?"on":"")+'">'+g[0]+'<br>'+lim[i]+'</div>'}).join("");
-  $("unfilled").textContent=c.filled<19?"아직 고르지 않은 항목 "+(19-c.filled)+"개":"19개 항목 모두 기록됨";
+  $("unfilled").textContent=c.filled<NI?"아직 고르지 않은 항목 "+(NI-c.filled)+"개":NI+"개 항목 모두 기록됨";
   var diff=!!cur.grade&&cur.grade!==c.grade;$("reasonWrap").hidden=!diff;
   var pd=precDefault(finalGrade(cur,c));$("precNote").hidden=!(cur.prec&&cur.prec!==pd);
   $("f_grade").options[0].textContent="기준 등급 따름"+(c.filled?" ("+c.grade+")":"");
@@ -564,11 +612,11 @@ function refreshRec(){
   var hs=(cur.hist||[]).slice(-3);$("histLine").textContent=hs.length?"주고받은 기록: "+hs.map(function(h){return new Date(h.at).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})+" "+(h.by||"")+" "+h.act}).join(" · "):"";
   $("recTitle").textContent=cur.addr?label(cur):"새 건물";
   var dup=cur.addr&&S.recs.some(function(r){return r!==cur&&akey(r)===akey(cur)});$("dupWarn").hidden=!dup;$("dupWarn").textContent=dup?"같은 주소(동 구분 포함)의 건물이 목록에 이미 있습니다. 한 필지에 여러 동이면 동 구분을 적어 주세요.":"";
-  for(var n2=1;n2<=19;n2++){var cm=$("cam"+n2),tg="_"+tagOf(n2)+"_",k2=(cur.photos||[]).filter(function(p){return p.indexOf(tg)>=0}).length;cm.classList.toggle("hot",cur.items[n2]==="하"&&!k2);cm.querySelector(".k").textContent=k2?k2:""}
+  for(var n2=1;n2<=NI;n2++){var cm=$("cam"+n2),tg="_"+tagOf(n2)+"_",k2=(cur.photos||[]).filter(function(p){return p.indexOf(tg)>=0}).length;cm.classList.toggle("hot",cur.items[n2]===FM.bad&&!k2);cm.querySelector(".k").textContent=k2?k2:""}
   var pl=$("phList"),want=(cur.photos||[]).join("|");
   if(pl.dataset.v!==want){pl.dataset.v=want;pl.innerHTML=(cur.photos||[]).map(function(p){return '<div class="ph"><img alt="" data-n="'+esc(p)+'"><span>'+esc(p)+'</span><button type="button" data-del="'+esc(p)+'">삭제</button></div>'}).join("");
     pl.querySelectorAll("img").forEach(function(im){pGet(im.dataset.n).then(function(b){if(b)im.src=URL.createObjectURL(b)})})}
-  $("stripTxt").innerHTML='하 <b>'+(c.a+c.b)+'</b> · '+(c.filled?'<span class="g g-'+finalGrade(cur,c)+'">'+finalGrade(cur,c)+'</span>':'미기록')+' <span>('+c.filled+'/19)</span>';
+  $("stripTxt").innerHTML=k26?'미흡 <b>'+c.bad.length+'</b> · '+(cur.actst?esc(cur.actst):'조치 미입력')+' <span>('+c.filled+'/'+NI+')</span>':'하 <b>'+(c.a+c.b)+'</b> · '+(c.filled?'<span class="g g-'+finalGrade(cur,c)+'">'+finalGrade(cur,c)+'</span>':'미기록')+' <span>('+c.filled+'/'+NI+')</span>';
 }
 $("items").addEventListener("click",function(e){
   var b=e.target.closest(".seg button");if(!b)return;var n=b.closest(".item").dataset.n;
@@ -599,9 +647,9 @@ $("stripSave").addEventListener("click",function(){saveNow("저장했습니다")
 $("saveDone").addEventListener("click",function(){
   var c=calc(cur),miss=[];
   if(!(cur.addr||"").trim())miss.push("건축물 위치");
-  if(c.filled<19)miss.push("점검 항목 "+(19-c.filled)+"개");
+  if(c.filled<NI)miss.push("점검 항목 "+(NI-c.filled)+"개");
   if(!cur.date)miss.push("조사일시");
-  if(cur.grade&&cur.grade!==c.grade&&!(cur.reason||"").trim())miss.push("등급 조정 사유");
+  if(formKey()==="y24"&&cur.grade&&cur.grade!==c.grade&&!(cur.reason||"").trim())miss.push("등급 조정 사유");
   if(miss.length){$("doneWarn").textContent="완료하려면 다음을 채워 주세요: "+miss.join(", ");$("doneWarn").hidden=false;return}
   $("doneWarn").hidden=true;cur.status="done";cur.prec=cur.prec||"";cur.upd=new Date().toISOString();saveNow("점검 완료로 저장했습니다");
 });
@@ -686,6 +734,7 @@ function colL(c){var s="";c++;while(c){var m=(c-1)%26;s=String.fromCharCode(65+m
 function cellX(r,c,v,st){var ref=colL(c)+r;if(v===""||v==null)return '<c r="'+ref+'" s="'+st+'"/>';
   if(typeof v==="number")return '<c r="'+ref+'" s="'+st+'"><v>'+v+'</v></c>';
   return '<c r="'+ref+'" s="'+st+'" t="inlineStr"><is><t xml:space="preserve">'+xesc(v)+'</t></is></c>'}
+var XSTYLES='';
 function buildReportXlsx(data){
   var d=new Date(),today=d.getFullYear()+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0")+".";
   var H4=["건축물 개요","","","","","","","","점검 개요","","","","","점검 결과","","","","구.군\n조치사항","비고"];
@@ -701,7 +750,7 @@ function buildReportXlsx(data){
   var widths=[6,8,22,12,14,16,6,6,12,12,10,12,10,8,14,12,40,12,10];
   var sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><cols>'+
     widths.map(function(w,i){return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'}).join("")+'</cols><sheetData>'+rows.join("")+'</sheetData><mergeCells count="'+merges.length+'">'+merges.map(function(m){return '<mergeCell ref="'+m+'"/>'}).join("")+'</mergeCells></worksheet>';
-  var styles='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="3"><font><sz val="10"/><name val="맑은 고딕"/></font><font><b/><sz val="10"/><name val="맑은 고딕"/></font><font><b/><sz val="14"/><name val="맑은 고딕"/></font></fonts>'+
+  XSTYLES='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="3"><font><sz val="10"/><name val="맑은 고딕"/></font><font><b/><sz val="10"/><name val="맑은 고딕"/></font><font><b/><sz val="14"/><name val="맑은 고딕"/></font></fonts>'+
     '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE7EEF5"/><bgColor indexed="64"/></patternFill></fill></fills>'+
     '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"/><right style="thin"/><top style="thin"/><bottom style="thin"/><diagonal/></border></borders>'+
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="5">'+
@@ -710,13 +759,17 @@ function buildReportXlsx(data){
     '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'+
     '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'+
     '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+  return xlsxFromSheet(sheet,"분기별 점검양식");
+}
+function xlsxFromSheet(sheet,sname){
+  if(!XSTYLES)buildReportXlsx([]);var styles=XSTYLES;
   var enc=new TextEncoder(),F=function(n,t){return {name:n,data:enc.encode(t)}};
-  return zip([
+  return new Blob([zip([
     F("[Content_Types].xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'),
     F("_rels/.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'),
-    F("xl/workbook.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="분기별 점검양식" sheetId="1" r:id="rId1"/></sheets></workbook>'),
+    F("xl/workbook.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="'+sname+'" sheetId="1" r:id="rId1"/></sheets></workbook>'),
     F("xl/_rels/workbook.xml.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'),
-    F("xl/worksheets/sheet1.xml",sheet),F("xl/styles.xml",styles)]);
+    F("xl/worksheets/sheet1.xml",sheet),F("xl/styles.xml",styles)])],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
 }
 function saveReport(h,rows,msgEl){var data=reportRows(h,rows);if(!data.length){msgEl.textContent="점검 완료된 건물이 없어 보고 양식을 만들지 않았습니다.";return}
   var b=buildReportXlsx(data),n=fname("xlsx","report");b=new Blob([b],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});download(b,n);
@@ -724,6 +777,36 @@ function saveReport(h,rows,msgEl){var data=reportRows(h,rows);if(!data.length){m
 
 
 
+/* ---------- 긴급점검 결과 제출 서식(붙임2) xlsx ---------- */
+function rep26Rows(){
+  var rs=RECS().filter(function(r){return r.status==="done"});
+  return rs.map(function(r,i){var c=calc(r),gu=S.gu||"",a=shortAddr(r.addr,gu)+(r.dong?" "+r.dong:"");
+    var fl=c.bad.length>0,jj=fl?c.bad.map(function(n){var it=ITEMS.find(function(x){return x.n===n})||{};return CIRC[n-1]+" "+(r.notes[n]||it.s)}).join("\n"):"특이사항 없음";
+    var area=r.area?Number(r.area).toFixed(2)+"㎡":"",fl2="(지하"+(r.down||0)+"/지상"+(r.up||"")+")";
+    var st=r.actst||(fl?"미조치":"조치완료");
+    return {cells:[i+1,a,area+"\n"+fl2,jj,r.act||"",r.crew?Number(r.crew)||r.crew:"",st],flag:fl,st:st,crew:Number(r.crew)||0,date:r.date||"",ext:r.ext,off:r.offname}});
+}
+function saveReport26(msgEl){
+  var d=rep26Rows();if(!d.length){msgEl.textContent="점검 완료된 건물이 없어 결과 서식을 만들지 않았습니다.";return}
+  var fl=d.filter(function(x){return x.flag}),done=fl.filter(function(x){return x.st==="조치완료"}).length,crew=d.reduce(function(a,x){return a+x.crew},0);
+  var dates=d.map(function(x){return x.date}).filter(Boolean).sort(),ex={},of={};d.forEach(function(x){if(x.ext)ex[x.ext]=1;if(x.off)of[x.off]=1});
+  var ne=Object.keys(ex).length,no=Object.keys(of).length,gu=S.gu||"";
+  var rows=[],r=function(n,arr,st,ht){rows.push('<row r="'+n+'"'+(ht?' ht="'+ht+'" customHeight="1"':'')+'>'+arr.map(function(v,i){return cellX(n,i,v,typeof st==="function"?st(i):st)}).join("")+'</row>')};
+  r(1,["관음동 건축물 천장 탈락사고 관련 안전점검 결과"+(gu?" ("+gu+")":""),"","","","","",""],4,28);
+  r(3,["□ 점검개요"],0);
+  r(4,[" ㅇ (기    간) "+(dates.length?dotDate(dates[0],true)+" ~ "+dotDate(dates[dates.length-1],true):"")],0);
+  r(5,[" ㅇ (점 검 자) 총 "+(ne+no)+"명(공무원 "+no+", 민간전문가 "+ne+")"],0);
+  r(6,[" ㅇ (점검실적) "+d.length+"개소"],0);
+  r(8,["□ 점검 및 조치결과"],0);
+  r(9,[" ㅇ 지적사항 "+fl.length+"건 / 조치완료 "+done+"건 / 미조치 "+(fl.length-done)+"건"],0);
+  r(11,["연번","소재지","연면적(층수)","지적사항","조치내용","점검인원","비고"],1,22);
+  r(12,["계","","",fl.length+"건",d.filter(function(x){return x.cells[4]}).length+"건",crew+"명",""],1);
+  d.forEach(function(x,i){r(13+i,x.cells,function(c){return c===3||c===4?3:2})});
+  var merges=["A1:G1","A12:C12"],widths=[6,22,16,40,30,9,10];
+  var sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols>'+widths.map(function(w,i){return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'}).join("")+'</cols><sheetData>'+rows.join("")+'</sheetData><mergeCells count="'+merges.length+'">'+merges.map(function(m){return '<mergeCell ref="'+m+'"/>'}).join("")+'</mergeCells></worksheet>';
+  var b=xlsxFromSheet(sheet,"점검결과"),n=fname("xlsx","result26");download(b,n);
+  msgEl.textContent="결과 제출 서식 "+n+"(점검 "+d.length+"개소, 지적 "+fl.length+"건) 저장을 요청했습니다. 지적사항 건수는 '미흡' 항목이 1개 이상인 건물 수입니다.";
+}
 /* ---------- 마감재 해체 확인 ---------- */
 var OPEN_FIND=["구조체 균열","철근 노출","콘크리트 박리","누수 흔적","달대·행어 부식","고정 불량","처짐","이상 없음"];
 function pinTxt(n){return typeof n==="number"?CIRC[n-1]:n==="기타"?"기":String(n)}
@@ -830,30 +913,33 @@ function docSection(r){
     var sig=function(u){return u?'<img class="sig" src="'+u+'">':'<span class="sgl">(서명)</span>'};
     var st=String(r.struct||""),sk={rc1:/라멘/.test(st),rc2:/벽식/.test(st),jo:/조적|벽돌|블록|블럭/.test(st),st:/철골/.test(st),wd:/목조|목구조/.test(st)};var oth=!(sk.rc1||sk.rc2||sk.jo||sk.st||sk.wd)&&st;
     var it=r.ivtype||"",ivk=function(x){return ck(it===x)};
-    var h='<section class="doc"><h1>대구시 소규모 노후건축물 안전점검표</h1>'+
+    var k26=formKey()==="k26";
+    var h='<section class="doc"><h1>'+(k26?'점검 체크리스트':'대구시 소규모 노후건축물 안전점검표')+'</h1>'+(k26?'<p class="c" style="text-align:center;margin:-4px 0 8px;font-size:9.5pt">관음동 건축물 천장 탈락사고 관련 안전점검</p>':'')+
     '<h2>■ 점검개요</h2><table class="ov"><tr><th>시설물명</th><td colspan="2">'+E(r.name)+'</td><th rowspan="3">점검자</th><th>성명</th><td>'+E(r.ext||"")+' '+sig(s1)+'</td></tr>'+
     '<tr><th>규모(층수)</th><td colspan="2">지상 '+E(r.up||"")+'층 / 지하 '+E(r.down||"0")+'층</td><th>소속</th><td>'+E(r.extf||"")+'</td></tr>'+
     '<tr><th>조사일시</th><td colspan="2">'+E(r.date||"")+'</td><th>연락처</th><td></td></tr>'+
-    '<tr><th>용도</th><td colspan="2">'+E(r.use)+'</td><th rowspan="3">점검자</th><th>성명</th><td>'+E(r.offname||"")+' '+sig(s2)+'</td></tr>'+
+    '<tr><th>'+(k26?'주 용 도':'용도')+'</th><td colspan="2">'+E(r.use)+'</td><th rowspan="3">점검자</th><th>성명</th><td>'+E(r.offname||"")+' '+sig(s2)+'</td></tr>'+
     '<tr><th>사용승인일</th><td colspan="2">'+E(r.appr)+'</td><th>소속</th><td>'+E(S.org||S.gu||"")+'</td></tr>'+
-    '<tr><th>관리주체</th><td>'+E(r.mgr||"")+'</td><td>연락처 '+E(r.mgrtel||"")+'</td><th>연락처</th><td></td></tr>'+
+    '<tr><th>'+(k26?'관 리 자':'관리주체')+'</th><td>'+E(r.mgr||"")+'</td><td>연락처 '+E(r.mgrtel||"")+'</td><th>연락처</th><td></td></tr>'+
     '<tr><th>구조형식</th><td colspan="5">RC라멘조 '+ck(sk.rc1)+' / RC벽식 '+ck(sk.rc2)+' / 조적조 '+ck(sk.jo)+' / 철골조 '+ck(sk.st)+' / 목조 '+ck(sk.wd)+' / 기타('+E(oth||"")+')</td></tr>'+
-    '<tr><th>주소</th><td colspan="5">'+E(r.addr)+(r.dong?" "+E(r.dong):"")+'</td></tr></table>'+
-    '<h2>■ 사용자 의견 청취 <small>(구조체 이상 발생음, 잦은 진동, 슬래브 부분 침하, 출입문 개폐 불량, 마감재 어긋남 등)</small></h2><table class="qa"><tr><th>면담자</th><td>성명 : '+E(r.iv||"")+' &nbsp; (관리자 '+ivk("관리자")+', 소유자 '+ivk("소유자")+', 세입자 '+ivk("세입자")+', 기타('+E(/^(관리자|소유자|세입자)$/.test(it)?"":it)+'))</td></tr>'+
+    '<tr><th>'+(k26?'건축물 위치':'주소')+'</th><td colspan="5">'+E(r.addr)+(r.dong?" "+E(r.dong):"")+'</td></tr></table>'+
+    (k26?'':'<h2>■ 사용자 의견 청취 <small>(구조체 이상 발생음, 잦은 진동, 슬래브 부분 침하, 출입문 개폐 불량, 마감재 어긋남 등)</small></h2><table class="qa"><tr><th>면담자</th><td>성명 : '+E(r.iv||"")+' &nbsp; (관리자 '+ivk("관리자")+', 소유자 '+ivk("소유자")+', 세입자 '+ivk("세입자")+', 기타('+E(/^(관리자|소유자|세입자)$/.test(it)?"":it)+'))</td></tr>'+
     '<tr><th rowspan="4">질의내용</th><td>1) 최근 안전 우려가 있는 현상과 부위가 있는가?<br>'+E(r.q1||"")+'</td></tr><tr><td>2) 최근 하중 증가요인이 있는가?<br>'+E(r.q2||"")+'</td></tr>'+
-    '<tr><td>3) 그간 점검실시 현황과 결과는?<br>'+E(r.q3||"")+'</td></tr><tr><td>4) 기타 의견<br>'+E(r.q4||"")+'</td></tr></table>'+
+    '<tr><td>3) 그간 점검실시 현황과 결과는?<br>'+E(r.q3||"")+'</td></tr><tr><td>4) 기타 의견<br>'+E(r.q4||"")+'</td></tr></table>')+
+    (k26?'<h2>■ 점검현황 <small>(상태 등급 : 양호 / 보통 / 미흡 / 해당없음)</small></h2><table class="items"><tr><th>점 검 항 목</th><th style="width:4.5em">상태</th><th>상세 내용(지적사항 등)</th></tr>'+rows+'</table>'+
+     '<table><tr><td class="sum"><b>점검 총평</b> <small>(향후 조치사항 및 참고할 사항 등)</small><br>'+E(summary(r,c))+(r.sum?'<br>'+E(r.sum):'')+(r.act?'<br>조치: '+E(r.act)+(r.actst?' ('+E(r.actst)+')':''):'')+(r.memo?'<br>'+E(r.memo):'')+'</td></tr></table>':
     '<h2>■ 점검현황 <small>(※ 상태 등급 : 상 – 양호한 상태, 중 - 보통 상태, 하 – 나쁜 상태)</small></h2><table class="items"><tr><th>점 검 항 목</th><th style="width:4.5em">상태</th><th>상세 내용(위치, 상태 등)</th></tr>'+rows+'</table>'+
     '<table><tr><td class="sum"><b>점검 총평</b> <small>(향후 추가 안전진단 등 참고할 사항 등)</small><br>'+E(summary(r,c))+(r.sum?'<br>'+E(r.sum):'')+'</td><td class="grade"><div>점검등급<br><small>5단계</small></div><b>'+E(f)+'</b></td></tr></table>'+
     '<p class="note">※ 1)-가의 항목 중 외장재 및 마감재로 인해 확인이 불가할 때는 관리주체의 협조를 통해 외장재 및 마감재 일부를 제거하고 조사하는 방안을 검토한다. 외장재 및 마감재 제거가 어려워 육안으로 직접 확인하지 못했을 경우에는 평가결과를 ‘중’ 이하로 판정 하여야 한다.(확인 불가 부재 : ‘상’ 평가 불가)<br>※ 각 항목별 해당 사항이 없으면 해당없음으로 표기</p>'+
     '<table><tr><th colspan="3">정밀안전점검 또는 정밀안전진단 필요 여부 (☑)</th></tr><tr><td class="c">정밀안전점검 필요 '+ck(pr==="정밀안전점검 필요")+'<br><small>(건축물관리점검기관의 점검 필요)</small></td><td class="c">정밀안전진단 필요 '+ck(pr==="정밀안전진단 필요")+'</td><td class="c">불필요 '+ck(pr==="불필요")+'</td></tr><tr><td colspan="3">[ 비고 ] '+E(r.memo||"")+(r.grade&&r.grade!==c.grade?' / 등급 조정 사유: '+E(r.reason||""):'')+'</td></tr></table>'+
-    '<p class="note">※ 점검결과 등급이 우수 ~ 보통 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 할 수 있음<br>※ 점검결과 등급이 미흡 ~ 불량 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 하지 않을 수 있음</p>';
+    '<p class="note">※ 점검결과 등급이 우수 ~ 보통 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 할 수 있음<br>※ 점검결과 등급이 미흡 ~ 불량 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 하지 않을 수 있음</p>');
     if((r.opens||[]).length)h+='<h2>■ 마감재 해체 확인</h2><table><tr><th>번호</th><th>위치</th><th>방법</th><th>안쪽 상태</th><th>메모</th><th>동의</th><th>복구</th></tr>'+r.opens.map(function(o,i){return '<tr><td class="c">'+(i+1)+'</td><td>'+E(o.loc||"")+'</td><td>'+E(o.how||"")+'</td><td>'+E((o.find||[]).join(", "))+'</td><td>'+E(o.memo||"")+'</td><td class="c">'+(o.consent?"○":"")+'</td><td class="c">'+(o.restored?"○":"")+'</td></tr>'}).join("")+'</table>';
     if(dw.length)h+='<div class="pb"></div><h2>■ 결함 위치도</h2>'+dw.map(function(d){return '<figure><img src="'+d.u+'"><figcaption>'+E(d.t)+'</figcaption></figure>'}).join("");
     ph.sort(function(x,y){return (/_전경_/.test(y.n)?1:0)-(/_전경_/.test(x.n)?1:0)});
-    var slot=function(t){return '<figure><figcaption class="ph">'+t+'</figcaption><div class="empty"></div></figure>'},fig=ph.map(function(p){return '<figure><figcaption class="ph">'+(/_전경_/.test(p.n)?'전경':'구조안전 결함')+'</figcaption><img src="'+p.u+'"><figcaption>'+E(photoLabel(p.n))+'</figcaption></figure>'});
-    if(!(ph[0]&&/_전경_/.test(ph[0].n)))fig.unshift(slot('전경'));while(fig.length<6)fig.push(slot('구조안전 결함'));
+    var slot=function(t){return '<figure><figcaption class="ph">'+t+'</figcaption><div class="empty"></div></figure>'},fig=ph.map(function(p){return '<figure><figcaption class="ph">'+(/_전경_/.test(p.n)?(k26?'점검 전경':'전경'):(k26?'지적사항':'구조안전 결함'))+'</figcaption><img src="'+p.u+'"><figcaption>'+E(photoLabel(p.n))+'</figcaption></figure>'});
+    if(!(ph[0]&&/_전경_/.test(ph[0].n)))fig.unshift(slot(k26?'점검 전경':'전경'));while(fig.length<6)fig.push(slot(k26?'지적사항':'구조안전 결함'));
     h+='<div class="pb"></div><h2>■ 현황 및 점검 사진 <small>(추가 사진 첨부가능)</small></h2><div class="pg">'+fig.join("")+'</div>';
-    h+='<div class="pb"></div><h2>등급선정기준</h2><table class="gd"><tr><th>등 급</th><th>기 준</th><th>안전등급</th><th>‘하’의 비율 범위</th><th>정밀안전점검 및 정밀안전진단 기준</th></tr>'+
+    if(!k26)h+='<div class="pb"></div><h2>등급선정기준</h2><table class="gd"><tr><th>등 급</th><th>기 준</th><th>안전등급</th><th>‘하’의 비율 범위</th><th>정밀안전점검 및 정밀안전진단 기준</th></tr>'+
       '<tr><td class="c">우수</td><td>기준에 부합하는 안전성 확보</td><td class="c">우수(6%)</td><td class="c">0~1개</td><td class="c" rowspan="3">불필요</td></tr>'+
       '<tr><td class="c">양호</td><td>일부 부재 경미한 결함 발생, 기능에는 지장 없으며 일부 보수 필요</td><td class="c">양호(22%)</td><td class="c">2~4개</td></tr>'+
       '<tr><td class="c">보통</td><td>광범위한 부재 결함 발생, 안전에는 지장 없으며, 간단한 보수·보강 필요</td><td class="c">보통(39%)</td><td class="c">5~7개</td></tr>'+
@@ -874,7 +960,7 @@ function docPage(body){return '<!doctype html><html lang="ko"><head><meta charse
 $("docOne").addEventListener("click",function(){if(!cur)return;persist();var w=null;try{w=window.open("","_blank")}catch(e){}
   docSection(cur).then(function(sec){var html=docPage(sec);
     if(w&&w.document){w.document.open();w.document.write(html);w.document.close()}else{download(new Blob([html],{type:"text/html"}),fname("html","doc"));toast("점검표 파일 저장을 요청했습니다")}})});
-$("expDocs").addEventListener("click",function(){var rs=S.recs.filter(function(r){return r.status==="done"});if(!rs.length){$("expMsg").textContent="점검 완료된 건물이 없습니다.";return}
+$("expDocs").addEventListener("click",function(){var rs=RECS().filter(function(r){return r.status==="done"});if(!rs.length){$("expMsg").textContent="점검 완료된 건물이 없습니다.";return}
   $("expMsg").textContent="점검표 "+rs.length+"건을 만드는 중입니다…";
   rs.reduce(function(p,r){return p.then(function(acc){return docSection(r).then(function(h){acc.push(h);return acc})})},Promise.resolve([])).then(function(all){
     var n=fname("html","docs");download(new Blob([docPage(all.join(""))],{type:"text/html"}),n);$("expMsg").textContent="점검표 "+rs.length+"건 묶음 "+n+" 저장을 요청했습니다. PC에서 열어 「인쇄 / PDF로 저장」을 누르세요."})});
@@ -887,7 +973,7 @@ function exportPackage(recs,kind,msgEl){
     msgEl.textContent=n+" ("+recs.length+"건, 사진·도면·서명 "+Object.keys(files).length+"개) 저장을 요청했습니다."});
 }
 $("pkgOne").addEventListener("click",function(){if(!cur)return;persist();exportPackage([cur],"handoff",$("pkgMsg"))});
-$("expPkg").addEventListener("click",function(){var rs=S.recs.filter(function(r){return r.status!=="new"});if(!rs.length){$("expMsg").textContent="넘길 기록이 없습니다.";return}exportPackage(rs,"package_"+rs.length,$("expMsg"))});
+$("expPkg").addEventListener("click",function(){var rs=RECS().filter(function(r){return r.status!=="new"});if(!rs.length){$("expMsg").textContent="넘길 기록이 없습니다.";return}exportPackage(rs,"package_"+rs.length,$("expMsg"))});
 function recKeys(r){var k=(r.photos||[]).slice();(r.dwgs||[]).forEach(function(d){k.push(d.k)});k.push("sig1_"+r.k,"sig2_"+r.k);return k}
 
 
@@ -895,7 +981,7 @@ function recKeys(r){var k=(r.photos||[]).slice();(r.dwgs||[]).forEach(function(d
 function fillDay(){var names={};S.recs.forEach(function(r){if(r.asg)names[r.asg]=1});
   $("daySel").innerHTML='<option value="">전체</option>'+Object.keys(names).map(function(k){return '<option>'+esc(k)+'</option>'}).join("");
   if(!$("dayDate").value){var t=new Date();t.setDate(t.getDate()+1);$("dayDate").value=t.toISOString().slice(0,10)}}
-function dayRecs(){var d=$("dayDate").value,a=$("daySel").value;return S.recs.filter(function(r){return r.visit&&r.visit.slice(0,10)===d&&(!a||r.asg===a)}).sort(function(x,y){return (x.visit||"")<(y.visit||"")?-1:1})}
+function dayRecs(){var d=$("dayDate").value,a=$("daySel").value;return RECS().filter(function(r){return r.visit&&r.visit.slice(0,10)===d&&(!a||r.asg===a)}).sort(function(x,y){return (x.visit||"")<(y.visit||"")?-1:1})}
 function openDoc(html,kind){var w=null;try{w=window.open("","_blank")}catch(e){}if(w&&w.document){w.document.open();w.document.write(html);w.document.close()}else{download(new Blob([html],{type:"text/html"}),fname("html",kind));toast("파일 저장을 요청했습니다")}}
 $("dayList").addEventListener("click",function(){var rs=dayRecs();if(!rs.length){$("dayMsg").textContent="그날 방문 예정인 건물이 없습니다.";return}var pii=$("dayPii").checked,E=esc;
   var body='<section class="doc"><h1>방문 일정표 — '+E($("dayDate").value)+(($("daySel").value)?' · '+E($("daySel").value):'')+'</h1><table><tr><th>시간</th><th>주소</th><th>건물ID</th><th>용도·규모</th>'+(pii?'<th>연락처</th>':'')+'<th>사전 확인 메모</th><th>점검자</th></tr>'+
@@ -923,14 +1009,15 @@ $("toSettings").addEventListener("click",function(){show("set")});
 function fillAsg(){var names={};S.recs.forEach(function(r){if(r.asg)names[r.asg]=(names[r.asg]||0)+1});var ks=Object.keys(names);
   $("asgSel").innerHTML=ks.length?ks.map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+' ('+names[k]+'건)</option>'}).join(""):'<option value="">배정된 건물이 없습니다</option>'}
 $("asgSave").addEventListener("click",function(){var a=$("asgSel").value;if(!a){$("asgMsg").textContent="사전 확인에서 「배정 점검자」를 먼저 적어 주세요.";return}
-  var pii=$("asgPii").checked,recs=S.recs.filter(function(r){return r.asg===a}).map(function(r){var c=JSON.parse(JSON.stringify(r));c.photos=[];if(!pii){delete c.mgr;delete c.mgrtel;delete c.calls;delete c.ship;delete c.iv}return c});
+  var pii=$("asgPii").checked,recs=RECS().filter(function(r){return r.asg===a}).map(function(r){var c=JSON.parse(JSON.stringify(r));c.photos=[];if(!pii){delete c.mgr;delete c.mgrtel;delete c.calls;delete c.ship;delete c.iv}return c});
   var keys=[];recs.forEach(function(r){(r.dwgs||[]).forEach(function(d){keys.push(d.k)})});$("asgMsg").textContent="배정 파일을 만드는 중입니다…";
   Promise.all(keys.map(function(k){return pGet(k).then(b2d).then(function(u){return [k,u]})})).then(function(fs){var files={};fs.forEach(function(x){if(x[1])files[x[0]]=x[1]});
   download(new Blob([JSON.stringify({org:S.org,gu:S.gu,recs:recs,files:files})],{type:"application/json"}),fname("json","assign_"+recs.length));
   $("asgMsg").textContent=(Object.keys(files).length?"도면 "+Object.keys(files).length+"장 포함. ":"")+a+"에게 보낼 "+recs.length+"건 배정 파일 저장을 요청했습니다. 파일 이름에는 영문만 들어가니, 보낼 때 점검자 이름을 알려 주세요."})});
-function fillSet(){fillAsg();fillDay();$("s_gu").value=S.gu||"";$("s_role").value=S.role||"ext";$("s_field").value=S.field||"";$("s_adv").checked=!!S.adv;$("s_pii").checked=!!S.pii;$("s_org").value=S.org||"";$("s_insp").value=S.insp||"";$("s_dept").value=S.dept||""}
+function fillSet(){fillAsg();fillDay();$("s_gu").value=S.gu||"";$("s_role").value=S.role||"ext";$("s_form").value=S.form||"k26";$("s_field").value=S.field||"";$("s_adv").checked=!!S.adv;$("s_pii").checked=!!S.pii;$("s_org").value=S.org||"";$("s_insp").value=S.insp||"";$("s_dept").value=S.dept||""}
 $("s_pii").addEventListener("change",function(e){S.pii=e.target.checked;document.body.classList.toggle("nopii",!S.pii);persist()});
 ["s_gu","s_role","s_field"].forEach(function(id){$(id).addEventListener("change",function(e){S[id.slice(2)]=e.target.value;persist()})});
+$("s_form").addEventListener("change",function(e){S.form=e.target.value;setForm();persist();toast("점검 양식을 바꿨습니다")});
 $("s_adv").addEventListener("change",function(e){S.adv=e.target.checked;persist()});
 ["s_org","s_insp","s_dept"].forEach(function(id){$(id).addEventListener("input",function(e){S[id.slice(2)]=e.target.value;persist()})});
 function readText(file,cb){
@@ -978,20 +1065,20 @@ var COLS=null;
 function header(){
   var h=["자치구","기관","기기사용자","외부전문가","전문가분야","시자문단","공무원참여","공동점검자","위치","동구분","시설물명","관리번호","건물ID","고유번호","도로명주소","사전확인메모","배정점검자","사전확인자","주용도","사용승인일","연면적","지상층수","지하층수","구조형식","관리자","관리자연락처","조사일시","상태","출입불가사유",
     "면담자","면담자구분","의견1_안전우려","의견2_하중증가","의견3_점검이력","의견4_기타"];
-  for(var n=1;n<=19;n++)h.push("항목"+String(n).padStart(2,"0"));
-  for(n=1;n<=19;n++)h.push("상세"+String(n).padStart(2,"0"));
-  return h.concat(["해당없음수","하_1_12","하_13_19","하합계","기준등급","최종등급","등급조정사유","정밀점검의견","총평","총평추가","비고","마감재해체확인","사진","수정시각"]);
+  for(var n=1;n<=NI;n++)h.push("항목"+String(n).padStart(2,"0"));
+  for(n=1;n<=NI;n++)h.push("상세"+String(n).padStart(2,"0"));
+  return h.concat(["해당없음수","하_1_12","하_13_19","하합계","기준등급","최종등급","등급조정사유","정밀점검의견","총평","총평추가","비고","마감재해체확인","사진","수정시각","조치내용","조치여부","점검인원","점검구분"]);
 }
 function rowOf(r){
   var c=calc(r),done=r.status==="done"||r.status==="draft";
   var a=[S.gu,S.org,S.insp+(S.dept?" ("+S.dept+")":""),r.ext,r.extf,r.adv?"○":"",r.off?"○":"",r.co,r.addr,r.dong,r.name,r.id,r.bid,r.uno,r.road,r.pre,r.asg,r.prechk,r.use,r.appr,r.area,r.up,r.down,r.struct,r.mgr,r.mgrtel,r.date,STATUS[r.status],r.noreason,r.iv,r.ivtype,r.q1,r.q2,r.q3,r.q4];
-  for(var n=1;n<=19;n++)a.push(r.items[n]?(r.items[n]==="-"?"해당없음":r.items[n]):"");
-  for(n=1;n<=19;n++)a.push(r.notes[n]||"");
+  for(var n=1;n<=NI;n++)a.push(r.items[n]?(r.items[n]==="-"?"해당없음":r.items[n]):"");
+  for(n=1;n<=NI;n++)a.push(r.notes[n]||"");
   var f=c.filled?finalGrade(r,c):"";
-  return a.concat([c.filled?c.na:"",c.filled?c.a:"",c.filled?c.b:"",c.filled?c.score:"",c.filled?c.grade:"",f,r.reason,c.filled?(r.prec||precDefault(f)):"",summary(r,c),r.sum,r.memo,opensText(r),(r.photos||[]).join(" "),r.upd]);
+  return a.concat([c.filled?c.na:"",c.filled?c.a:"",c.filled?c.b:"",c.filled?c.score:"",c.filled?c.grade:"",f,r.reason,c.filled?(r.prec||precDefault(f)):"",summary(r,c),r.sum,r.memo,opensText(r),(r.photos||[]).join(" "),r.upd,r.act,r.actst,r.crew,formKey()==="k26"?"긴급점검":"사전안전점검"]);
 }
 function csvLine(a){return a.map(function(x){x=String(x==null?"":x);return /[",\n\r]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x}).join(",")}
-function buildCSV(){return [csvLine(header())].concat(S.recs.map(function(r){return csvLine(rowOf(r))})).join("\r\n")}
+function buildCSV(){return [csvLine(header())].concat(RECS().map(function(r){return csvLine(rowOf(r))})).join("\r\n")}
 function fname(ext,kind){var d=new Date(),p=function(x){return String(x).padStart(2,"0")};
   return "inspect_"+(kind||"result")+"_"+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"_"+p(d.getHours())+p(d.getMinutes())+"."+ext}
 function download(blob,name){try{var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(u);a.remove()},1500)}catch(e){toast("이 화면에서는 파일 저장이 막혀 있습니다")}}
@@ -1084,7 +1171,7 @@ $("mergeFiles").addEventListener("change",function(e){
       var mr=Object.keys(byId).map(function(k){return byId[k]});setTimeout(function(){saveReport(head,mr,$("mergeMsg"))},800);
     }})});e.target.value="";
 });
-$("expRep").addEventListener("click",function(){$("expMsg").textContent="";saveReport(header(),S.recs.map(rowOf).map(function(a){return a.map(function(x){return x==null?"":String(x)})}),$("expMsg"))});
+$("expRep").addEventListener("click",function(){$("expMsg").textContent="";if(formKey()==="k26"){saveReport26($("expMsg"));return}saveReport(header(),RECS().map(rowOf).map(function(a){return a.map(function(x){return x==null?"":String(x)})}),$("expMsg"))});
 $("expZip").addEventListener("click",function(){exportPhotos(S.recs,$("expMsg"))});
 function purgeable(){return S.recs.filter(function(r){return (r.status==="done"||r.status==="noaccess")&&S.lastExport&&(r.upd||"")<=S.lastExport&&(!(r.photos||[]).length||(S.lastPhotoExport&&(r.upd||"")<=S.lastPhotoExport))})}
 $("purge").addEventListener("click",function(){
