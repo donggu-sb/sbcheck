@@ -148,7 +148,7 @@ body.nopii .pii{display:none!important}
   <!-- LIST VIEW -->
   <div id="vList">
     <div class="top">
-      <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v2.0</span></h1>
+      <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v2.1</span></h1>
       <button class="iconbtn" id="toSettings" type="button">설정·내보내기</button>
     </div>
     <div class="fsbar" id="fsBar" hidden><span id="fsTxt"></span> <button class="btn small" type="button" id="fsBtn">기록 폴더 지정</button></div>
@@ -1035,7 +1035,7 @@ function parseCSV(t){
   if(f!==""||row.length){row.push(f);rows.push(row)}
   return rows.filter(function(r){return r.some(function(x){return x.trim()!==""})});
 }
-var ALIAS={mgr:["소유자","관리자","소유자명","소유자(명칭)","관리자(소유자)","소유자(관리자)"],ship:["발송주소","우편주소","송달주소"],vtime:["점검시간","방문시간","방문예정시간"],mgrtel:["연락처","소유자연락처","관리자연락처","전화번호"],visit:["방문예정일시","방문일시","점검일","점검일자","방문예정일","점검예정일"],bid:["건물ID","건물아이디","건물id"],uno:["고유번호"],road:["도로명주소","도로명"],jibun:["지번"],asg:["배정점검자","점검자","외부전문가"],dong:["동구분","동명칭","동명","동"],id:["관리번호","건축물대장관리번호","대장관리번호","건물관리번호","PNU"],addr:["위치","건축물위치","주소","대지위치","소재지","지번주소","법정동주소"],name:["시설물명","건물명","건축물명"],
+var ALIAS={mgr:["소유자","관리자","소유자명","소유자(명칭)","관리자(소유자)","소유자(관리자)"],ship:["발송주소","우편주소","송달주소"],pre:["사전확인메모","사전확인","사전메모"],vtime:["점검시간","방문시간","방문예정시간"],mgrtel:["연락처","소유자연락처","관리자연락처","전화번호"],visit:["방문예정일시","방문일시","점검일","점검일자","방문예정일","점검예정일"],bid:["건물ID","건물아이디","건물id"],uno:["고유번호"],road:["도로명주소","도로명"],jibun:["지번"],asg:["배정점검자","점검자","외부전문가"],dong:["동구분","동명칭","동명","동"],id:["관리번호","건축물대장관리번호","대장관리번호","건물관리번호","PNU"],addr:["위치","건축물위치","주소","대지위치","소재지","지번주소","법정동주소"],name:["시설물명","건물명","건축물명"],
   use:["주용도","용도"],appr:["사용승인일","사용승인일자"],area:["연면적","연면적(㎡)"],up:["지상층수","지상"],down:["지하층수","지하"],struct:["구조","구조형식","주구조"]};
 function mapHeader(h){var m={};h.forEach(function(x,i){var k=x.replace(/\s/g,"");Object.keys(ALIAS).forEach(function(f){if(m[f]==null&&ALIAS[f].indexOf(k)>=0)m[f]=i})});return m}
 $("impCsv").addEventListener("change",function(e){
