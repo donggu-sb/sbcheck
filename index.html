@@ -391,7 +391,7 @@ body.nopii .pii{display:none!important}
         <button class="btn small" type="button" id="expDocs">점검표 문서 묶음 저장</button>
         <button class="btn small" type="button" id="expPkg">결과 묶음(사진·서명 포함) 저장</button>
         <button class="btn small" type="button" id="expJson">백업 파일 저장</button>
-        <label class="btn small" style="display:inline-block">받은 파일·백업 불러오기<input id="impJson" type="file" accept=".json,application/json" multiple hidden></label>
+        <label class="btn small" style="display:inline-block">받은 파일·백업 불러오기<input id="impJson" type="file" accept=".json,application/json,.txt,text/plain" multiple hidden></label>
       </div>
       <p class="hint" id="expMsg"></p>
       <div style="margin-top:10px"><button class="btn small danger" type="button" id="purge">보낸 기록 이 휴대폰에서 지우기</button></div>
@@ -996,7 +996,7 @@ function exportPackage(recs,kind,msgEl){
   Promise.all(keys.map(function(k){return pGet(k).then(b2d).then(function(u){return [k,u]})})).then(function(fs){var files={};fs.forEach(function(x){if(x[1])files[x[0]]=x[1]});
     recs.forEach(function(r){r.hist=r.hist||[];r.hist.push({by:S.insp||"",at:new Date().toISOString(),act:"넘겨줌"})});persist();
     var n=fname("json",kind),blob=new Blob([JSON.stringify({org:S.org,gu:S.gu,recs:recs,files:files})],{type:"application/json"}),info=" ("+recs.length+"건, 사진·도면·서명 "+Object.keys(files).length+"개)";
-    var f=null;try{f=new File([blob],n,{type:"application/json"})}catch(e){}
+    var f=null;try{f=new File([blob],n,{type:"application/json"});if(navigator.canShare&&!navigator.canShare({files:[f]}))f=new File([blob],n+".txt",{type:"text/plain"})}catch(e){}/* 안드로이드 크롬은 .json 공유를 막아서 .json.txt로 보냄 */
     if(MOBILE&&f&&navigator.canShare&&navigator.canShare({files:[f]})){
       msgEl.innerHTML="";var bt=document.createElement("button");bt.type="button";bt.className="btn primary";bt.textContent="메일·카카오톡으로 보내기";
       var sv=document.createElement("button");sv.type="button";sv.className="btn small";sv.textContent="파일로 저장";sv.style.marginLeft="8px";
@@ -1160,7 +1160,7 @@ function fsPullMedia(){return fsMediaDir().then(function(md){var keys=[];S.recs.
 function fsScanInbox(){if(!FS.ok||!FS.dir||!FS.dir.values)return Promise.resolve();S.seen=S.seen||{};
   return (async function(){var inbox=null;for await(const h of FS.dir.values()){if(h.kind==="directory"&&/받은/.test(h.name)){inbox=h;break}}
     if(!inbox){inbox=await FS.dir.getDirectoryHandle("2. 받은파일",{create:true})}
-    var fresh=[];for await(const h of inbox.values()){if(h.kind!=="file"||!/\.json$/i.test(h.name))continue;var f=await h.getFile(),key=h.name+"|"+f.lastModified;if(!S.seen[key]){fresh.push(f);S.seen[key]=1}}
+    var fresh=[];for await(const h of inbox.values()){if(h.kind!=="file"||!/\.json(\.txt)?$/i.test(h.name))continue;var f=await h.getFile(),key=h.name+"|"+f.lastModified;if(!S.seen[key]){fresh.push(f);S.seen[key]=1}}
     if(fresh.length){await importFiles(fresh);toast("「"+inbox.name+"」 폴더의 새 파일 "+fresh.length+"개를 불러왔습니다")}})().catch(function(){})}
 window.addEventListener("focus",function(){clearTimeout(FS.scanT);FS.scanT=setTimeout(fsScanInbox,600)});
 function fsConnect(dir){FS.dir=dir;return dir.requestPermission({mode:"readwrite"}).then(function(p){if(p!=="granted")throw {name:"권한 거부"};FS.ok=true;FS.done={};return fsLoad()})
@@ -1205,14 +1205,14 @@ function importText(t){var d=JSON.parse(t);if(!d.recs)throw 0;var k=0,conf=[];if
 function importDone(n,k,conf,bad){persist();fillSet();renderList();if(FS.ok)fsPullMedia().then(function(){if(cur)renderDwg()});
   var m=(n>1?"파일 "+n+"개에서 ":"")+k+"건을 반영했습니다."+(bad.length?" 읽지 못한 파일: "+bad.join(", ")+" (이 앱에서 만든 .json인지 확인)":"")+(conf.length?" 서로 다르게 적힌 칸 "+conf.length+"건 — 최근 수정한 쪽을 남기고 다른 쪽 내용은 각 건물의 「주고받은 기록」에 남겼습니다: "+conf.join(" / "):"");
   toast(k+"건을 불러왔습니다");$("expMsg").textContent=m;if(conf.length)alert(m)}
-function importFiles(files){files=[].slice.call(files||[]).filter(function(f){return /\.json$/i.test(f.name)||/json/.test(f.type)});if(!files.length)return Promise.resolve(0);
+function importFiles(files){files=[].slice.call(files||[]).filter(function(f){return /\.json(\.txt)?$/i.test(f.name)||/json/.test(f.type)||/\.txt$/i.test(f.name)});if(!files.length)return Promise.resolve(0);
   var k=0,conf=[],bad=[];
   return files.reduce(function(p,f){return p.then(function(){return new Promise(function(res){readText(f,function(t){try{var o=importText(t);k+=o.k;conf=conf.concat(o.conf)}catch(e){bad.push(f.name)}res()})})})},Promise.resolve())
   .then(function(){importDone(files.length,k,conf,bad);return files.length})}
 $("impJson").addEventListener("change",function(e){importFiles(e.target.files).then(function(){e.target.value=""})});
 /* PC: 파일을 화면에 끌어다 놓으면 불러오기 */
 document.addEventListener("dragover",function(e){if(e.dataTransfer&&[].indexOf.call(e.dataTransfer.types||[],"Files")>=0){e.preventDefault()}});
-document.addEventListener("drop",function(e){if(!e.dataTransfer||!e.dataTransfer.files.length)return;var js=[].filter.call(e.dataTransfer.files,function(f){return /\.json$/i.test(f.name)});if(!js.length)return;e.preventDefault();importFiles(js)});
+document.addEventListener("drop",function(e){if(!e.dataTransfer||!e.dataTransfer.files.length)return;var js=[].filter.call(e.dataTransfer.files,function(f){return /\.json(\.txt)?$/i.test(f.name)});if(!js.length)return;e.preventDefault();importFiles(js)});
 $("mergeFiles").addEventListener("change",function(e){
   var files=[].slice.call(e.target.files);if(!files.length)return;var left=files.length,head=null,byId={},n=0,bad=[];
   files.forEach(function(file){readText(file,function(t){
