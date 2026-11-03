@@ -836,6 +836,7 @@ var OPEN_FIND=["구조체 균열","철근 노출","콘크리트 박리","누수 
 function pinTxt(n){return typeof n==="number"?CIRC[n-1]:n==="기타"?"기":String(n)}
 function pinName(n){return typeof n==="number"?CIRC[n-1]+" "+ITEMS.find(function(x){return x.n==n}).s:n==="기타"?"기타":/^해\d+$/.test(n)?"해체 확인 "+n.slice(1):String(n)}
 function renderOpens(){
+  $("openBlock").hidden=formKey()==="k26";/* 긴급점검은 ⑯ 천장 마감재 항목으로 확인하므로 별도 칸 없음 */
   var os=cur.opens||[];
   $("opens").innerHTML=os.map(function(o,i){var key="해"+(i+1),cnt=function(t){var tg="_"+key+t+"_";return (cur.photos||[]).filter(function(p){return p.indexOf(tg)>=0}).length};
     return '<div class="open" data-oi="'+i+'"><b>해체 확인 '+(i+1)+'</b>'+
@@ -875,7 +876,7 @@ function renderDwg(){
   $("markTools").hidden=!ds.length;$("noDwg").hidden=!!ds.length;if(!ds.length)return;if(curD>=ds.length)curD=0;
   $("dwgTabs").innerHTML=ds.map(function(d,i){return '<button type="button" class="chip" data-dt="'+i+'" aria-pressed="'+(i===curD)+'">'+esc(d.t||("도면 "+(i+1)))+'</button>'}).join("");
   var mi=$("markItem"),keep=mi.value,base='';ITEMS.forEach(function(it){if(it.n)base+='<option value="'+it.n+'">'+CIRC[it.n-1]+' '+it.s+'</option>'});
-  (r.opens||[]).forEach(function(o,i){base+='<option value="해'+(i+1)+'">해체 확인 '+(i+1)+(o.loc?' ('+esc(o.loc)+')':'')+'</option>'});base+='<option value="기타">기타</option>';mi.innerHTML=base;if(keep)mi.value=keep;
+  (formKey()==='k26'?[]:(r.opens||[])).forEach(function(o,i){base+='<option value="해'+(i+1)+'">해체 확인 '+(i+1)+(o.loc?' ('+esc(o.loc)+')':'')+'</option>'});base+='<option value="기타">기타</option>';mi.innerHTML=base;if(keep)mi.value=keep;
   var d=ds[curD];objURL(d.k).then(function(u){$("dwgImg").src=u;$("dwgImg").hidden=!u;$("dwgMiss").hidden=!!u});
   $("dwgBox").classList.toggle("zoom",dwgZoomed);$("dwgZoom").textContent=dwgZoomed?"원래 크기":"크게 보기";
   var ms=(r.marks||[]);
@@ -958,7 +959,7 @@ function docSection(r){
     '<p class="note">※ 점검 시 유의사항 1. 항목별 해당 사항이 없으면 ‘해당없음’으로 표기<br>2. 외장재 및 내부 마감재로 인해 주요 구조체(보, 기둥 등)의 직접 확인이 불가한 경우, 마감 표면의 균열, 누수 흔적, 변색 등 간접 징후를 통해 구조 결함 여부를 판단하며, 점검구(천장텍스 마감 등)으로 점검이 가능한 경우 반드시 구조체 상태 확인 필요함<br>3. 육안으로 확인이 불가하더라도 마감재 결함이 심각하여 구조적 안전성이 우려될 경우, 본 점검(정밀안전점검, 정밀안전진단) 필요 의견을 제시함</p>'+
     '<table><tr><th colspan="3">정밀안전점검 또는 정밀안전진단 필요 여부 (☑)</th></tr><tr><td class="c">정밀안전점검 필요 '+ck(pr==="정밀안전점검 필요")+'<br><small>(건축물관리점검기관의 점검 필요)</small></td><td class="c">정밀안전진단 필요 '+ck(pr==="정밀안전진단 필요")+'</td><td class="c">불필요 '+ck(pr==="불필요")+'</td></tr><tr><td colspan="3">[ 비고 ] '+E(r.memo||"")+(r.grade&&r.grade!==c.grade?' / 등급 조정 사유: '+E(r.reason||""):'')+'</td></tr></table>'+
     '<p class="note">※ 점검결과 등급이 우수 ~ 보통 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 할 수 있음<br>※ 점검결과 등급이 미흡 ~ 불량 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 하지 않을 수 있음</p>');
-    if((r.opens||[]).length)h+='<h2>■ 마감재 해체 확인</h2><table><tr><th>번호</th><th>위치</th><th>방법</th><th>안쪽 상태</th><th>메모</th><th>동의</th><th>복구</th></tr>'+r.opens.map(function(o,i){return '<tr><td class="c">'+(i+1)+'</td><td>'+E(o.loc||"")+'</td><td>'+E(o.how||"")+'</td><td>'+E((o.find||[]).join(", "))+'</td><td>'+E(o.memo||"")+'</td><td class="c">'+(o.consent?"○":"")+'</td><td class="c">'+(o.restored?"○":"")+'</td></tr>'}).join("")+'</table>';
+    if(!k26&&(r.opens||[]).length)h+='<h2>■ 마감재 해체 확인</h2><table><tr><th>번호</th><th>위치</th><th>방법</th><th>안쪽 상태</th><th>메모</th><th>동의</th><th>복구</th></tr>'+r.opens.map(function(o,i){return '<tr><td class="c">'+(i+1)+'</td><td>'+E(o.loc||"")+'</td><td>'+E(o.how||"")+'</td><td>'+E((o.find||[]).join(", "))+'</td><td>'+E(o.memo||"")+'</td><td class="c">'+(o.consent?"○":"")+'</td><td class="c">'+(o.restored?"○":"")+'</td></tr>'}).join("")+'</table>';
     if(dw.length)h+='<div class="pb"></div><h2>■ 결함 위치도</h2>'+dw.map(function(d){return '<figure><img src="'+d.u+'"><figcaption>'+E(d.t)+'</figcaption></figure>'}).join("");
     ph.sort(function(x,y){return (/_전경_/.test(y.n)?1:0)-(/_전경_/.test(x.n)?1:0)});
     var slot=function(t){return '<figure><figcaption class="ph">'+t+'</figcaption><div class="empty"></div></figure>'},fig=ph.map(function(p){return '<figure><figcaption class="ph">'+(/_전경_/.test(p.n)?(k26?'점검 전경':'전경'):(k26?'지적사항':'구조안전 결함'))+'</figcaption><img src="'+p.u+'"><figcaption>'+E(photoLabel(p.n))+'</figcaption></figure>'});
