@@ -302,13 +302,17 @@ body.nopii .pii{display:none!important}
       <button class="btn small" type="button" id="openAdd">+ 해체 확인 추가</button>
     </section>
 
-    <section class="block" id="markBlock" hidden>
+    <section class="block" id="markBlock">
       <h2>도면에 결함 위치 표시</h2>
+      <p class="hint" id="noDwg" style="margin:0 0 8px">도면이 없으면 현장에서 건물 입면이나 층별 안내도를 찍어 도면으로 쓸 수 있습니다. 넣은 뒤 아래 「도면·현황 사진」 목록에서 이름(예: 정면, 북측 입면)을 바꿔 적으면 점검표에도 그 이름으로 나옵니다.</p>
+      <div class="row" style="margin-bottom:8px"><label class="btn small" style="display:inline-block">현장 사진으로 도면 넣기<input id="dwgCam" type="file" accept="image/*" capture="environment" hidden></label><label class="btn small" style="display:inline-block">사진첩에서 도면 고르기<input id="dwgPick" type="file" accept="image/*" multiple hidden></label></div>
+      <div id="markTools">
       <p class="hint" style="margin:0 0 6px">표시할 항목을 고른 뒤 도면을 누르면 번호가 찍힙니다. 찍힌 번호를 다시 누르면 지워집니다.</p>
       <div class="row"><select class="inp" id="markItem" style="flex:1;min-width:0"></select><button class="btn small" type="button" id="dwgZoom">크게 보기</button></div>
       <div class="dwgtabs" id="dwgTabs"></div>
       <p class="hint" id="dwgMiss" hidden style="color:#C2352B">이 기기에는 이 도면 그림이 없습니다. 도면을 넣은 사람에게서 「백업 파일」 또는 「이 건물 넘겨주기 파일」을 받아 불러오면 보입니다. 표시한 위치 정보는 남아 있습니다.</p><div style="overflow:auto;max-width:100%"><div class="dwgbox" id="dwgBox"><img id="dwgImg" alt="도면"><div id="pins"></div></div></div>
       <p class="hint" id="markList" style="margin-top:6px"></p>
+      </div>
     </section>
 
     <section class="block">
@@ -860,14 +864,15 @@ function objURL(k){if(urlCache[k])return Promise.resolve(urlCache[k]);return pGe
 function shrinkTo(f,M,q){return new Promise(function(res){var u=URL.createObjectURL(f),im=new Image();
   im.onload=function(){var w=im.naturalWidth,h=im.naturalHeight,sc=Math.min(1,M/Math.max(w,h)),c=document.createElement("canvas");c.width=Math.round(w*sc);c.height=Math.round(h*sc);var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(function(b){res(b||f)},"image/jpeg",q||0.85)};
   im.onerror=function(){URL.revokeObjectURL(u);res(f)};im.src=u})}
-$("dwgFile").addEventListener("change",function(e){var fs=[].slice.call(e.target.files||[]),r=cur;if(!r)return;r.dwgs=r.dwgs||[];
-  fs.reduce(function(p,f,i){return p.then(function(){return shrinkTo(f,2200,0.85).then(function(b){var k="dwg_"+r.k+"_"+Date.now()+"_"+i;return pPut(k,b).then(function(){r.dwgs.push({k:k,t:f.name.replace(/\.[^.]+$/,"")})})})})},Promise.resolve())
-  .then(function(){r.upd=new Date().toISOString();persist();if(cur===r){renderDwg();toast(fs.length+"장 넣음")}}).catch(function(){toast("도면을 넣지 못했습니다")});e.target.value=""});
+function addDwgs(e){var fs=[].slice.call(e.target.files||[]),r=cur;if(!r)return;r.dwgs=r.dwgs||[];
+  fs.reduce(function(p,f,i){return p.then(function(){return shrinkTo(f,2200,0.85).then(function(b){var k="dwg_"+r.k+"_"+Date.now()+"_"+i;return pPut(k,b).then(function(){r.dwgs.push({k:k,t:(e.target.id==="dwgCam"||/^image$/i.test(f.name.replace(/\.[^.]+$/,"")))?"현장 사진 "+(r.dwgs.length+1):f.name.replace(/\.[^.]+$/,"")})})})})},Promise.resolve())
+  .then(function(){r.upd=new Date().toISOString();persist();if(cur===r){renderDwg();toast(fs.length+"장 넣음")}}).catch(function(){toast("도면을 넣지 못했습니다")});e.target.value=""}
+["dwgFile","dwgCam","dwgPick"].forEach(function(id){$(id).addEventListener("change",addDwgs)});
 function renderDwg(){
   var r=cur,ds=r.dwgs||[],L=$("dwgList");
   L.innerHTML=ds.map(function(d,i){return '<div class="ph"><img alt="" data-dk="'+esc(d.k)+'"><input class="inp" style="font-size:13px;padding:6px" data-dn="'+i+'" value="'+esc(d.t)+'" aria-label="도면 이름"><button type="button" data-ddel="'+i+'">삭제</button></div>'}).join("");
   L.querySelectorAll("img[data-dk]").forEach(function(im){objURL(im.dataset.dk).then(function(u){if(u)im.src=u;else im.alt="그림 없음"})});
-  $("markBlock").hidden=!ds.length;if(!ds.length)return;if(curD>=ds.length)curD=0;
+  $("markTools").hidden=!ds.length;$("noDwg").hidden=!!ds.length;if(!ds.length)return;if(curD>=ds.length)curD=0;
   $("dwgTabs").innerHTML=ds.map(function(d,i){return '<button type="button" class="chip" data-dt="'+i+'" aria-pressed="'+(i===curD)+'">'+esc(d.t||("도면 "+(i+1)))+'</button>'}).join("");
   var mi=$("markItem"),keep=mi.value,base='';ITEMS.forEach(function(it){if(it.n)base+='<option value="'+it.n+'">'+CIRC[it.n-1]+' '+it.s+'</option>'});
   (r.opens||[]).forEach(function(o,i){base+='<option value="해'+(i+1)+'">해체 확인 '+(i+1)+(o.loc?' ('+esc(o.loc)+')':'')+'</option>'});base+='<option value="기타">기타</option>';mi.innerHTML=base;if(keep)mi.value=keep;
