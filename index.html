@@ -153,7 +153,7 @@ body.nopii .pii{display:none!important}
   <!-- LIST VIEW -->
   <div id="vList">
     <div class="top">
-      <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v2.4</span></h1>
+      <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v1.0</span></h1>
       <button class="iconbtn" id="toSettings" type="button">설정·내보내기</button>
     </div>
     <div class="fsbar" id="fsBar" hidden><span id="fsTxt"></span> <button class="btn small" type="button" id="fsBtn">기록 폴더 지정</button></div>
@@ -218,7 +218,7 @@ body.nopii .pii{display:none!important}
         <label class="f">시설물명<input id="f_name"></label>
         <label class="f">대장 관리번호 (있으면)<input id="f_id" name="mgmt"></label>
         <label class="f">외부 전문가 성명<input id="f_ext"></label>
-        <label class="f">외부 전문가 분야<select id="f_extf"><option value="">선택</option><option>건축사</option><option>건축구조기술사</option><option>건축시공기술사</option><option>건축안전기술사</option><option>구조기술사</option><option>기타</option></select></label>
+        <label class="f">외부 전문가 분야<select id="f_extf"><option value="">선택</option><option>건축사</option><option>건축구조기술사</option><option>건축시공기술사</option><option>건축안전기술사</option><option>기타</option></select></label>
         <label class="row" style="font-size:14px;gap:8px"><input type="checkbox" id="f_adv"> 市 자문단 해당</label>
         <label class="row" style="font-size:14px;gap:8px"><input type="checkbox" id="f_off"> 구·군 공무원 현장 참여</label>
         <label class="f" style="grid-column:1/-1">함께 점검한 사람 (기록용, 여러 명이면 쉼표)<input id="f_co"></label>
@@ -306,7 +306,7 @@ body.nopii .pii{display:none!important}
       <p class="hint" style="margin:0 0 6px">표시할 항목을 고른 뒤 도면을 누르면 번호가 찍힙니다. 찍힌 번호를 다시 누르면 지워집니다.</p>
       <div class="row"><select class="inp" id="markItem" style="flex:1;min-width:0"></select><button class="btn small" type="button" id="dwgZoom">크게 보기</button></div>
       <div class="dwgtabs" id="dwgTabs"></div>
-      <div style="overflow:auto;max-width:100%"><div class="dwgbox" id="dwgBox"><img id="dwgImg" alt="도면"><div id="pins"></div></div></div>
+      <p class="hint" id="dwgMiss" hidden style="color:#C2352B">이 기기에는 이 도면 그림이 없습니다. 도면을 넣은 사람에게서 「백업 파일」(v1.0 이후) 또는 「이 건물 넘기기」 파일을 받아 불러오면 보입니다. 표시한 위치 정보는 남아 있습니다.</p><div style="overflow:auto;max-width:100%"><div class="dwgbox" id="dwgBox"><img id="dwgImg" alt="도면"><div id="pins"></div></div></div>
       <p class="hint" id="markList" style="margin-top:6px"></p>
     </section>
 
@@ -315,7 +315,7 @@ body.nopii .pii{display:none!important}
       <p class="hint" style="margin:0 0 8px">항목 사진은 각 항목 옆 「사진」 버튼으로 찍고, 여러 장이면 다시 누릅니다. 전경·기타 사진과 먼저 찍어 둔 사진은 여기서 넣습니다. 사진은 앱 안에 보관되며(사진첩에는 남지 않음), 이름은 주소와 항목으로 붙습니다(예: 침산동100-1_05내력벽_1.jpg).</p>
       <div class="row">
         <select class="inp" id="phItem" style="flex:1;min-width:0"></select>
-        <label class="btn small" style="display:inline-block">촬영<input id="phFile" type="file" accept="image/*" multiple hidden></label>
+        <label class="btn small" style="display:inline-block">촬영<input id="phFile" type="file" accept="image/*" capture="environment" hidden></label>
         <label class="btn small" style="display:inline-block">사진첩에서 여러 장<input id="phMulti" type="file" accept="image/*" multiple hidden></label>
       </div>
       <div class="photos" id="phList"></div>
@@ -331,6 +331,7 @@ body.nopii .pii{display:none!important}
       <h3 style="font-size:14px;margin:14px 0 4px">서명</h3>
       <div class="grid2">
         <label class="f">동행 공무원 성명<input id="f_offname"></label>
+        <label class="f">동행 공무원 분야<select id="f_offf"><option value="">선택</option><option>시설</option><option>건축</option><option>구조</option></select></label>
       </div>
       <div class="sigs">
         <div class="sg"><span>점검자 서명 (외부 전문가) <b id="sigName1"></b></span><img id="sigImg1" alt="" hidden><div class="row"><button class="btn small" type="button" data-sig="1">서명하기</button><label class="btn small" style="display:inline-block">서명 이미지 올리기<input type="file" accept="image/*" hidden data-sigup="1"></label></div></div>
@@ -361,7 +362,7 @@ body.nopii .pii{display:none!important}
         <label class="f">배정 기관<input id="s_org" placeholder="예: ○○구청 건축과"></label>
         <label class="f">점검자 구분<select id="s_role"><option value="ext">외부 전문가</option><option value="off">구·군 공무원</option></select></label>
         <label class="f">점검자 성명<input id="s_insp"></label>
-        <label class="f">분야<select id="s_field"><option value="">선택</option><option>건축사</option><option>건축구조기술사</option><option>건축시공기술사</option><option>건축안전기술사</option><option>구조기술사</option><option>기타</option></select></label>
+        <label class="f"><span id="s_fieldL">분야</span><select id="s_field"><option value="">선택</option><option>건축사</option><option>건축구조기술사</option><option>건축시공기술사</option><option>건축안전기술사</option><option>기타</option></select></label>
         <label class="row" style="font-size:14px;gap:8px;align-self:end"><input type="checkbox" id="s_adv"> 市 자문단 해당</label>
         <label class="f" style="grid-column:1/-1">소속<input id="s_dept" placeholder="예: ○○건축사사무소"></label>
       </div>
@@ -571,7 +572,7 @@ function norm2(r){norm(r);return r}
 function RECS(){var f=formKey();return S.recs.filter(function(r){return (r.form||"k26")===f})}
 
 /* ---------- record view ---------- */
-var FMAP={f_id:"id",f_date:"date",f_name:"name",f_addr:"addr",f_dong:"dong",f_visit:"visit",f_mgrtel2:"mgrtel",f_calls:"calls",f_ship:"ship",f_offname:"offname",f_bid:"bid",f_uno:"uno",f_road:"road",f_pre:"pre",f_asg:"asg",f_prechk:"prechk",f_ext:"ext",f_extf:"extf",f_co:"co",f_use:"use",f_appr:"appr",f_up:"up",f_down:"down",f_area:"area",f_struct:"struct",f_mgr:"mgr",f_mgrtel:"mgrtel",
+var FMAP={f_id:"id",f_date:"date",f_name:"name",f_addr:"addr",f_dong:"dong",f_visit:"visit",f_mgrtel2:"mgrtel",f_calls:"calls",f_ship:"ship",f_offname:"offname",f_offf:"offf",f_bid:"bid",f_uno:"uno",f_road:"road",f_pre:"pre",f_asg:"asg",f_prechk:"prechk",f_ext:"ext",f_extf:"extf",f_co:"co",f_use:"use",f_appr:"appr",f_up:"up",f_down:"down",f_area:"area",f_struct:"struct",f_mgr:"mgr",f_mgrtel:"mgrtel",
   f_iv:"iv",f_ivtype:"ivtype",f_q1:"q1",f_q2:"q2",f_q3:"q3",f_q4:"q4",f_grade:"grade",f_prec:"prec",f_reason:"reason",f_sum:"sum",f_memo:"memo",f_noreason:"noreason",f_act:"act",f_actst:"actst",f_crew:"crew"};
 function buildItems(){
   var h="";
@@ -593,6 +594,7 @@ function openRec(id){
   else if(!cur.ext&&cur.asg){cur.ext=cur.asg}
   else if(cur.ext==null){cur.ext=S.lastExt||"";cur.extf=S.lastExtf||"";cur.adv=!!S.lastAdv}
   if(cur.off==null)cur.off=S.role==="off"?true:!!S.lastOff;
+  if(S.role==="off"&&!cur.offname&&S.insp){cur.offname=S.insp;if(!cur.offf)cur.offf=S.field||""}
   if(cur.co==null)cur.co=S.lastCo||"";
   Object.keys(FMAP).forEach(function(k){$(k).value=cur[FMAP[k]]||""});
   for(var n=1;n<=NI;n++){$("note"+n).value=cur.notes[n]||""}
@@ -863,12 +865,12 @@ $("dwgFile").addEventListener("change",function(e){var fs=[].slice.call(e.target
 function renderDwg(){
   var r=cur,ds=r.dwgs||[],L=$("dwgList");
   L.innerHTML=ds.map(function(d,i){return '<div class="ph"><img alt="" data-dk="'+esc(d.k)+'"><input class="inp" style="font-size:13px;padding:6px" data-dn="'+i+'" value="'+esc(d.t)+'" aria-label="도면 이름"><button type="button" data-ddel="'+i+'">삭제</button></div>'}).join("");
-  L.querySelectorAll("img[data-dk]").forEach(function(im){objURL(im.dataset.dk).then(function(u){im.src=u})});
+  L.querySelectorAll("img[data-dk]").forEach(function(im){objURL(im.dataset.dk).then(function(u){if(u)im.src=u;else im.alt="그림 없음"})});
   $("markBlock").hidden=!ds.length;if(!ds.length)return;if(curD>=ds.length)curD=0;
   $("dwgTabs").innerHTML=ds.map(function(d,i){return '<button type="button" class="chip" data-dt="'+i+'" aria-pressed="'+(i===curD)+'">'+esc(d.t||("도면 "+(i+1)))+'</button>'}).join("");
   var mi=$("markItem"),keep=mi.value,base='';ITEMS.forEach(function(it){if(it.n)base+='<option value="'+it.n+'">'+CIRC[it.n-1]+' '+it.s+'</option>'});
   (r.opens||[]).forEach(function(o,i){base+='<option value="해'+(i+1)+'">해체 확인 '+(i+1)+(o.loc?' ('+esc(o.loc)+')':'')+'</option>'});base+='<option value="기타">기타</option>';mi.innerHTML=base;if(keep)mi.value=keep;
-  var d=ds[curD];objURL(d.k).then(function(u){$("dwgImg").src=u});
+  var d=ds[curD];objURL(d.k).then(function(u){$("dwgImg").src=u;$("dwgImg").hidden=!u;$("dwgMiss").hidden=!!u});
   $("dwgBox").style.width=dwgZoomed?"200%":"100%";$("dwgZoom").textContent=dwgZoomed?"원래 크기":"크게 보기";
   var ms=(r.marks||[]);
   $("pins").innerHTML=ms.map(function(m,i){return m.d!==d.k?"":'<span class="pin" data-mi="'+i+'" style="left:'+(m.x*100)+'%;top:'+(m.y*100)+'%">'+pinTxt(m.n)+'</span>'}).join("");
@@ -1032,9 +1034,11 @@ $("asgSave").addEventListener("click",function(){var a=$("asgSel").value;if(!a){
   Promise.all(keys.map(function(k){return pGet(k).then(b2d).then(function(u){return [k,u]})})).then(function(fs){var files={};fs.forEach(function(x){if(x[1])files[x[0]]=x[1]});
   download(new Blob([JSON.stringify({org:S.org,gu:S.gu,recs:recs,files:files})],{type:"application/json"}),fname("json","assign_"+recs.length));
   $("asgMsg").textContent=(Object.keys(files).length?"도면 "+Object.keys(files).length+"장 포함. ":"")+a+"에게 보낼 "+recs.length+"건 배정 파일 저장을 요청했습니다. 파일 이름에는 영문만 들어가니, 보낼 때 점검자 이름을 알려 주세요."})});
-function fillSet(){fillAsg();fillDay();$("s_gu").value=S.gu||"";$("s_role").value=S.role||"ext";$("s_form").value=S.form||"k26";$("s_field").value=S.field||"";$("s_adv").checked=!!S.adv;$("s_pii").checked=!!S.pii;$("s_org").value=S.org||"";$("s_insp").value=S.insp||"";$("s_dept").value=S.dept||""}
+var FIELD_OPTS={ext:'<option value="">선택</option><option>건축사</option><option>건축구조기술사</option><option>건축시공기술사</option><option>건축안전기술사</option><option>기타</option>',off:'<option value="">선택</option><option>시설</option><option>건축</option><option>구조</option>'};
+function roleField(){var off=($("s_role").value==="off");$("s_field").innerHTML=FIELD_OPTS[off?"off":"ext"];$("s_fieldL").textContent=off?"분야 (공무원)":"분야";$("s_adv").parentNode.hidden=off;$("s_dept").placeholder=off?"예: 동구청 건축주택과":"예: ○○건축사사무소";$("s_field").value=S.field||"";if($("s_field").value!==(S.field||"")){S.field="";persist()}}
+function fillSet(){fillAsg();fillDay();$("s_gu").value=S.gu||"";$("s_role").value=S.role||"ext";$("s_form").value=S.form||"k26";roleField();$("s_adv").checked=!!S.adv;$("s_pii").checked=!!S.pii;$("s_org").value=S.org||"";$("s_insp").value=S.insp||"";$("s_dept").value=S.dept||""}
 $("s_pii").addEventListener("change",function(e){S.pii=e.target.checked;document.body.classList.toggle("nopii",!S.pii);persist()});
-["s_gu","s_role","s_field"].forEach(function(id){$(id).addEventListener("change",function(e){S[id.slice(2)]=e.target.value;persist()})});
+["s_gu","s_role","s_field"].forEach(function(id){$(id).addEventListener("change",function(e){S[id.slice(2)]=e.target.value;persist();if(id==="s_role")roleField()})});
 $("s_form").addEventListener("change",function(e){S.form=e.target.value;setForm();persist();toast("점검 양식을 바꿨습니다")});
 $("s_adv").addEventListener("change",function(e){S.adv=e.target.checked;persist()});
 ["s_org","s_insp","s_dept"].forEach(function(id){$(id).addEventListener("input",function(e){S[id.slice(2)]=e.target.value;persist()})});
@@ -1104,7 +1108,11 @@ $("expCsv").addEventListener("click",function(){S.lastExport=new Date().toISOStr
 $("cpCsv").addEventListener("click",function(){S.lastExport=new Date().toISOString();persist();var t=buildCSV(),o=$("cpOut");o.textContent=t;o.hidden=false;
   try{navigator.clipboard.writeText(t).then(function(){toast("CSV를 복사했습니다")},function(){sel(o)})}catch(e){sel(o)}});
 function sel(el){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r);toast("아래 글을 길게 눌러 복사하세요")}
-$("expJson").addEventListener("click",function(){download(new Blob([JSON.stringify(S)],{type:"application/json"}),fname("json","backup"));$("expMsg").textContent="백업 파일 저장을 요청했습니다. 다른 휴대폰에서 「백업 불러오기」로 이어 쓸 수 있습니다."});
+/* 백업: 기록 + 도면·서명 그림(사진은 용량 때문에 사진 묶음 ZIP으로 따로) */
+function backupBlob(){var keys=[];S.recs.forEach(function(r){(r.dwgs||[]).forEach(function(d){keys.push(d.k)});keys.push("sig1_"+r.k,"sig2_"+r.k)});
+  return Promise.all(keys.map(function(k){return pGet(k).then(b2d).then(function(u){return [k,u]})})).then(function(fs){var files={};fs.forEach(function(x){if(x[1])files[x[0]]=x[1]});
+    var o=JSON.parse(JSON.stringify(S));o.files=files;return {blob:new Blob([JSON.stringify(o)],{type:"application/json"}),n:Object.keys(files).length}})}
+$("expJson").addEventListener("click",function(){$("expMsg").textContent="백업 파일을 만드는 중입니다…";backupBlob().then(function(b){download(b.blob,fname("json","backup"));$("expMsg").textContent="백업 파일 저장을 요청했습니다(기록 "+S.recs.length+"건, 도면·서명 "+b.n+"개 포함, 사진은 「사진 묶음(ZIP) 저장」으로 따로). 다른 휴대폰에서 「백업 불러오기」로 이어 쓸 수 있습니다."})});
 
 
 /* ---------- 기록 폴더 (PC 크롬·엣지) ---------- */
@@ -1118,7 +1126,7 @@ function fsMediaDir(){return FS.dir.getDirectoryHandle("사진·도면·서명",
 function fsSchedule(){if(!FS.ok)return;clearTimeout(FS.timer);FS.timer=setTimeout(fsSave,1500)}
 function fsSave(){if(!FS.ok)return Promise.resolve();if(FS.busy){FS.again=true;return Promise.resolve()}FS.busy=true;
   var txt=JSON.stringify(S),day=new Date().toISOString().slice(0,10).replace(/-/g,"");
-  return fsWrite(FS.dir,"기록.json",txt).then(function(){return FS.dir.getDirectoryHandle("일별백업",{create:true})}).then(function(b){return fsWrite(b,"기록_"+day+".json",txt)})
+  return fsWrite(FS.dir,"기록.json",txt).then(function(){if(!S.recs.length)return;/* 빈 목록으로 그날 백업을 덮지 않음 */return FS.dir.getDirectoryHandle("일별백업",{create:true}).then(function(b){return fsWrite(b,"기록_"+day+".json",txt)})})
   .then(fsMediaDir).then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){if(!FS.done[fsName(k)])keys.push(k)})});
     return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(!b)return;return fsWrite(md,fsName(k),b).then(function(){FS.done[fsName(k)]=1})})})},Promise.resolve())})
   .then(function(){FS.last=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});fsSet("on","기록 폴더 「"+FS.dir.name+"」에 자동 저장 중 · 마지막 저장 "+FS.last,"")})
@@ -1131,6 +1139,8 @@ function fsLoad(){/* 폴더에 있던 기록을 앱에 합치고, 앱에 없는 
   .then(function(res){return fsMediaDir().then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){keys.push(k)})});
       return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(b){return}return fsRead(md,fsName(k)).then(function(f){return pPut(k,f)},function(){})})})},Promise.resolve())
       .then(function(){return md.keys?(async function(){for await(const n of md.keys())FS.done[n]=1})().catch(function(){}):0})}).then(function(){return res})})}
+function fsPullMedia(){return fsMediaDir().then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){keys.push(k)})});
+  return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(b)return;return fsRead(md,fsName(k)).then(function(f){return pPut(k,f)},function(){})})})},Promise.resolve())}).catch(function(){})}
 function fsConnect(dir){FS.dir=dir;return dir.requestPermission({mode:"readwrite"}).then(function(p){if(p!=="granted")throw {name:"권한 거부"};FS.ok=true;FS.done={};return fsLoad()})
   .then(function(res){persist();renderList();fsHandleSave(FS.dir);fsSave();toast(res.none?"새 기록 폴더로 연결했습니다":"폴더의 기록을 불러왔습니다"+(res.add?" (새로 "+res.add+"건)":""));if(res.conf.length)alert("서로 다르게 적힌 칸이 있어 최근 수정한 쪽을 남겼습니다:\n"+res.conf.join("\n"))})
   .catch(function(e){FS.ok=false;fsSet("warn","기록 폴더를 연결하지 못했습니다("+(e&&e.name||e)+").","기록 폴더 지정")})}
@@ -1143,7 +1153,7 @@ function fsConnect(dir){FS.dir=dir;return dir.requestPermission({mode:"readwrite
 })();
 /* 같은 건물 기록 합치기: 빈 칸은 덮지 않고, 양쪽이 다르면 최근 쪽을 남기고 다른 값은 기록 */
 var MERGE_SKIP={k:1,hist:1,upd:1,items:1,notes:1,photos:1,dwgs:1,marks:1,opens:1};
-var FLD={addr:"주소",name:"시설물명",mgr:"관리주체",mgrtel:"연락처",ship:"발송주소",calls:"연락 기록",pre:"사전 확인",visit:"방문일시",asg:"배정 점검자",ext:"외부 전문가",offname:"공무원",sum:"총평",memo:"비고",grade:"점검등급",prec:"정밀점검 의견",reason:"등급 조정 사유",status:"상태",date:"조사일시"};
+var FLD={addr:"주소",name:"시설물명",mgr:"관리주체",mgrtel:"연락처",ship:"발송주소",calls:"연락 기록",pre:"사전 확인",visit:"방문일시",asg:"배정 점검자",ext:"외부 전문가",offname:"공무원",offf:"공무원 분야",sum:"총평",memo:"비고",grade:"점검등급",prec:"정밀점검 의견",reason:"등급 조정 사유",status:"상태",date:"조사일시"};
 function mergeRec(o,n){
   var newer=(n.upd||"")>=(o.upd||""),cf=[],note=[];
   Object.keys(n).forEach(function(f){if(MERGE_SKIP[f])return;var a=o[f],b=n[f];
@@ -1170,7 +1180,7 @@ $("impJson").addEventListener("change",function(e){var file=e.target.files[0];if
   try{var d=JSON.parse(t);if(!d.recs)throw 0;var k=0,conf=[];if(S.sample){S.recs=[];S.sample=false}
     d.recs.forEach(function(r){norm(r);var ex=S.recs.findIndex(function(x){return x.k===r.k||(r.addr&&akey(x)===akey(r))});r.hist=r.hist||[];r.hist.push({by:S.insp||"",at:new Date().toISOString(),act:"받음"});if(ex<0){S.recs.push(r);k++}else{var cf=mergeRec(S.recs[ex],r);if(cf.length)conf.push(label(S.recs[ex])+": "+cf.join(", "));k++}});
     if(d.files)Object.keys(d.files).forEach(function(k){try{pPut(k,d2b(d.files[k]))}catch(e){}});
-    ["org","insp","dept","gu"].forEach(function(f){if(!S[f]&&d[f])S[f]=d[f]});persist();fillSet();toast(k+"건을 불러왔습니다");renderList();$("expMsg").textContent="백업에서 "+k+"건을 반영했습니다."+(conf.length?" 서로 다르게 적힌 칸 "+conf.length+"건 — 최근 수정한 쪽을 남기고 다른 쪽 내용은 각 건물의 「주고받은 기록」에 남겼습니다: "+conf.join(" / "):"")}
+    ["org","insp","dept","gu"].forEach(function(f){if(!S[f]&&d[f])S[f]=d[f]});persist();fillSet();toast(k+"건을 불러왔습니다");renderList();if(FS.ok)fsPullMedia().then(function(){if(cur)renderDwg()});$("expMsg").textContent="백업에서 "+k+"건을 반영했습니다."+(conf.length?" 서로 다르게 적힌 칸 "+conf.length+"건 — 최근 수정한 쪽을 남기고 다른 쪽 내용은 각 건물의 「주고받은 기록」에 남겼습니다: "+conf.join(" / "):"")}
   catch(err){$("expMsg").textContent="백업 파일을 읽지 못했습니다. 이 앱에서 저장한 .json 파일인지 확인해 주세요."}e.target.value=""})});
 $("mergeFiles").addEventListener("change",function(e){
   var files=[].slice.call(e.target.files);if(!files.length)return;var left=files.length,head=null,byId={},n=0,bad=[];
@@ -1201,7 +1211,13 @@ $("purgeNo").addEventListener("click",function(){$("purgeConfirm").hidden=true})
 $("purgeYes").addEventListener("click",function(){var del=purgeable();del.forEach(function(r){recKeys(r).forEach(pDel)});S.recs=S.recs.filter(function(r){return del.indexOf(r)<0});persist();$("purgeConfirm").hidden=true;$("expMsg").textContent=del.length+"건을 지웠습니다.";toast(del.length+"건 지움")});
 $("resetAll").addEventListener("click",function(){$("resetConfirm").hidden=false});
 $("resetNo").addEventListener("click",function(){$("resetConfirm").hidden=true});
-$("resetYes").addEventListener("click",function(){S.recs.forEach(function(r){recKeys(r).forEach(pDel)});S={org:S.org,insp:S.insp,dept:S.dept,sample:false,recs:[]};persist();$("resetConfirm").hidden=true;show("list");toast("모두 지웠습니다")});
+$("resetYes").addEventListener("click",function(){$("resetConfirm").hidden=true;
+  if(!S.recs.length){S={org:S.org,insp:S.insp,dept:S.dept,sample:false,recs:[]};persist();show("list");toast("모두 지웠습니다");return}
+  toast("지우기 전 백업을 저장하는 중…");
+  backupBlob().then(function(b){var d=new Date(),p=function(x){return String(x).padStart(2,"0")},st=d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"_"+p(d.getHours())+p(d.getMinutes());
+    var w=FS.ok?FS.dir.getDirectoryHandle("일별백업",{create:true}).then(function(bd){return fsWrite(bd,"기록_"+st+"_지우기전.json",b.blob)}).catch(function(){}):Promise.resolve();
+    if(!S.sample)download(b.blob,fname("json","before_reset"));return w})
+  .then(function(){S.recs.forEach(function(r){recKeys(r).forEach(pDel)});S={org:S.org,insp:S.insp,dept:S.dept,sample:false,recs:[]};FS.done={};persist();show("list");toast("모두 지웠습니다. 지우기 전 백업 파일을 저장했습니다")})});
 
 show("list");
 })();
