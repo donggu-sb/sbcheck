@@ -193,7 +193,6 @@ body.nopii .pii{display:none!important}
       <div class="grid2">
         <label class="f">건물ID (대장)<input id="f_bid" inputmode="numeric"></label>
         <label class="f">고유번호 (대장)<input id="f_uno"></label>
-        <label class="f" style="grid-column:1/-1">도로명주소<input id="f_road"></label>
         <label class="f" style="grid-column:1/-1">로드뷰·대장 확인 메모<textarea id="f_pre" rows="3" placeholder="예: 북측 외벽 사선균열 의심, 1층 간판 노후, 담장 기울음, 골목 진입 협소"></textarea></label>
         <label class="f">배정 점검자<input id="f_asg" placeholder="외부 전문가 성명"></label>
         <label class="f">사전 확인자<input id="f_prechk"></label>
@@ -212,7 +211,8 @@ body.nopii .pii{display:none!important}
     <section class="block">
       <h2>점검개요</h2>
       <div class="grid2">
-        <label class="f" style="grid-column:1/-1">건축물 위치 (주소, 필수)<input id="f_addr" placeholder="예: ○○동 123-4"></label>
+        <label class="f" style="grid-column:1/-1">법정동 주소 (지번, 필수)<input id="f_addr" placeholder="예: 신천동 110-7"></label>
+        <label class="f" style="grid-column:1/-1">도로명주소<input id="f_road" placeholder="예: 동대구로 445"></label>
         <p class="warn" id="dupWarn" hidden style="grid-column:1/-1;margin:-4px 0 0"></p>
         <label class="f">동 구분 (한 필지에 여러 동일 때)<input id="f_dong" placeholder="예: 가동, A동"></label>
         <label class="f">조사일시<input id="f_date" type="date"></label>
@@ -947,7 +947,7 @@ function docSection(r){
     '<tr><th>사용승인일</th><td colspan="2">'+E(r.appr)+'</td><th>소속</th><td>'+E(S.org||S.gu||"")+'</td></tr>'+
     '<tr><th>'+'관 리 자'+'</th><td>'+E(r.mgr||"")+'</td><td>연락처 '+E(r.mgrtel||"")+'</td><th>연락처</th><td></td></tr>'+
     '<tr><th>구조형식</th><td colspan="5">RC라멘조 '+ck(sk.rc1)+' / RC벽식 '+ck(sk.rc2)+' / 조적조 '+ck(sk.jo)+' / 철골조 '+ck(sk.st)+' / 목조 '+ck(sk.wd)+' / 기타('+E(oth||"")+')</td></tr>'+
-    '<tr><th>'+'건축물 위치'+'</th><td colspan="5">'+E(r.addr)+(r.dong?" "+E(r.dong):"")+'</td></tr></table>'+
+    '<tr><th>'+'건축물 위치'+'</th><td colspan="5">'+E(r.addr)+(r.dong?" "+E(r.dong):"")+(r.road?" ("+E(r.road)+")":"")+'</td></tr></table>'+
     (k26?'':'<h2>■ 사용자 의견 청취 <small>(구조체 이상 발생음, 잦은 진동, 슬래브 부분 침하, 출입문 개폐 불량, 마감재 어긋남 등)</small></h2><table class="qa"><tr><th>면담자</th><td>성명 : '+E(r.iv||"")+' &nbsp; (관리자 '+ivk("관리자")+', 소유자 '+ivk("소유자")+', 세입자 '+ivk("세입자")+', 기타('+E(/^(관리자|소유자|세입자)$/.test(it)?"":it)+'))</td></tr>'+
     '<tr><th rowspan="4">질의내용</th><td>1) 최근 안전 우려가 있는 현상과 부위가 있는가?<br>'+E(r.q1||"")+'</td></tr><tr><td>2) 최근 하중 증가요인이 있는가?<br>'+E(r.q2||"")+'</td></tr>'+
     '<tr><td>3) 그간 점검실시 현황과 결과는?<br>'+E(r.q3||"")+'</td></tr><tr><td>4) 기타 의견<br>'+E(r.q4||"")+'</td></tr></table>')+
