@@ -120,6 +120,7 @@ textarea{resize:vertical;min-height:64px}
 .confirm{border:1px solid var(--bad);background:var(--bad-soft);border-radius:var(--r);padding:12px;margin-top:10px}
 pre.out{white-space:pre-wrap;word-break:break-all;font-family:var(--mono);font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;max-height:200px;overflow:auto}
 .dwgbox{position:relative;display:inline-block;max-width:100%;touch-action:manipulation}
+.dwgbox.zoom{max-width:none;width:200%}.dwgbox.zoom img{width:100%;max-width:none}
 .dwgbox img{display:block;max-width:100%;height:auto;border:1px solid var(--line);border-radius:6px;background:#fff}
 .pin{position:absolute;transform:translate(-50%,-50%);min-width:26px;height:26px;border-radius:13px;background:var(--bad);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}
 .open{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px}
@@ -306,7 +307,7 @@ body.nopii .pii{display:none!important}
       <p class="hint" style="margin:0 0 6px">표시할 항목을 고른 뒤 도면을 누르면 번호가 찍힙니다. 찍힌 번호를 다시 누르면 지워집니다.</p>
       <div class="row"><select class="inp" id="markItem" style="flex:1;min-width:0"></select><button class="btn small" type="button" id="dwgZoom">크게 보기</button></div>
       <div class="dwgtabs" id="dwgTabs"></div>
-      <p class="hint" id="dwgMiss" hidden style="color:#C2352B">이 기기에는 이 도면 그림이 없습니다. 도면을 넣은 사람에게서 「백업 파일」(v1.0 이후) 또는 「이 건물 넘기기」 파일을 받아 불러오면 보입니다. 표시한 위치 정보는 남아 있습니다.</p><div style="overflow:auto;max-width:100%"><div class="dwgbox" id="dwgBox"><img id="dwgImg" alt="도면"><div id="pins"></div></div></div>
+      <p class="hint" id="dwgMiss" hidden style="color:#C2352B">이 기기에는 이 도면 그림이 없습니다. 도면을 넣은 사람에게서 「백업 파일」 또는 「이 건물 넘겨주기 파일」을 받아 불러오면 보입니다. 표시한 위치 정보는 남아 있습니다.</p><div style="overflow:auto;max-width:100%"><div class="dwgbox" id="dwgBox"><img id="dwgImg" alt="도면"><div id="pins"></div></div></div>
       <p class="hint" id="markList" style="margin-top:6px"></p>
     </section>
 
@@ -871,7 +872,7 @@ function renderDwg(){
   var mi=$("markItem"),keep=mi.value,base='';ITEMS.forEach(function(it){if(it.n)base+='<option value="'+it.n+'">'+CIRC[it.n-1]+' '+it.s+'</option>'});
   (r.opens||[]).forEach(function(o,i){base+='<option value="해'+(i+1)+'">해체 확인 '+(i+1)+(o.loc?' ('+esc(o.loc)+')':'')+'</option>'});base+='<option value="기타">기타</option>';mi.innerHTML=base;if(keep)mi.value=keep;
   var d=ds[curD];objURL(d.k).then(function(u){$("dwgImg").src=u;$("dwgImg").hidden=!u;$("dwgMiss").hidden=!!u});
-  $("dwgBox").style.width=dwgZoomed?"200%":"100%";$("dwgZoom").textContent=dwgZoomed?"원래 크기":"크게 보기";
+  $("dwgBox").classList.toggle("zoom",dwgZoomed);$("dwgZoom").textContent=dwgZoomed?"원래 크기":"크게 보기";
   var ms=(r.marks||[]);
   $("pins").innerHTML=ms.map(function(m,i){return m.d!==d.k?"":'<span class="pin" data-mi="'+i+'" style="left:'+(m.x*100)+'%;top:'+(m.y*100)+'%">'+pinTxt(m.n)+'</span>'}).join("");
   var cnt={};ms.forEach(function(m){var t=pinName(m.n);cnt[t]=(cnt[t]||0)+1});
