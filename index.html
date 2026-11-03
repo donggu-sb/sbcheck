@@ -391,7 +391,7 @@ body.nopii .pii{display:none!important}
         <button class="btn small" type="button" id="expDocs">점검표 문서 묶음 저장</button>
         <button class="btn small" type="button" id="expPkg">결과 묶음(사진·서명 포함) 저장</button>
         <button class="btn small" type="button" id="expJson">백업 파일 저장</button>
-        <label class="btn small" style="display:inline-block">받은 파일·백업 불러오기<input id="impJson" type="file" accept=".json,application/json" hidden></label>
+        <label class="btn small" style="display:inline-block">받은 파일·백업 불러오기<input id="impJson" type="file" accept=".json,application/json" multiple hidden></label>
       </div>
       <p class="hint" id="expMsg"></p>
       <div style="margin-top:10px"><button class="btn small danger" type="button" id="purge">보낸 기록 이 휴대폰에서 지우기</button></div>
@@ -995,9 +995,18 @@ function exportPackage(recs,kind,msgEl){
   msgEl.textContent="파일을 만드는 중입니다…";
   Promise.all(keys.map(function(k){return pGet(k).then(b2d).then(function(u){return [k,u]})})).then(function(fs){var files={};fs.forEach(function(x){if(x[1])files[x[0]]=x[1]});
     recs.forEach(function(r){r.hist=r.hist||[];r.hist.push({by:S.insp||"",at:new Date().toISOString(),act:"넘겨줌"})});persist();
-    var n=fname("json",kind);download(new Blob([JSON.stringify({org:S.org,gu:S.gu,recs:recs,files:files})],{type:"application/json"}),n);
-    msgEl.textContent=n+" ("+recs.length+"건, 사진·도면·서명 "+Object.keys(files).length+"개) 저장을 요청했습니다."});
+    var n=fname("json",kind),blob=new Blob([JSON.stringify({org:S.org,gu:S.gu,recs:recs,files:files})],{type:"application/json"}),info=" ("+recs.length+"건, 사진·도면·서명 "+Object.keys(files).length+"개)";
+    var f=null;try{f=new File([blob],n,{type:"application/json"})}catch(e){}
+    if(MOBILE&&f&&navigator.canShare&&navigator.canShare({files:[f]})){
+      msgEl.innerHTML="";var bt=document.createElement("button");bt.type="button";bt.className="btn primary";bt.textContent="메일·카카오톡으로 보내기";
+      var sv=document.createElement("button");sv.type="button";sv.className="btn small";sv.textContent="파일로 저장";sv.style.marginLeft="8px";
+      var t=document.createElement("span");t.className="hint";t.style.display="block";t.style.marginTop="6px";t.textContent="파일이 준비되었습니다"+info+". 「보내기」를 누르면 공유창이 뜨니 메일이나 카카오톡을 고르세요.";
+      bt.onclick=function(){navigator.share({files:[f],title:n}).then(function(){t.textContent="보냈습니다"+info+"."},function(e){if(e&&e.name!=="AbortError"){download(blob,n);t.textContent="공유창을 열지 못해 파일로 저장했습니다(다운로드 폴더)."}})};
+      sv.onclick=function(){download(blob,n);t.textContent=n+" 저장을 요청했습니다."};
+      msgEl.appendChild(bt);msgEl.appendChild(sv);msgEl.appendChild(t);return}
+    download(blob,n);msgEl.textContent=n+info+" 저장을 요청했습니다."});
 }
+var MOBILE=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 $("pkgOne").addEventListener("click",function(){if(!cur)return;persist();exportPackage([cur],"handoff",$("pkgMsg"))});
 $("expPkg").addEventListener("click",function(){var rs=RECS().filter(function(r){return r.status!=="new"});if(!rs.length){$("expMsg").textContent="넘길 기록이 없습니다.";return}exportPackage(rs,"package_"+rs.length,$("expMsg"))});
 function recKeys(r){var k=(r.photos||[]).slice();(r.dwgs||[]).forEach(function(d){k.push(d.k)});k.push("sig1_"+r.k,"sig2_"+r.k);return k}
@@ -1147,8 +1156,15 @@ function fsLoad(){/* 폴더에 있던 기록을 앱에 합치고, 앱에 없는 
       .then(function(){return md.keys?(async function(){for await(const n of md.keys())FS.done[n]=1})().catch(function(){}):0})}).then(function(){return res})})}
 function fsPullMedia(){return fsMediaDir().then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){keys.push(k)})});
   return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(b)return;return fsRead(md,fsName(k)).then(function(f){return pPut(k,f)},function(){})})})},Promise.resolve())}).catch(function(){})}
+/* PC: 기록 폴더 안 '받은' 이 들어간 폴더(예: 2. 받은파일)에 새로 넣은 .json을 자동으로 불러옴 */
+function fsScanInbox(){if(!FS.ok||!FS.dir||!FS.dir.values)return Promise.resolve();S.seen=S.seen||{};
+  return (async function(){var inbox=null;for await(const h of FS.dir.values()){if(h.kind==="directory"&&/받은/.test(h.name)){inbox=h;break}}
+    if(!inbox){inbox=await FS.dir.getDirectoryHandle("2. 받은파일",{create:true})}
+    var fresh=[];for await(const h of inbox.values()){if(h.kind!=="file"||!/\.json$/i.test(h.name))continue;var f=await h.getFile(),key=h.name+"|"+f.lastModified;if(!S.seen[key]){fresh.push(f);S.seen[key]=1}}
+    if(fresh.length){await importFiles(fresh);toast("「"+inbox.name+"」 폴더의 새 파일 "+fresh.length+"개를 불러왔습니다")}})().catch(function(){})}
+window.addEventListener("focus",function(){clearTimeout(FS.scanT);FS.scanT=setTimeout(fsScanInbox,600)});
 function fsConnect(dir){FS.dir=dir;return dir.requestPermission({mode:"readwrite"}).then(function(p){if(p!=="granted")throw {name:"권한 거부"};FS.ok=true;FS.done={};return fsLoad()})
-  .then(function(res){persist();renderList();fsHandleSave(FS.dir);fsSave();toast(res.none?"새 기록 폴더로 연결했습니다":"폴더의 기록을 불러왔습니다"+(res.add?" (새로 "+res.add+"건)":""));if(res.conf.length)alert("서로 다르게 적힌 칸이 있어 최근 수정한 쪽을 남겼습니다:\n"+res.conf.join("\n"))})
+  .then(function(res){persist();renderList();fsHandleSave(FS.dir);fsSave();fsScanInbox();toast(res.none?"새 기록 폴더로 연결했습니다":"폴더의 기록을 불러왔습니다"+(res.add?" (새로 "+res.add+"건)":""));if(res.conf.length)alert("서로 다르게 적힌 칸이 있어 최근 수정한 쪽을 남겼습니다:\n"+res.conf.join("\n"))})
   .catch(function(e){FS.ok=false;fsSet("warn","기록 폴더를 연결하지 못했습니다("+(e&&e.name||e)+").","기록 폴더 지정")})}
 (function(){if(typeof window.showDirectoryPicker!=="function")return;/* 휴대폰 등 지원하지 않는 브라우저에서는 표시하지 않음 */
   fsSet("","기록 폴더에 연결되어 있지 않습니다. 이 PC에서는 기록을 폴더에 자동 저장할 수 있습니다.","기록 폴더 지정");
@@ -1182,12 +1198,21 @@ function mergeRec(o,n){
   if(newer)o.upd=n.upd;
   return cf}
 $("impQuick").addEventListener("click",function(){$("impJson").click()});
-$("impJson").addEventListener("change",function(e){var file=e.target.files[0];if(!file)return;readText(file,function(t){
-  try{var d=JSON.parse(t);if(!d.recs)throw 0;var k=0,conf=[];if(S.sample){S.recs=[];S.sample=false}
+function importText(t){var d=JSON.parse(t);if(!d.recs)throw 0;var k=0,conf=[];if(S.sample){S.recs=[];S.sample=false}
     d.recs.forEach(function(r){norm(r);var ex=S.recs.findIndex(function(x){return x.k===r.k||(r.addr&&akey(x)===akey(r))});r.hist=r.hist||[];r.hist.push({by:S.insp||"",at:new Date().toISOString(),act:"받음"});if(ex<0){S.recs.push(r);k++}else{var cf=mergeRec(S.recs[ex],r);if(cf.length)conf.push(label(S.recs[ex])+": "+cf.join(", "));k++}});
     if(d.files)Object.keys(d.files).forEach(function(k){try{pPut(k,d2b(d.files[k]))}catch(e){}});
-    ["org","insp","dept","gu"].forEach(function(f){if(!S[f]&&d[f])S[f]=d[f]});persist();fillSet();toast(k+"건을 불러왔습니다");renderList();if(FS.ok)fsPullMedia().then(function(){if(cur)renderDwg()});$("expMsg").textContent="백업에서 "+k+"건을 반영했습니다."+(conf.length?" 서로 다르게 적힌 칸 "+conf.length+"건 — 최근 수정한 쪽을 남기고 다른 쪽 내용은 각 건물의 「주고받은 기록」에 남겼습니다: "+conf.join(" / "):"")}
-  catch(err){$("expMsg").textContent="백업 파일을 읽지 못했습니다. 이 앱에서 저장한 .json 파일인지 확인해 주세요."}e.target.value=""})});
+    ["org","insp","dept","gu"].forEach(function(f){if(!S[f]&&d[f])S[f]=d[f]});return {k:k,conf:conf}}
+function importDone(n,k,conf,bad){persist();fillSet();renderList();if(FS.ok)fsPullMedia().then(function(){if(cur)renderDwg()});
+  var m=(n>1?"파일 "+n+"개에서 ":"")+k+"건을 반영했습니다."+(bad.length?" 읽지 못한 파일: "+bad.join(", ")+" (이 앱에서 만든 .json인지 확인)":"")+(conf.length?" 서로 다르게 적힌 칸 "+conf.length+"건 — 최근 수정한 쪽을 남기고 다른 쪽 내용은 각 건물의 「주고받은 기록」에 남겼습니다: "+conf.join(" / "):"");
+  toast(k+"건을 불러왔습니다");$("expMsg").textContent=m;if(conf.length)alert(m)}
+function importFiles(files){files=[].slice.call(files||[]).filter(function(f){return /\.json$/i.test(f.name)||/json/.test(f.type)});if(!files.length)return Promise.resolve(0);
+  var k=0,conf=[],bad=[];
+  return files.reduce(function(p,f){return p.then(function(){return new Promise(function(res){readText(f,function(t){try{var o=importText(t);k+=o.k;conf=conf.concat(o.conf)}catch(e){bad.push(f.name)}res()})})})},Promise.resolve())
+  .then(function(){importDone(files.length,k,conf,bad);return files.length})}
+$("impJson").addEventListener("change",function(e){importFiles(e.target.files).then(function(){e.target.value=""})});
+/* PC: 파일을 화면에 끌어다 놓으면 불러오기 */
+document.addEventListener("dragover",function(e){if(e.dataTransfer&&[].indexOf.call(e.dataTransfer.types||[],"Files")>=0){e.preventDefault()}});
+document.addEventListener("drop",function(e){if(!e.dataTransfer||!e.dataTransfer.files.length)return;var js=[].filter.call(e.dataTransfer.files,function(f){return /\.json$/i.test(f.name)});if(!js.length)return;e.preventDefault();importFiles(js)});
 $("mergeFiles").addEventListener("change",function(e){
   var files=[].slice.call(e.target.files);if(!files.length)return;var left=files.length,head=null,byId={},n=0,bad=[];
   files.forEach(function(file){readText(file,function(t){
