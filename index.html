@@ -1118,7 +1118,7 @@ function rowOf(r){
 function csvLine(a){return a.map(function(x){x=String(x==null?"":x);return /[",\n\r]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x}).join(",")}
 function buildCSV(){return [csvLine(header())].concat(RECS().map(function(r){return csvLine(rowOf(r))})).join("\r\n")}
 function fname(ext,kind){var d=new Date(),p=function(x){return String(x).padStart(2,"0")};
-  return "inspect_"+(kind||"result")+"_"+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"_"+p(d.getHours())+p(d.getMinutes())+"."+ext}
+  return "inspect_"+(kind||"result")+"_"+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"_"+p(d.getHours())+p(d.getMinutes())+p(d.getSeconds())+"."+ext}
 function download(blob,name){try{var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(u);a.remove()},1500)}catch(e){toast("이 화면에서는 파일 저장이 막혀 있습니다")}}
 $("expCsv").addEventListener("click",function(){S.lastExport=new Date().toISOString();persist();var n=fname("csv");download(new Blob(["﻿"+buildCSV()],{type:"text/csv;charset=utf-8"}),n);$("expMsg").textContent=n+" 저장을 요청했습니다. 파일이 안 보이면 「CSV 복사」를 쓰세요."});
 $("cpCsv").addEventListener("click",function(){S.lastExport=new Date().toISOString();persist();var t=buildCSV(),o=$("cpOut");o.textContent=t;o.hidden=false;
