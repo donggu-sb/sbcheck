@@ -395,6 +395,8 @@ body.nopii .pii{display:none!important}
         <button class="btn small" type="button" id="expJson">백업 파일 저장</button>
         <label class="btn small" style="display:inline-block">받은 파일·백업 불러오기<input id="impJson" type="file" accept=".json,application/json,.txt,text/plain" multiple hidden></label>
       </div>
+      <div class="grid2" style="margin-top:8px"><label class="f">결과 묶음 날짜 (비우면 전체)<input type="date" id="pkgDate"></label><label class="f">결과 묶음 점검자<select id="pkgSel"></select></label></div>
+      <p class="hint" style="margin:2px 0 0">「결과 묶음」은 위에서 고른 날짜(조사일시, 없으면 방문일)와 점검자(배정 점검자 또는 외부 전문가 성명)의 기록만 담습니다.</p>
       <p class="hint" id="expMsg"></p>
       <div style="margin-top:10px"><button class="btn small danger" type="button" id="purge">보낸 기록 이 휴대폰에서 지우기</button></div>
       <div class="confirm" id="purgeConfirm" hidden><span id="purgeTxt"></span>
@@ -1066,12 +1068,16 @@ function exportPackage(recs,kind,msgEl){
 }
 var MOBILE=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 $("pkgOne").addEventListener("click",function(){if(!cur)return;persist();exportPackage([cur],"handoff",$("pkgMsg"))});
-$("expPkg").addEventListener("click",function(){var rs=RECS().filter(function(r){return r.status!=="new"});if(!rs.length){$("expMsg").textContent="넘길 기록이 없습니다.";return}exportPackage(rs,"package_"+rs.length,$("expMsg"))});
+$("expPkg").addEventListener("click",function(){var d=$("pkgDate").value,a=$("pkgSel").value;
+  var rs=RECS().filter(function(r){if(r.status==="new")return false;if(d&&((r.date||(r.visit||"").slice(0,10))!==d))return false;if(a&&r.asg!==a&&r.ext!==a)return false;return true});
+  if(!rs.length){$("expMsg").textContent="고른 날짜·점검자에 해당하는 기록이 없습니다"+(d||a?" ("+[d,a].filter(Boolean).join(", ")+")":"")+".";return}
+  exportPackage(rs,"package_"+(d?d.replace(/-/g,""):"all")+"_"+rs.length,$("expMsg"))});
 function recKeys(r){var k=(r.photos||[]).slice();(r.dwgs||[]).forEach(function(d){k.push(d.k)});k.push("sig1_"+r.k,"sig2_"+r.k);return k}
 
 
 /* ---------- 당일 배부 ---------- */
 function fillDay(){var names={};S.recs.forEach(function(r){if(r.asg)names[r.asg]=1});
+  var pn={};RECS().forEach(function(r){if(r.asg)pn[r.asg]=1;if(r.ext)pn[r.ext]=1});var pk=$("pkgSel").value;$("pkgSel").innerHTML='<option value="">전체</option>'+Object.keys(pn).sort().map(function(k){return '<option>'+esc(k)+'</option>'}).join("");$("pkgSel").value=pk;
   $("daySel").innerHTML='<option value="">전체</option>'+Object.keys(names).map(function(k){return '<option>'+esc(k)+'</option>'}).join("");
   if(!$("dayDate").value){var t=new Date();t.setDate(t.getDate()+1);$("dayDate").value=t.toISOString().slice(0,10)}}
 function dayRecs(){var d=$("dayDate").value,a=$("daySel").value;return RECS().filter(function(r){return r.visit&&r.visit.slice(0,10)===d&&(!a||r.asg===a)}).sort(function(x,y){return (x.visit||"")<(y.visit||"")?-1:1})}
