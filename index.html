@@ -319,7 +319,7 @@ body.nopii .pii{display:none!important}
 
     <section class="block">
       <h2>현황 및 점검 사진</h2>
-      <p class="hint" style="margin:0 0 8px">항목 사진은 각 항목 옆 「사진」 버튼으로 찍고, 여러 장이면 다시 누릅니다. 전경·기타 사진과 먼저 찍어 둔 사진은 여기서 넣습니다. 사진은 앱 안에 보관되며(사진첩에는 남지 않음), 이름은 주소와 항목으로 붙습니다(예: 침산동100-1_05내력벽_1.jpg).</p>
+      <p class="hint" style="margin:0 0 8px">항목 사진은 각 항목 옆 「사진」 버튼으로 찍고, 여러 장이면 다시 누릅니다. 전경·현황 사진과 먼저 찍어 둔 사진은 여기서 넣습니다. 사진은 앱 안에 보관되며(사진첩에는 남지 않음), 이름은 주소와 항목으로 붙습니다(예: 침산동100-1_05내력벽_1.jpg).</p>
       <div class="row">
         <select class="inp" id="phItem" style="flex:1;min-width:0"></select>
         <label class="btn small" style="display:inline-block">촬영<input id="phFile" type="file" accept="image/*" capture="environment" hidden></label>
@@ -597,7 +597,7 @@ function buildItems(){
       '<input class="inp note" id="note'+it.n+'" placeholder="'+(formKey()==="k26"?"상세 내용(지적사항 등)":"상세 내용(위치, 상태 등)")+'"></div>';
   });
   $("items").innerHTML=h;
-  var opts='<option value="전경">전경 (건물 전체)</option><option value="기타">기타</option>';ITEMS.forEach(function(it){if(it.n)opts+='<option value="'+it.n+'">'+CIRC[it.n-1]+' '+it.s+'</option>'});
+  var opts='<option value="전경">전경 (건물 전체)</option><option value="현황">현황</option>';ITEMS.forEach(function(it){if(it.n)opts+='<option value="'+it.n+'">'+CIRC[it.n-1]+' '+it.s+'</option>'});
   $("phItem").innerHTML=opts;
 }
 setForm();
@@ -696,7 +696,7 @@ $("delNo").addEventListener("click",function(){$("delConfirm").hidden=true});
 $("delYes").addEventListener("click",function(){recKeys(cur).forEach(pDel);S.recs=S.recs.filter(function(r){return r!==cur});cur=null;persist();show("list");toast("삭제했습니다")});
 
 /* photos: capture → save with a structured filename */
-function tagOf(key){if(key==="전경"||key==="기타"||/^해\d/.test(key))return key;var it=ITEMS.find(function(x){return x.n==key});return String(key).padStart(2,"0")+it.s}
+function tagOf(key){if(key==="전경"||key==="현황"||key==="기타"||/^해\d/.test(key))return key;var it=ITEMS.find(function(x){return x.n==key});return String(key).padStart(2,"0")+it.s}
 /* photos live inside the app (IndexedDB), resized, and leave as one ZIP per day */
 var DB=null;
 function db(){return new Promise(function(res,rej){if(DB)return res(DB);try{var q=indexedDB.open("sbcheck-photos",1);q.onupgradeneeded=function(){q.result.createObjectStore("p")};q.onsuccess=function(){DB=q.result;res(DB)};q.onerror=function(){rej(q.error)}}catch(e){rej(e)}})}
@@ -984,7 +984,7 @@ function pinned(r,d){return pGet(d.k).then(function(b){if(!b)return "";return ne
   (r.marks||[]).filter(function(m){return m.d===d.k}).forEach(function(m){var px=m.x*c.width,py=m.y*c.height;x.beginPath();x.arc(px,py,R,0,7);x.fillStyle="#C2352B";x.fill();x.lineWidth=R/5;x.strokeStyle="#fff";x.stroke();
     x.fillStyle="#fff";x.font="bold "+Math.round(R*1.1)+"px sans-serif";x.textAlign="center";x.textBaseline="middle";x.fillText(typeof m.n==="number"?String(m.n):pinTxt(m.n),px,py+1)});
   URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",0.85))};im.onerror=function(){res("")};im.src=u})})}
-function photoLabel(n){var mo=n.match(/_해(\d+)(전|내부|후)_(\d+)\.\w+$/);if(mo)return "해체 확인 "+mo[1]+" "+({"전":"해체 전","내부":"안쪽","후":"복구 후"})[mo[2]]+" "+mo[3];var m=n.match(/_(\d\d)([^_]+)_(\d+)\.\w+$/);if(m)return CIRC[+m[1]-1]+" "+m[2]+" "+m[3];var m2=n.match(/_(전경|기타)_(\d+)\.\w+$/);return m2?m2[1]+" "+m2[2]:n}
+function photoLabel(n){var mo=n.match(/_해(\d+)(전|내부|후)_(\d+)\.\w+$/);if(mo)return "해체 확인 "+mo[1]+" "+({"전":"해체 전","내부":"안쪽","후":"복구 후"})[mo[2]]+" "+mo[3];var m=n.match(/_(\d\d)([^_]+)_(\d+)\.\w+$/);if(m)return CIRC[+m[1]-1]+" "+m[2]+" "+m[3];var m2=n.match(/_(전경|현황|기타)_(\d+)\.\w+$/);return m2?m2[1]+" "+m2[2]:n}
 function docSection(r){
   var c=calc(r),f=c.filled?finalGrade(r,c):"",pr=c.filled?(r.prec||precDefault(f)):"",E=esc;
   var ck=function(on){return on?"☑":"☐"};
@@ -1021,8 +1021,8 @@ function docSection(r){
     if(!k26&&(r.opens||[]).length)h+='<h2>■ 마감재 해체 확인</h2><table><tr><th>번호</th><th>위치</th><th>방법</th><th>안쪽 상태</th><th>메모</th><th>동의</th><th>복구</th></tr>'+r.opens.map(function(o,i){return '<tr><td class="c">'+(i+1)+'</td><td>'+E(o.loc||"")+'</td><td>'+E(o.how||"")+'</td><td>'+E((o.find||[]).join(", "))+'</td><td>'+E(o.memo||"")+'</td><td class="c">'+(o.consent?"○":"")+'</td><td class="c">'+(o.restored?"○":"")+'</td></tr>'}).join("")+'</table>';
     if(dw.length)h+='<div class="pb"></div><h2>■ 결함 위치도</h2>'+dw.map(function(d){return '<figure><img src="'+d.u+'"><figcaption>'+E(d.t)+'</figcaption></figure>'}).join("");
     ph.sort(function(x,y){return (/_전경_/.test(y.n)?1:0)-(/_전경_/.test(x.n)?1:0)});
-    var slot=function(t){return '<figure><figcaption class="ph">'+t+'</figcaption><div class="empty"></div></figure>'},fig=ph.map(function(p){return '<figure><figcaption class="ph">'+(/_전경_/.test(p.n)?(k26?'점검 전경':'전경'):(k26?'지적사항':'구조안전 결함'))+'</figcaption><img src="'+p.u+'"><figcaption>'+E(photoLabel(p.n))+((r.capt||{})[p.n]?'<br><span class="cpt">'+E(r.capt[p.n]).replace(/\n/g,"<br>")+'</span>':'')+'</figcaption></figure>'});
-    if(!(ph[0]&&/_전경_/.test(ph[0].n)))fig.unshift(slot(k26?'점검 전경':'전경'));while(fig.length<6)fig.push(slot(k26?'지적사항':'구조안전 결함'));
+    var slot=function(t){return '<figure><figcaption class="ph">'+t+'</figcaption><div class="empty"></div></figure>'},fig=ph.map(function(p){return '<figure><figcaption class="ph">'+(/_전경_/.test(p.n)?('전경'):/_현황_/.test(p.n)?'현황':/_기타_/.test(p.n)?'기타':(k26?'지적사항':'구조안전 결함'))+'</figcaption><img src="'+p.u+'"><figcaption>'+E(photoLabel(p.n))+((r.capt||{})[p.n]?'<br><span class="cpt">'+E(r.capt[p.n]).replace(/\n/g,"<br>")+'</span>':'')+'</figcaption></figure>'});
+    if(!(ph[0]&&/_전경_/.test(ph[0].n)))fig.unshift(slot('전경'));while(fig.length<6)fig.push(slot(k26?'지적사항':'구조안전 결함'));
     h+='<div class="pb"></div><h2>■ 현황 및 점검 사진 <small>(추가 사진 첨부가능)</small></h2><div class="pg">'+fig.join("")+'</div>';
     if(!k26)h+='<div class="pb"></div><h2>점검등급선정 기준</h2><table class="gd"><tr><th>등 급</th><th>기 준</th><th>안전등급</th><th>최종 환산 점수</th><th>정밀안전점검 및 정밀안전진단 기준</th></tr>'+
       '<tr><td class="c">우 수</td><td>기준에 부합하는 안전성 확보</td><td class="c">우수(10%)</td><td class="c">1.5점 이하</td><td class="c" rowspan="3">불필요</td></tr>'+
