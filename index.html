@@ -119,7 +119,7 @@ textarea{resize:vertical;min-height:64px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:20}
 .confirm{border:1px solid var(--bad);background:var(--bad-soft);border-radius:var(--r);padding:12px;margin-top:10px}
 pre.out{white-space:pre-wrap;word-break:break-all;font-family:var(--mono);font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;max-height:200px;overflow:auto}
-.dwgbox{position:relative;display:inline-block;max-width:100%;touch-action:manipulation}
+.dwgbox{position:relative;display:inline-block;max-width:100%;touch-action:manipulation}.dwgbox.drawmode{touch-action:none;cursor:crosshair}.pin.ln{min-width:20px;height:20px;font-size:11px;border-radius:10px;background:#fff;color:var(--bad);border:2px solid var(--bad)}
 .dwgbox.zoom{max-width:none;width:200%}.dwgbox.zoom img{width:100%;max-width:none}
 .dwgbox img{display:block;max-width:100%;height:auto;border:1px solid var(--line);border-radius:6px;background:#fff}
 .pin{position:absolute;transform:translate(-50%,-50%);min-width:26px;height:26px;border-radius:13px;background:var(--bad);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}
@@ -145,6 +145,7 @@ body.nopii .pii{display:none!important}
 .ph{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);min-width:0}
 .ph img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;background:var(--na-soft);max-width:100%}
 .ph span{overflow-wrap:anywhere}
+.ph .cap{font:inherit;font-size:13px;color:var(--ink);width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid var(--line);border-radius:6px;resize:vertical}
 .ph button{border:1px solid var(--line);background:var(--surface);border-radius:6px;font-size:12px;padding:3px}
 @media (min-width:900px){.wrap{max-width:1040px}#items{display:grid;grid-template-columns:1fr 1fr;column-gap:24px}#items .grp{grid-column:1/-1}.strip .in{max-width:1040px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -307,10 +308,11 @@ body.nopii .pii{display:none!important}
       <p class="hint" id="noDwg" style="margin:0 0 8px">도면이 없으면 현장에서 건물 입면이나 층별 안내도를 찍어 도면으로 쓸 수 있습니다. 넣은 뒤 아래 「도면·현황 사진」 목록에서 이름(예: 정면, 북측 입면)을 바꿔 적으면 점검표에도 그 이름으로 나옵니다.</p>
       <div class="row" style="margin-bottom:8px"><label class="btn small" style="display:inline-block">현장 사진으로 도면 넣기<input id="dwgCam" type="file" accept="image/*" capture="environment" hidden></label><label class="btn small" style="display:inline-block">사진첩에서 도면 고르기<input id="dwgPick" type="file" accept="image/*" multiple hidden></label></div>
       <div id="markTools">
-      <p class="hint" style="margin:0 0 6px">표시할 항목을 고른 뒤 도면을 누르면 번호가 찍힙니다. 찍힌 번호를 다시 누르면 지워집니다.</p>
+      <p class="hint" id="markHint" style="margin:0 0 6px">표시할 항목을 고른 뒤 도면을 누르면 번호가 찍힙니다. 찍힌 번호를 다시 누르면 지워집니다.</p>
+      <div class="row" style="margin-bottom:6px"><button type="button" class="chip" id="modePin" aria-pressed="true">번호 찍기</button><button type="button" class="chip" id="modeLine" aria-pressed="false">선 긋기 (균열)</button><button type="button" class="btn small" id="lineUndo" hidden>마지막 선 지우기</button></div>
       <div class="row"><select class="inp" id="markItem" style="flex:1;min-width:0"></select><button class="btn small" type="button" id="dwgZoom">크게 보기</button></div>
       <div class="dwgtabs" id="dwgTabs"></div>
-      <p class="hint" id="dwgMiss" hidden style="color:#C2352B">이 기기에는 이 도면 그림이 없습니다. 도면을 넣은 사람에게서 「백업 파일」 또는 「이 건물 넘겨주기 파일」을 받아 불러오면 보입니다. 표시한 위치 정보는 남아 있습니다.</p><div style="overflow:auto;max-width:100%"><div class="dwgbox" id="dwgBox"><img id="dwgImg" alt="도면"><div id="pins"></div></div></div>
+      <p class="hint" id="dwgMiss" hidden style="color:#C2352B">이 기기에는 이 도면 그림이 없습니다. 도면을 넣은 사람에게서 「백업 파일」 또는 「이 건물 넘겨주기 파일」을 받아 불러오면 보입니다. 표시한 위치 정보는 남아 있습니다.</p><div style="overflow:auto;max-width:100%"><div class="dwgbox" id="dwgBox"><img id="dwgImg" alt="도면"><svg id="dwgLines" viewBox="0 0 1000 1000" preserveAspectRatio="none" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible"></svg><div id="pins"></div></div></div>
       <p class="hint" id="markList" style="margin-top:6px"></p>
       </div>
     </section>
@@ -426,6 +428,11 @@ body.nopii .pii{display:none!important}
   </div>
 </div>
 
+<div id="ann" hidden style="position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;gap:10px">
+  <p style="color:#fff;margin:0;font-size:14px">손가락(마우스)으로 균열을 따라 그으세요. 빨간 선으로 사진에 남습니다.</p>
+  <canvas id="annCv" style="max-width:100%;max-height:72vh;touch-action:none;background:#fff;border-radius:4px"></canvas>
+  <div class="row" style="justify-content:center;flex-wrap:wrap;gap:8px"><button type="button" class="btn small" id="annUndo">되돌리기</button><button type="button" class="btn small" id="annOrig">원본 사진으로</button><button type="button" class="btn small" id="annCancel">취소</button><button type="button" class="btn primary small" id="annSave">저장</button></div>
+</div>
 <div class="strip" id="strip" hidden><div class="in">
   <div class="sc" id="stripTxt"></div>
   <button class="btn primary small" type="button" id="stripSave">저장</button>
@@ -634,7 +641,7 @@ function refreshRec(){
   var dup=cur.addr&&S.recs.some(function(r){return r!==cur&&akey(r)===akey(cur)});$("dupWarn").hidden=!dup;$("dupWarn").textContent=dup?"같은 주소(동 구분 포함)의 건물이 목록에 이미 있습니다. 한 필지에 여러 동이면 동 구분을 적어 주세요.":"";
   for(var n2=1;n2<=NI;n2++){var cm=$("cam"+n2),tg="_"+tagOf(n2)+"_",k2=(cur.photos||[]).filter(function(p){return p.indexOf(tg)>=0}).length;cm.classList.toggle("hot",cur.items[n2]===FM.bad&&!k2);cm.querySelector(".k").textContent=k2?k2:""}
   var pl=$("phList"),want=(cur.photos||[]).join("|");
-  if(pl.dataset.v!==want){pl.dataset.v=want;pl.innerHTML=(cur.photos||[]).map(function(p){return '<div class="ph"><img alt="" data-n="'+esc(p)+'"><span>'+esc(p)+'</span><button type="button" data-del="'+esc(p)+'">삭제</button></div>'}).join("");
+  if(pl.dataset.v!==want){pl.dataset.v=want;pl.innerHTML=(cur.photos||[]).map(function(p){return '<div class="ph"><img alt="" data-n="'+esc(p)+'"><span>'+esc(p)+'</span><textarea class="cap" rows="2" data-cap="'+esc(p)+'" placeholder="사진 설명 (점검표에 함께 나옴)">'+esc((cur.capt||{})[p]||"")+'</textarea><button type="button" data-draw="'+esc(p)+'">선 그리기</button><button type="button" data-del="'+esc(p)+'">삭제</button></div>'}).join("");
     pl.querySelectorAll("img").forEach(function(im){pGet(im.dataset.n).then(function(b){if(b)im.src=URL.createObjectURL(b)})})}
   $("stripTxt").innerHTML=k26?'미흡 <b>'+c.bad.length+'</b> · '+(cur.actst?esc(cur.actst):'조치 미입력')+' <span>('+c.filled+'/'+NI+')</span>':'하 <b>'+(c.a+c.b)+'</b> · '+(c.filled?'<span class="g g-'+finalGrade(cur,c)+'">'+finalGrade(cur,c)+'</span>':'미기록')+' <span>('+c.filled+'/'+NI+')</span>';
 }
@@ -707,8 +714,9 @@ function savePhoto(f,key){
     return pPut(name,b).then(function(){r.photos.push(name);if(r.status==="new"||r.status==="pre")r.status="draft";r.upd=new Date().toISOString();persist();if(cur===r)refreshRec();toast(name+" 저장")});
   }).catch(function(){toast("사진을 저장하지 못했습니다. 휴대폰 저장 공간을 확인하세요")});
 }
-$("phList").addEventListener("click",function(e){var b=e.target.closest("[data-del]");if(b)delPhoto(b.dataset.del)});
-function delPhoto(name){if(!cur)return;cur.photos=cur.photos.filter(function(p){return p!==name});pDel(name);touch();refreshRec()}
+$("phList").addEventListener("click",function(e){var b=e.target.closest("[data-del]");if(b)delPhoto(b.dataset.del);var w=e.target.closest("[data-draw]");if(w)annOpen(w.dataset.draw)});
+$("phList").addEventListener("input",function(e){var t=e.target.closest("[data-cap]");if(!t||!cur)return;e.stopPropagation();cur.capt=cur.capt||{};var v=t.value.trim();if(v)cur.capt[t.dataset.cap]=t.value;else delete cur.capt[t.dataset.cap];touch()});
+function delPhoto(name){if(!cur)return;cur.photos=cur.photos.filter(function(p){return p!==name});pDel(name);pDel("orig_"+name);if(cur.capt)delete cur.capt[name];touch();refreshRec()}
 /* minimal ZIP (stored, UTF-8 names) */
 var CRC=(function(){var t=[];for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 function crc32(u){var c=0xFFFFFFFF;for(var i=0;i<u.length;i++)c=CRC[(c^u[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
@@ -880,22 +888,63 @@ function renderDwg(){
   var d=ds[curD];objURL(d.k).then(function(u){$("dwgImg").src=u;$("dwgImg").hidden=!u;$("dwgMiss").hidden=!!u});
   $("dwgBox").classList.toggle("zoom",dwgZoomed);$("dwgZoom").textContent=dwgZoomed?"원래 크기":"크게 보기";
   var ms=(r.marks||[]);
-  $("pins").innerHTML=ms.map(function(m,i){return m.d!==d.k?"":'<span class="pin" data-mi="'+i+'" style="left:'+(m.x*100)+'%;top:'+(m.y*100)+'%">'+pinTxt(m.n)+'</span>'}).join("");
-  var cnt={};ms.forEach(function(m){var t=pinName(m.n);cnt[t]=(cnt[t]||0)+1});
-  $("markList").textContent=ms.length?"표시한 위치: "+Object.keys(cnt).map(function(k){return k+" "+cnt[k]+"곳"}).join(", "):"아직 표시한 위치가 없습니다.";
+  var ls=(r.lines||[]);
+  $("dwgLines").innerHTML=ls.map(function(l){return l.d!==d.k?"":'<polyline points="'+esc(l.p)+'" fill="none" stroke="#C2352B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'}).join("");
+  $("pins").innerHTML=ms.map(function(m,i){return m.d!==d.k?"":'<span class="pin" data-mi="'+i+'" style="left:'+(m.x*100)+'%;top:'+(m.y*100)+'%">'+pinTxt(m.n)+'</span>'}).join("")+
+    ls.map(function(l,i){if(l.d!==d.k)return "";var q=l.p.split(" ").pop().split(",");return '<span class="pin ln" data-li="'+i+'" style="left:'+(q[0]/10)+'%;top:'+(q[1]/10)+'%">'+pinTxt(l.n)+'</span>'}).join("");
+  var cnt={};ms.forEach(function(m){var t=pinName(m.n);cnt[t]=(cnt[t]||0)+1});var lc={};ls.forEach(function(l){var t=pinName(l.n);lc[t]=(lc[t]||0)+1});
+  var parts=Object.keys(cnt).map(function(k){return k+" "+cnt[k]+"곳"}).concat(Object.keys(lc).map(function(k){return k+" 선 "+lc[k]+"개"}));
+  $("markList").textContent=parts.length?"표시한 위치: "+parts.join(", "):"아직 표시한 위치가 없습니다.";
+  $("dwgBox").classList.toggle("drawmode",dwgMode==="line");$("modePin").setAttribute("aria-pressed",dwgMode==="pin");$("modeLine").setAttribute("aria-pressed",dwgMode==="line");
+  $("lineUndo").hidden=!ls.some(function(l){return l.d===d.k});
+  $("markHint").textContent=dwgMode==="line"?"표시할 항목을 고른 뒤 도면 위에서 손가락(마우스)으로 균열을 따라 그으면 빨간 선이 남습니다. 선 끝의 번호를 「번호 찍기」 상태에서 누르면 그 선이 지워집니다.":"표시할 항목을 고른 뒤 도면을 누르면 번호가 찍힙니다. 찍힌 번호를 다시 누르면 지워집니다.";
 }
 (function(){var o='';ITEMS.forEach(function(it){if(it.n)o+='<option value="'+it.n+'">'+CIRC[it.n-1]+' '+it.s+'</option>'});o+='<option value="기타">기타</option>';$("markItem").innerHTML=o})();
-$("dwgList").addEventListener("click",function(e){var b=e.target.closest("[data-ddel]");if(!b)return;var d=cur.dwgs.splice(+b.dataset.ddel,1)[0];pDel(d.k);cur.marks=(cur.marks||[]).filter(function(m){return m.d!==d.k});touch();renderDwg()});
+$("dwgList").addEventListener("click",function(e){var b=e.target.closest("[data-ddel]");if(!b)return;var d=cur.dwgs.splice(+b.dataset.ddel,1)[0];pDel(d.k);cur.marks=(cur.marks||[]).filter(function(m){return m.d!==d.k});cur.lines=(cur.lines||[]).filter(function(l){return l.d!==d.k});touch();renderDwg()});
 $("dwgList").addEventListener("input",function(e){var i=e.target.dataset.dn;if(i==null)return;cur.dwgs[+i].t=e.target.value;touch();
   var t=$("dwgTabs").querySelector('[data-dt="'+i+'"]');if(t)t.textContent=e.target.value});
 $("dwgTabs").addEventListener("click",function(e){var b=e.target.closest("[data-dt]");if(!b)return;curD=+b.dataset.dt;renderDwg()});
 $("dwgZoom").addEventListener("click",function(){dwgZoomed=!dwgZoomed;renderDwg()});
+var dwgMode="pin",lnPts=null,lnEl=null;
+$("modePin").addEventListener("click",function(){dwgMode="pin";renderDwg()});
+$("modeLine").addEventListener("click",function(){dwgMode="line";renderDwg()});
+$("lineUndo").addEventListener("click",function(){var k=cur.dwgs[curD].k,ls=cur.lines||[];for(var i=ls.length-1;i>=0;i--){if(ls[i].d===k){ls.splice(i,1);break}}touch();renderDwg()});
+function lnXY(e){var rc=$("dwgImg").getBoundingClientRect();if(!rc.width)return null;var x=(e.clientX-rc.left)/rc.width,y=(e.clientY-rc.top)/rc.height;return [Math.max(0,Math.min(1000,Math.round(x*1000))),Math.max(0,Math.min(1000,Math.round(y*1000)))]}
+$("dwgBox").addEventListener("pointerdown",function(e){if(dwgMode!=="line"||e.button>0)return;var q=lnXY(e);if(!q)return;e.preventDefault();this.setPointerCapture(e.pointerId);lnPts=[q];
+  lnEl=document.createElementNS("http://www.w3.org/2000/svg","polyline");lnEl.setAttribute("fill","none");lnEl.setAttribute("stroke","#C2352B");lnEl.setAttribute("stroke-width","3");lnEl.setAttribute("stroke-linecap","round");lnEl.setAttribute("vector-effect","non-scaling-stroke");$("dwgLines").appendChild(lnEl)});
+$("dwgBox").addEventListener("pointermove",function(e){if(!lnPts)return;var q=lnXY(e);if(!q)return;var l=lnPts[lnPts.length-1];if(Math.abs(q[0]-l[0])+Math.abs(q[1]-l[1])<4)return;lnPts.push(q);lnEl.setAttribute("points",lnPts.map(function(p){return p.join(",")}).join(" "))});
+function lnEnd(){if(!lnPts)return;var pts=lnPts;lnPts=null;if(pts.length<2){renderDwg();return}
+  var v=$("markItem").value;cur.lines=cur.lines||[];cur.lines.push({d:cur.dwgs[curD].k,n:/^\d+$/.test(v)?+v:v,p:pts.map(function(p){return p.join(",")}).join(" ")});
+  if(cur.status==="new"||cur.status==="pre")cur.status="draft";touch();renderDwg()}
+$("dwgBox").addEventListener("pointerup",lnEnd);$("dwgBox").addEventListener("pointercancel",lnEnd);
 $("dwgBox").addEventListener("click",function(e){
   var pin=e.target.closest(".pin");cur.marks=cur.marks||[];
+  if(pin&&pin.dataset.li!=null){if(dwgMode==="pin"){cur.lines.splice(+pin.dataset.li,1);touch();renderDwg()}return}
+  if(dwgMode==="line")return;
   if(pin){cur.marks.splice(+pin.dataset.mi,1)}else{var rc=$("dwgImg").getBoundingClientRect();if(!rc.width)return;
     var x=(e.clientX-rc.left)/rc.width,y=(e.clientY-rc.top)/rc.height;if(x<0||x>1||y<0||y>1)return;
     var v=$("markItem").value;cur.marks.push({d:cur.dwgs[curD].k,x:Math.round(x*1000)/1000,y:Math.round(y*1000)/1000,n:/^\d+$/.test(v)?+v:v})}
   if(cur.status==="new"||cur.status==="pre")cur.status="draft";touch();renderDwg()});
+
+/* ---------- 사진 위 선 그리기 ---------- */
+var AN={k:null,img:null,strokes:[],cur:null};
+function annDraw(){var c=$("annCv"),x=c.getContext("2d");x.drawImage(AN.img,0,0,c.width,c.height);x.strokeStyle="#E0201B";x.lineWidth=Math.max(4,c.width/180);x.lineCap="round";x.lineJoin="round";
+  AN.strokes.concat(AN.cur?[AN.cur]:[]).forEach(function(st){if(st.length<2)return;x.beginPath();x.moveTo(st[0][0],st[0][1]);st.slice(1).forEach(function(p){x.lineTo(p[0],p[1])});x.stroke()})}
+function annLoad(blob){return new Promise(function(res){var u=URL.createObjectURL(blob),im=new Image();im.onload=function(){AN.img=im;var c=$("annCv");c.width=im.naturalWidth;c.height=im.naturalHeight;AN.strokes=[];annDraw();res()};im.src=u})}
+function annOpen(k){pGet(k).then(function(b){if(!b){toast("이 기기에는 이 사진이 없습니다");return}AN.k=k;return annLoad(b).then(function(){$("ann").hidden=false;
+  return pGet("orig_"+k).then(function(o){$("annOrig").hidden=!o})})})}
+function annXY(e){var c=$("annCv"),r=c.getBoundingClientRect();return [(e.clientX-r.left)*c.width/r.width,(e.clientY-r.top)*c.height/r.height]}
+$("annCv").addEventListener("pointerdown",function(e){e.preventDefault();this.setPointerCapture(e.pointerId);AN.cur=[annXY(e)]});
+$("annCv").addEventListener("pointermove",function(e){if(!AN.cur)return;AN.cur.push(annXY(e));annDraw()});
+function annUp(){if(!AN.cur)return;if(AN.cur.length>1)AN.strokes.push(AN.cur);AN.cur=null;annDraw()}
+$("annCv").addEventListener("pointerup",annUp);$("annCv").addEventListener("pointercancel",annUp);
+$("annUndo").addEventListener("click",function(){AN.strokes.pop();annDraw()});
+$("annCancel").addEventListener("click",function(){$("ann").hidden=true;AN.k=null});
+function annStore(k,blob){if(urlCache[k]){URL.revokeObjectURL(urlCache[k]);delete urlCache[k]}if(FS.done)delete FS.done[fsName(k)];return pPut(k,blob).then(function(){$("phList").dataset.v="";touch();refreshRec();if(typeof fsSchedule==="function")fsSchedule()})}
+$("annSave").addEventListener("click",function(){var k=AN.k;if(!k)return;if(!AN.strokes.length){$("ann").hidden=true;return}
+  pGet("orig_"+k).then(function(o){return o?0:pGet(k).then(function(b){return pPut("orig_"+k,b)})}).then(function(){
+    $("annCv").toBlob(function(bl){annStore(k,bl).then(function(){$("ann").hidden=true;AN.k=null;toast("선을 그린 사진으로 저장했습니다")})},"image/jpeg",0.88)})});
+$("annOrig").addEventListener("click",function(){var k=AN.k;pGet("orig_"+k).then(function(o){if(!o)return;return annStore(k,o).then(function(){return pDel("orig_"+k)}).then(function(){$("ann").hidden=true;AN.k=null;toast("원본 사진으로 되돌렸습니다")})})});
 
 /* ---------- 서명 ---------- */
 var sigN=0,pad=$("sigPad"),pctx=pad.getContext("2d"),drawing=false,dirty=false;
@@ -922,6 +971,10 @@ function b2d(b){return new Promise(function(res){if(!b)return res("");var f=new 
 function d2b(d){var a=d.split(","),m=(a[0].match(/:(.*?);/)||[])[1]||"image/jpeg",bin=atob(a[1]),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:m})}
 function pinned(r,d){return pGet(d.k).then(function(b){if(!b)return "";return new Promise(function(res){var u=URL.createObjectURL(b),im=new Image();im.onload=function(){
   var c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;var x=c.getContext("2d");x.drawImage(im,0,0);var R=Math.max(14,c.width/70);
+  (r.lines||[]).filter(function(l){return l.d===d.k}).forEach(function(l){var q=l.p.split(" ").map(function(t){var a=t.split(",");return [a[0]/1000*c.width,a[1]/1000*c.height]});
+    x.beginPath();x.moveTo(q[0][0],q[0][1]);q.slice(1).forEach(function(p){x.lineTo(p[0],p[1])});x.strokeStyle="#C2352B";x.lineWidth=Math.max(3,R/3);x.lineCap="round";x.lineJoin="round";x.stroke();
+    var e2=q[q.length-1],r2=R*0.8;x.beginPath();x.arc(e2[0],e2[1],r2,0,7);x.fillStyle="#fff";x.fill();x.lineWidth=R/5;x.strokeStyle="#C2352B";x.stroke();
+    x.fillStyle="#C2352B";x.font="bold "+Math.round(r2*1.1)+"px sans-serif";x.textAlign="center";x.textBaseline="middle";x.fillText(typeof l.n==="number"?String(l.n):pinTxt(l.n),e2[0],e2[1]+1)});
   (r.marks||[]).filter(function(m){return m.d===d.k}).forEach(function(m){var px=m.x*c.width,py=m.y*c.height;x.beginPath();x.arc(px,py,R,0,7);x.fillStyle="#C2352B";x.fill();x.lineWidth=R/5;x.strokeStyle="#fff";x.stroke();
     x.fillStyle="#fff";x.font="bold "+Math.round(R*1.1)+"px sans-serif";x.textAlign="center";x.textBaseline="middle";x.fillText(typeof m.n==="number"?String(m.n):pinTxt(m.n),px,py+1)});
   URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",0.85))};im.onerror=function(){res("")};im.src=u})})}
@@ -962,7 +1015,7 @@ function docSection(r){
     if(!k26&&(r.opens||[]).length)h+='<h2>■ 마감재 해체 확인</h2><table><tr><th>번호</th><th>위치</th><th>방법</th><th>안쪽 상태</th><th>메모</th><th>동의</th><th>복구</th></tr>'+r.opens.map(function(o,i){return '<tr><td class="c">'+(i+1)+'</td><td>'+E(o.loc||"")+'</td><td>'+E(o.how||"")+'</td><td>'+E((o.find||[]).join(", "))+'</td><td>'+E(o.memo||"")+'</td><td class="c">'+(o.consent?"○":"")+'</td><td class="c">'+(o.restored?"○":"")+'</td></tr>'}).join("")+'</table>';
     if(dw.length)h+='<div class="pb"></div><h2>■ 결함 위치도</h2>'+dw.map(function(d){return '<figure><img src="'+d.u+'"><figcaption>'+E(d.t)+'</figcaption></figure>'}).join("");
     ph.sort(function(x,y){return (/_전경_/.test(y.n)?1:0)-(/_전경_/.test(x.n)?1:0)});
-    var slot=function(t){return '<figure><figcaption class="ph">'+t+'</figcaption><div class="empty"></div></figure>'},fig=ph.map(function(p){return '<figure><figcaption class="ph">'+(/_전경_/.test(p.n)?(k26?'점검 전경':'전경'):(k26?'지적사항':'구조안전 결함'))+'</figcaption><img src="'+p.u+'"><figcaption>'+E(photoLabel(p.n))+'</figcaption></figure>'});
+    var slot=function(t){return '<figure><figcaption class="ph">'+t+'</figcaption><div class="empty"></div></figure>'},fig=ph.map(function(p){return '<figure><figcaption class="ph">'+(/_전경_/.test(p.n)?(k26?'점검 전경':'전경'):(k26?'지적사항':'구조안전 결함'))+'</figcaption><img src="'+p.u+'"><figcaption>'+E(photoLabel(p.n))+((r.capt||{})[p.n]?'<br><span class="cpt">'+E(r.capt[p.n]).replace(/\n/g,"<br>")+'</span>':'')+'</figcaption></figure>'});
     if(!(ph[0]&&/_전경_/.test(ph[0].n)))fig.unshift(slot(k26?'점검 전경':'전경'));while(fig.length<6)fig.push(slot(k26?'지적사항':'구조안전 결함'));
     h+='<div class="pb"></div><h2>■ 현황 및 점검 사진 <small>(추가 사진 첨부가능)</small></h2><div class="pg">'+fig.join("")+'</div>';
     if(!k26)h+='<div class="pb"></div><h2>점검등급선정 기준</h2><table class="gd"><tr><th>등 급</th><th>기 준</th><th>안전등급</th><th>최종 환산 점수</th><th>정밀안전점검 및 정밀안전진단 기준</th></tr>'+
@@ -982,7 +1035,7 @@ function docPage(body){return '<!doctype html><html lang="ko"><head><meta charse
   'table{width:100%;border-collapse:collapse;margin-bottom:4px}th,td{border:1px solid #000;padding:3px 5px;vertical-align:middle;font-size:9.5pt}th{background:#eee;font-weight:600;white-space:nowrap}td.c{text-align:center}td.gh{background:#f6f6f6;font-weight:600}'+
   '.qa th{width:36%;white-space:normal;text-align:left}.items td:first-child{width:52%}.grade{width:22%;text-align:center}.grade b{font-size:16pt}.sum{line-height:1.5}.calc td{text-align:center}.note{font-size:8.5pt;margin:2px 0 6px}'+
   '.sig{height:42px;display:block;margin-top:2px}.sgl{color:#888}.pb{page-break-before:always;break-before:page}figure{margin:0 0 8px;break-inside:avoid}figure img{width:100%;border:1px solid #999}figcaption{text-align:center;font-size:9pt}'+
-  '.pg{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pg img{aspect-ratio:4/3;object-fit:cover}.pg .ph{font-weight:600;background:#eee;border:1px solid #999;border-bottom:0}.pg .empty{aspect-ratio:4/3;border:1px solid #999}.ov th{width:5.5em}.gd td,.gd th{font-size:8.5pt}'+
+  '.cpt{display:block;margin-top:2px;color:#000;font-size:9.5pt;text-align:left}.pg{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pg img{aspect-ratio:4/3;object-fit:cover}.pg .ph{font-weight:600;background:#eee;border:1px solid #999;border-bottom:0}.pg .empty{aspect-ratio:4/3;border:1px solid #999}.ov th{width:5.5em}.gd td,.gd th{font-size:8.5pt}'+
   '</style></head><body><div class="bar"><button onclick="print()">인쇄 / PDF로 저장</button></div>'+body+'</body></html>'}
 $("docOne").addEventListener("click",function(){if(!cur)return;persist();var w=null;try{w=window.open("","_blank")}catch(e){}
   docSection(cur).then(function(sec){var html=docPage(sec);
@@ -1175,7 +1228,7 @@ function fsConnect(dir){FS.dir=dir;return dir.requestPermission({mode:"readwrite
     window.showDirectoryPicker({mode:"readwrite",id:"sbcheck"}).then(fsConnect,function(e){if(e&&e.name!=="AbortError")fsSet("warn","폴더를 고르지 못했습니다("+e.name+").","기록 폴더 지정")})});
 })();
 /* 같은 건물 기록 합치기: 빈 칸은 덮지 않고, 양쪽이 다르면 최근 쪽을 남기고 다른 값은 기록 */
-var MERGE_SKIP={k:1,hist:1,upd:1,items:1,notes:1,photos:1,dwgs:1,marks:1,opens:1};
+var MERGE_SKIP={k:1,hist:1,upd:1,items:1,notes:1,photos:1,dwgs:1,marks:1,opens:1,lines:1,capt:1};
 var FLD={addr:"주소",name:"시설물명",mgr:"관리주체",mgrtel:"연락처",ship:"발송주소",calls:"연락 기록",pre:"사전 확인",visit:"방문일시",asg:"배정 점검자",ext:"외부 전문가",offname:"공무원",offf:"공무원 분야",sum:"총평",memo:"비고",grade:"점검등급",prec:"정밀점검 의견",reason:"등급 조정 사유",status:"상태",date:"조사일시"};
 function mergeRec(o,n){
   var newer=(n.upd||"")>=(o.upd||""),cf=[],note=[];
@@ -1187,12 +1240,14 @@ function mergeRec(o,n){
     if(f==="status"){var rk={new:0,pre:1,draft:2,noaccess:2,done:3};if((rk[b]||0)>(rk[a]||0))o[f]=b;return}
     var keep=newer?b:a,other=newer?a:b;o[f]=keep;cf.push(FLD[f]||f);note.push((FLD[f]||f)+"=「"+String(other).slice(0,60)+"」")});
   o.items=o.items||{};o.notes=o.notes||{};
+  if(n.capt){o.capt=o.capt||{};Object.keys(n.capt).forEach(function(k){var a=o.capt[k],b=n.capt[k];if(!b||a===b)return;if(!a||newer)o.capt[k]=b})}
   ["items","notes"].forEach(function(g){var A=o[g],B=n[g]||{};Object.keys(B).forEach(function(i){var a=A[i],b=B[i];if(!b)return;if(!a){A[i]=b;return}if(a===b)return;
     if(g==="notes"&&a.indexOf(b)>=0)return;if(g==="notes"&&b.indexOf(a)>=0){A[i]=b;return}
     var keep=newer?b:a,other=newer?a:b;A[i]=keep;var lb=CIRC[i-1]+(g==="items"?" 상태":" 내용");cf.push(lb);note.push(lb+"=「"+String(other).slice(0,60)+"」")})});
   o.photos=(o.photos||[]).concat((n.photos||[]).filter(function(x){return (o.photos||[]).indexOf(x)<0}));
   var dk=(o.dwgs||[]).map(function(d){return d.k});o.dwgs=(o.dwgs||[]).concat((n.dwgs||[]).filter(function(d){return dk.indexOf(d.k)<0}));
   var mk=function(m){return m.d+"|"+m.n+"|"+m.x+"|"+m.y};var ms=(o.marks||[]).map(mk);o.marks=(o.marks||[]).concat((n.marks||[]).filter(function(m){return ms.indexOf(mk(m))<0}));
+  var lk=function(l){return l.d+"|"+l.n+"|"+l.p};var lss=(o.lines||[]).map(lk);o.lines=(o.lines||[]).concat((n.lines||[]).filter(function(l){return lss.indexOf(lk(l))<0}));
   if((n.opens||[]).length&&(!(o.opens||[]).length||newer))o.opens=n.opens;
   var hs=(o.hist||[]).map(function(h){return h.at+h.act});o.hist=(o.hist||[]).concat((n.hist||[]).filter(function(h){return hs.indexOf(h.at+h.act)<0}));
   if(note.length)o.hist.push({by:S.insp||"",at:new Date().toISOString(),act:"다르게 적힌 칸(남기지 않은 쪽) "+note.join("; ")});
@@ -1201,7 +1256,7 @@ function mergeRec(o,n){
 $("impQuick").addEventListener("click",function(){$("impJson").click()});
 function importText(t){var d=JSON.parse(t);if(!d.recs)throw 0;var k=0,conf=[];if(S.sample){S.recs=[];S.sample=false}
     d.recs.forEach(function(r){norm(r);var ex=S.recs.findIndex(function(x){return x.k===r.k||(r.addr&&akey(x)===akey(r))});r.hist=r.hist||[];r.hist.push({by:S.insp||"",at:new Date().toISOString(),act:"받음"});if(ex<0){S.recs.push(r);k++}else{var cf=mergeRec(S.recs[ex],r);if(cf.length)conf.push(label(S.recs[ex])+": "+cf.join(", "));k++}});
-    if(d.files)Object.keys(d.files).forEach(function(k){try{pPut(k,d2b(d.files[k]))}catch(e){}});
+    if(d.files)Object.keys(d.files).forEach(function(k){try{pPut(k,d2b(d.files[k]));if(urlCache[k]){URL.revokeObjectURL(urlCache[k]);delete urlCache[k]}if(FS.done)delete FS.done[fsName(k)]}catch(e){}});
     ["org","insp","dept","gu"].forEach(function(f){if(!S[f]&&d[f])S[f]=d[f]});return {k:k,conf:conf}}
 function importDone(n,k,conf,bad){persist();fillSet();renderList();if(FS.ok)fsPullMedia().then(function(){if(cur)renderDwg()});
   var m=(n>1?"파일 "+n+"개에서 ":"")+k+"건을 반영했습니다."+(bad.length?" 읽지 못한 파일: "+bad.join(", ")+" (이 앱에서 만든 .json인지 확인)":"")+(conf.length?" 서로 다르게 적힌 칸 "+conf.length+"건 — 최근 수정한 쪽을 남기고 다른 쪽 내용은 각 건물의 「주고받은 기록」에 남겼습니다: "+conf.join(" / "):"");
