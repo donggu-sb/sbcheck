@@ -218,7 +218,7 @@ body.nopii .pii{display:none!important}
         <label class="f">동 구분 (한 필지에 여러 동일 때)<input id="f_dong" placeholder="예: 가동, A동"></label>
         <label class="f">조사일시<input id="f_date" type="date"></label>
         <label class="f">시설물명<input id="f_name"></label>
-        <label class="f">대장 관리번호 (있으면)<input id="f_id" name="mgmt"></label>
+        <label class="f">건물ID / 고유번호 (사전 확인에서 자동)<input id="f_idshow" readonly tabindex="-1" style="color:var(--muted)"></label>
         <label class="f">외부 전문가 성명<input id="f_ext"></label>
         <label class="f">외부 전문가 연락처<input id="f_exttel" inputmode="tel"></label>
         <label class="f">외부 전문가 분야<select id="f_extf"><option value="">선택</option><option>건축사</option><option>건축구조기술사</option><option>건축시공기술사</option><option>건축안전기술사</option><option>기타</option></select></label>
@@ -594,7 +594,7 @@ function norm2(r){norm(r);return r}
 function RECS(){var f=formKey();return S.recs.filter(function(r){return (r.form||"k26")===f})}
 
 /* ---------- record view ---------- */
-var FMAP={f_exttel:"exttel",f_offtel:"offtel",f_rctype:"rctype",f_structx:"structx",f_id:"id",f_date:"date",f_name:"name",f_addr:"addr",f_dong:"dong",f_visit:"visit",f_mgrtel2:"mgrtel",f_calls:"calls",f_ship:"ship",f_offname:"offname",f_offf:"offf",f_bid:"bid",f_uno:"uno",f_road:"road",f_pre:"pre",f_asg:"asg",f_prechk:"prechk",f_ext:"ext",f_extf:"extf",f_co:"co",f_use:"use",f_appr:"appr",f_up:"up",f_down:"down",f_area:"area",f_struct:"struct",f_mgr:"mgr",f_mgrtel:"mgrtel",
+var FMAP={f_exttel:"exttel",f_offtel:"offtel",f_rctype:"rctype",f_structx:"structx",f_date:"date",f_name:"name",f_addr:"addr",f_dong:"dong",f_visit:"visit",f_mgrtel2:"mgrtel",f_calls:"calls",f_ship:"ship",f_offname:"offname",f_offf:"offf",f_bid:"bid",f_uno:"uno",f_road:"road",f_pre:"pre",f_asg:"asg",f_prechk:"prechk",f_ext:"ext",f_extf:"extf",f_co:"co",f_use:"use",f_appr:"appr",f_up:"up",f_down:"down",f_area:"area",f_struct:"struct",f_mgr:"mgr",f_mgrtel:"mgrtel",
   f_iv:"iv",f_ivtype:"ivtype",f_q1:"q1",f_q2:"q2",f_q3:"q3",f_q4:"q4",f_grade:"grade",f_prec:"prec",f_reason:"reason",f_sum:"sum",f_memo:"memo",f_noreason:"noreason",f_act:"act",f_actst:"actst",f_crew:"crew"};
 function buildItems(){
   var h="";
@@ -616,11 +616,13 @@ function openRec(id){
   if(!cur.ext&&S.role!=="off"&&S.insp){cur.ext=S.insp;cur.extf=S.field||cur.extf||"";cur.adv=!!S.adv}
   else if(!cur.ext&&cur.asg){cur.ext=cur.asg}
   else if(cur.ext==null){cur.ext=S.lastExt||"";cur.extf=S.lastExtf||"";cur.adv=!!S.lastAdv}
+  if(!cur.date&&cur.visit)cur.date=String(cur.visit).slice(0,10);
   if(cur.off==null)cur.off=S.role==="off"?true:!!S.lastOff;
   if(S.role==="off"&&!cur.offname&&S.insp){cur.offname=S.insp;if(!cur.offf)cur.offf=S.field||""}
   if(S.role==="off"&&S.tel&&!cur.offtel&&cur.offname===S.insp)cur.offtel=S.tel;
   if(cur.co==null)cur.co=S.lastCo||"";
   document.querySelectorAll("option[data-extra]").forEach(function(o){o.remove()});
+  idShow();
   Object.keys(FMAP).forEach(function(k){var el=$(k),v=cur[FMAP[k]]||"";
     if(el.tagName==="SELECT"&&v&&![].some.call(el.options,function(o){return o.value===v})){var o=document.createElement("option");o.textContent=v;o.dataset.extra="1";el.appendChild(o)}/* 대장에서 온 값(예: 철근콘크리트구조)이 목록에 없으면 그대로 보이게 추가 */
     el.value=v});
@@ -1152,6 +1154,13 @@ $("asgSave").addEventListener("click",function(){var a=$("asgSel").value;if(!a){
   $("asgMsg").textContent=(Object.keys(files).length?"도면 "+Object.keys(files).length+"장 포함. ":"")+a+"에게 보낼 "+recs.length+"건 배정 파일 저장을 요청했습니다. 파일 이름에는 영문만 들어가니, 보낼 때 점검자 이름을 알려 주세요."})});
 var FIELD_OPTS={ext:'<option value="">선택</option><option>건축사</option><option>건축구조기술사</option><option>건축시공기술사</option><option>건축안전기술사</option><option>기타</option>',off:'<option value="">선택</option><option>시설</option><option>건축</option><option>구조</option>'};
 function roleField(){var off=($("s_role").value==="off");$("s_field").innerHTML=FIELD_OPTS[off?"off":"ext"];$("s_fieldL").textContent=off?"분야 (공무원)":"분야";$("s_adv").parentNode.hidden=off;$("s_dept").placeholder=off?"예: 동구청 건축주택과":"예: ○○건축사사무소";$("s_field").value=S.field||"";if($("s_field").value!==(S.field||"")){S.field="";persist()}}
+function idShow(){var a=[cur&&cur.bid,cur&&cur.uno].filter(Boolean);$("f_idshow").value=a.length?a.join(" / "):"(사전 확인에 아직 없음)"}
+["f_bid","f_uno"].forEach(function(id){$(id).addEventListener("input",function(){setTimeout(idShow,0)})});
+/* 사전 확인 → 점검개요: 같은 내용은 자동으로 채움(점검개요를 따로 고쳤으면 덮지 않음) */
+var SYNC=[["f_asg","asg","f_ext","ext",function(v){return v}],["f_visit","visit","f_date","date",function(v){return String(v||"").slice(0,10)}]];
+SYNC.forEach(function(x){$(x[0]).addEventListener("input",function(e){if(!cur)return;var old=x[4](cur[x[1]]),nv=x[4](e.target.value);
+  if(!cur[x[3]]||cur[x[3]]===old||(!old&&(cur.status==="new"||cur.status==="pre"))){cur[x[3]]=nv;$(x[2]).value=nv}})});
+["f_mgrtel","f_mgrtel2"].forEach(function(id,i,a){$(id).addEventListener("input",function(e){$(a[1-i]).value=e.target.value})});
 function structX(){var v=$("f_struct").value;$("f_structx").hidden=v!=="복합구조";$("f_rctype").hidden=!(/철근콘크리트/.test(v)&&!/철골/.test(v))}
 $("f_struct").addEventListener("change",structX);
 function fillSet(){fillAsg();fillDay();$("s_gu").value=S.gu||"";$("s_role").value=S.role||"ext";$("s_form").value=S.form||"k26";roleField();$("s_adv").checked=!!S.adv;$("s_pii").checked=!!S.pii;$("s_org").value=S.org||"";$("s_insp").value=S.insp||"";$("s_dept").value=S.dept||"";$("s_tel").value=S.tel||""}
