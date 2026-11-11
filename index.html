@@ -221,6 +221,7 @@ body.nopii .pii{display:none!important}
         <label class="f">시설물명<input id="f_name"></label>
         <label class="f">건물ID / 고유번호 (사전 확인에서 자동)<input id="f_idshow" readonly tabindex="-1" style="color:var(--muted)"></label>
         <label class="f">외부 전문가 성명<input id="f_ext"></label>
+        <label class="f">외부 전문가 소속<input id="f_extorg" placeholder="예: ○○건축사사무소"></label>
         <label class="f">외부 전문가 연락처<input id="f_exttel" inputmode="tel"></label>
         <label class="f">외부 전문가 분야<select id="f_extf"><option value="">선택</option><option>건축사</option><option>건축구조기술사</option><option>건축시공기술사</option><option>건축안전기술사</option><option>기타</option></select></label>
         <label class="row" style="font-size:14px;gap:8px"><input type="checkbox" id="f_adv"> 市 자문단 해당</label>
@@ -596,7 +597,7 @@ function norm2(r){norm(r);return r}
 function RECS(){var f=formKey();return S.recs.filter(function(r){return (r.form||"k26")===f})}
 
 /* ---------- record view ---------- */
-var FMAP={f_exttel:"exttel",f_offtel:"offtel",f_rctype:"rctype",f_structx:"structx",f_date:"date",f_name:"name",f_addr:"addr",f_dong:"dong",f_visit:"visit",f_mgrtel2:"mgrtel",f_calls:"calls",f_ship:"ship",f_offname:"offname",f_offf:"offf",f_bid:"bid",f_uno:"uno",f_road:"road",f_pre:"pre",f_asg:"asg",f_prechk:"prechk",f_ext:"ext",f_extf:"extf",f_co:"co",f_use:"use",f_appr:"appr",f_up:"up",f_down:"down",f_area:"area",f_struct:"struct",f_mgr:"mgr",f_mgrtel:"mgrtel",
+var FMAP={f_extorg:"extorg",f_exttel:"exttel",f_offtel:"offtel",f_rctype:"rctype",f_structx:"structx",f_date:"date",f_name:"name",f_addr:"addr",f_dong:"dong",f_visit:"visit",f_mgrtel2:"mgrtel",f_calls:"calls",f_ship:"ship",f_offname:"offname",f_offf:"offf",f_bid:"bid",f_uno:"uno",f_road:"road",f_pre:"pre",f_asg:"asg",f_prechk:"prechk",f_ext:"ext",f_extf:"extf",f_co:"co",f_use:"use",f_appr:"appr",f_up:"up",f_down:"down",f_area:"area",f_struct:"struct",f_mgr:"mgr",f_mgrtel:"mgrtel",
   f_iv:"iv",f_ivtype:"ivtype",f_q1:"q1",f_q2:"q2",f_q3:"q3",f_q4:"q4",f_grade:"grade",f_prec:"prec",f_reason:"reason",f_sum:"sum",f_memo:"memo",f_noreason:"noreason",f_act:"act",f_actst:"actst",f_crew:"crew"};
 function buildItems(){
   var h="";
@@ -615,6 +616,7 @@ function openRec(id){
   cur=S.recs.find(function(r){return r.k===id});if(!cur)return;
   if(!cur.date)cur.date=(cur.visit||"").slice(0,10)||new Date().toISOString().slice(0,10);
   if(S.role!=="off"&&S.tel&&!cur.exttel&&(!cur.ext||cur.ext===S.insp))cur.exttel=S.tel;
+  if(S.role!=="off"&&S.dept&&!cur.extorg&&(!cur.ext||cur.ext===S.insp))cur.extorg=S.dept;
   if(!cur.ext&&S.role!=="off"&&S.insp){cur.ext=S.insp;cur.extf=S.field||cur.extf||"";cur.adv=!!S.adv}
   else if(!cur.ext&&cur.asg){cur.ext=cur.asg}
   else if(cur.ext==null){cur.ext=S.lastExt||"";cur.extf=S.lastExtf||"";cur.adv=!!S.lastAdv}
@@ -1046,8 +1048,8 @@ function docSection(r){
     var it=r.ivtype||"",ivk=function(x){return ck(it===x)};
     var k26=formKey()==="k26";
     var h='<section class="doc"><h1>'+(k26?'점검 체크리스트':'소규모 노후 건축물등 사전점검 안전점검표')+'</h1>'+(k26?'<p class="c" style="text-align:center;margin:-4px 0 8px;font-size:9.5pt">관음동 건축물 천장 탈락사고 관련 안전점검</p>':'')+
-    '<h2>■ 점검개요</h2><table class="ov"><tr><th>시설물명</th><td colspan="2">'+E(r.name)+'</td><th rowspan="3">점검자</th><th>성명</th><td>'+E(r.ext||"")+' '+sig(s1)+'</td></tr>'+
-    '<tr><th>규모(층수)</th><td colspan="2">지상 '+E(r.up||"")+'층 / 지하 '+E(r.down||"0")+'층</td><th>소속</th><td>'+E(r.extf||"")+'</td></tr>'+
+    '<h2>■ 점검개요</h2><table class="ov"><tr><th>시설물명</th><td colspan="2">'+E(r.name||(String(r.addr||"").replace(/^\s*대구(광역)?시\s*/,"").replace(/^동구\s*/,"")+(r.dong?" "+r.dong:"")))+'</td><th rowspan="3">점검자</th><th>성명</th><td>'+E(r.ext||"")+' '+sig(s1)+'</td></tr>'+
+    '<tr><th>규모(층수)</th><td colspan="2">지상 '+E(r.up||"")+'층 / 지하 '+E(r.down||"0")+'층</td><th>소속</th><td>'+E([r.extorg,r.extf?(r.extorg?"("+r.extf+")":r.extf):""].filter(Boolean).join(" "))+'</td></tr>'+
     '<tr><th>조사일시</th><td colspan="2">'+E(r.date||"")+'</td><th>연락처</th><td>'+E(r.exttel||"")+'</td></tr>'+
     '<tr><th>'+'주 용 도'+'</th><td colspan="2">'+E(r.use)+'</td><th rowspan="3">점검자</th><th>성명</th><td>'+E(r.offname||"")+' '+sig(s2)+'</td></tr>'+
     '<tr><th>사용승인일</th><td colspan="2">'+E(r.appr)+'</td><th>소속</th><td>'+E(S.org||S.gu||"")+'</td></tr>'+
@@ -1067,7 +1069,7 @@ function docSection(r){
     if(!k26&&(r.opens||[]).length)h+='<h2>■ 마감재 해체 확인</h2><table><tr><th>번호</th><th>위치</th><th>방법</th><th>안쪽 상태</th><th>메모</th><th>동의</th><th>복구</th></tr>'+r.opens.map(function(o,i){return '<tr><td class="c">'+(i+1)+'</td><td>'+E(o.loc||"")+'</td><td>'+E(o.how||"")+'</td><td>'+E((o.find||[]).join(", "))+'</td><td>'+E(o.memo||"")+'</td><td class="c">'+(o.consent?"○":"")+'</td><td class="c">'+(o.restored?"○":"")+'</td></tr>'}).join("")+'</table>';
     if(dw.length)h+='<div class="pb"></div><h2>■ 결함 위치도</h2>'+dw.map(function(d){return '<figure><img src="'+d.u+'"><figcaption>'+E(d.t)+'</figcaption></figure>'}).join("");
     ph.sort(function(x,y){var a=phOrd(x.n),b=phOrd(y.n);return a[0]-b[0]||a[1]-b[1]});
-    var slot=function(t){return '<figure><figcaption class="ph">'+t+'</figcaption><div class="empty"></div></figure>'},fig=ph.map(function(p){return '<figure><figcaption class="ph">'+(/_전경_/.test(p.n)?('전경'):/_현황_/.test(p.n)?'현황':/_기타_/.test(p.n)?'기타':(k26?'지적사항':'구조안전 결함'))+'</figcaption><img src="'+p.u+'"><figcaption>'+E(photoLabel(p.n))+((r.capt||{})[p.n]?'<br><span class="cpt">'+E(r.capt[p.n]).replace(/\n/g,"<br>")+'</span>':'')+'</figcaption></figure>'});
+    var slot=function(t){return '<figure><figcaption class="ph">'+t+'</figcaption><div class="empty"></div></figure>'},fig=ph.map(function(p){return '<figure><figcaption class="ph">'+(/_전경_/.test(p.n)?('전경'):/_현황_/.test(p.n)?'현황':/_기타_/.test(p.n)?'기타':(k26?'지적사항':'구조안전 결함'))+'</figcaption><img src="'+p.u+'"><figcaption>'+E(photoLabel(p.n))+((r.capt||{})[p.n]?' : '+E(r.capt[p.n]):'')+'</figcaption></figure>'});
     if(!(ph[0]&&/_전경_/.test(ph[0].n)))fig.unshift(slot('전경'));while(fig.length<6)fig.push(slot(k26?'지적사항':'구조안전 결함'));
     h+='<div class="pb"></div><h2>■ 현황 및 점검 사진 <small>(추가 사진 첨부가능)</small></h2><div class="pg">'+fig.join("")+'</div>';
     if(!k26)h+='<div class="pb"></div><h2>점검등급선정 기준</h2><table class="gd"><tr><th>등 급</th><th>기 준</th><th>안전등급</th><th>최종 환산 점수</th><th>정밀안전점검 및 정밀안전진단 기준</th></tr>'+
@@ -1304,7 +1306,7 @@ function fsConnect(dir){FS.dir=dir;return dir.requestPermission({mode:"readwrite
 })();
 /* 같은 건물 기록 합치기: 빈 칸은 덮지 않고, 양쪽이 다르면 최근 쪽을 남기고 다른 값은 기록 */
 var MERGE_SKIP={k:1,hist:1,upd:1,items:1,notes:1,photos:1,dwgs:1,marks:1,opens:1,lines:1,capt:1};
-var FLD={exttel:"외부 전문가 연락처",offtel:"동행 공무원 연락처",rctype:"RC 형식",structx:"복합구조 내용",addr:"주소",name:"시설물명",mgr:"관리주체",mgrtel:"연락처",ship:"발송주소",calls:"연락 기록",pre:"사전 확인",visit:"방문일시",asg:"배정 점검자",ext:"외부 전문가",offname:"공무원",offf:"공무원 분야",sum:"총평",memo:"비고",grade:"점검등급",prec:"정밀점검 의견",reason:"등급 조정 사유",status:"상태",date:"조사일시"};
+var FLD={extorg:"외부 전문가 소속",exttel:"외부 전문가 연락처",offtel:"동행 공무원 연락처",rctype:"RC 형식",structx:"복합구조 내용",addr:"주소",name:"시설물명",mgr:"관리주체",mgrtel:"연락처",ship:"발송주소",calls:"연락 기록",pre:"사전 확인",visit:"방문일시",asg:"배정 점검자",ext:"외부 전문가",offname:"공무원",offf:"공무원 분야",sum:"총평",memo:"비고",grade:"점검등급",prec:"정밀점검 의견",reason:"등급 조정 사유",status:"상태",date:"조사일시"};
 function mergeRec(o,n){
   var newer=(n.upd||"")>=(o.upd||""),cf=[],note=[];
   Object.keys(n).forEach(function(f){if(MERGE_SKIP[f])return;var a=o[f],b=n[f];
