@@ -146,6 +146,7 @@ body.nopii .pii{display:none!important}
 .ph{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);min-width:0}
 .ph img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;background:var(--na-soft);max-width:100%}
 .ph span{overflow-wrap:anywhere}
+.ph .pk{display:flex;align-items:center;gap:4px;font-size:12px;margin-top:4px;cursor:pointer}
 .ph .cap{font:inherit;font-size:13px;color:var(--ink);width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid var(--line);border-radius:6px;resize:vertical}
 .ph button{border:1px solid var(--line);background:var(--surface);border-radius:6px;font-size:12px;padding:3px}
 @media (min-width:900px){.wrap{max-width:1040px}#items{display:grid;grid-template-columns:1fr 1fr;column-gap:24px}#items .grp{grid-column:1/-1}.strip .in{max-width:1040px}}
@@ -328,6 +329,7 @@ body.nopii .pii{display:none!important}
         <label class="btn small" style="display:inline-block">사진첩에서 여러 장<input id="phMulti" type="file" accept="image/*" multiple hidden></label>
       </div>
       <div class="photos" id="phList"></div>
+      <div class="row" style="margin-top:8px"><button type="button" class="btn small" id="phDl" disabled>고른 사진 내려받기</button><span class="hint">공문 붙임 등에 쓸 사진을 골라 내려받습니다(선 그리기 한 사진은 그린 그대로).</span></div>
     </section>
 
     <section class="block">
@@ -624,7 +626,7 @@ function openRec(id){
   if(S.role==="off"&&S.tel&&!cur.offtel&&cur.offname===S.insp)cur.offtel=S.tel;
   if(cur.co==null)cur.co=S.lastCo||"";
   document.querySelectorAll("option[data-extra]").forEach(function(o){o.remove()});
-  idShow();
+  idShow();setTimeout(growAll,0);
   Object.keys(FMAP).forEach(function(k){var el=$(k),v=cur[FMAP[k]]||"";
     if(el.tagName==="SELECT"&&v&&![].some.call(el.options,function(o){return o.value===v})){var o=document.createElement("option");o.textContent=v;o.dataset.extra="1";el.appendChild(o)}/* 대장에서 온 값(예: 철근콘크리트구조)이 목록에 없으면 그대로 보이게 추가 */
     el.value=v});
@@ -663,7 +665,7 @@ function refreshRec(){
     var th=$("ith"+n2);if(th){var sig=pl2.join("|");if(th.dataset.v!==sig){th.dataset.v=sig;th.innerHTML=pl2.map(function(p){return '<img alt="'+esc(photoLabel(p))+'" data-view="'+esc(p)+'" title="'+esc(((cur.capt||{})[p])||photoLabel(p))+'">'}).join("");
       th.querySelectorAll("img").forEach(function(im){objURL(im.dataset.view).then(function(u){if(u)im.src=u})})}}cm.classList.toggle("hot",cur.items[n2]===FM.bad&&!k2);cm.querySelector(".k").textContent=k2?k2:""}
   var pl=$("phList"),want=(cur.photos||[]).join("|");
-  if(pl.dataset.v!==want){pl.dataset.v=want;pl.innerHTML=(cur.photos||[]).map(function(p){return '<div class="ph"><img alt="" data-n="'+esc(p)+'"><span>'+esc(p)+'</span><textarea class="cap" rows="2" data-cap="'+esc(p)+'" placeholder="사진 설명 (점검표에 함께 나옴)">'+esc((cur.capt||{})[p]||"")+'</textarea><button type="button" data-draw="'+esc(p)+'">선 그리기</button><button type="button" data-del="'+esc(p)+'">삭제</button></div>'}).join("");
+  if(pl.dataset.v!==want){pl.dataset.v=want;pl.innerHTML=(cur.photos||[]).slice().sort(function(x,y){var a=phOrd(x),b=phOrd(y);return a[0]-b[0]||a[1]-b[1]}).map(function(p){return '<div class="ph"><img alt="" data-n="'+esc(p)+'"><span>'+esc(p)+'</span><textarea class="cap" rows="2" data-cap="'+esc(p)+'" placeholder="사진 설명 (점검표에 함께 나옴)">'+esc((cur.capt||{})[p]||"")+'</textarea><label class="pk"><input type="checkbox" data-pick="'+esc(p)+'"> 내려받기 선택</label><button type="button" data-draw="'+esc(p)+'">선 그리기</button><button type="button" data-del="'+esc(p)+'">삭제</button></div>'}).join("");
     pl.querySelectorAll("img").forEach(function(im){pGet(im.dataset.n).then(function(b){if(b)im.src=URL.createObjectURL(b)})})}
   $("stripTxt").innerHTML=k26?'미흡 <b>'+c.bad.length+'</b> · '+(cur.actst?esc(cur.actst):'조치 미입력')+' <span>('+c.filled+'/'+NI+')</span>':'하 <b>'+(c.a+c.b)+'</b> · '+(c.filled?'<span class="g g-'+finalGrade(cur,c)+'">'+finalGrade(cur,c)+'</span>':'미기록')+' <span>('+c.filled+'/'+NI+')</span>';
 }
@@ -737,6 +739,7 @@ function savePhoto(f,key){
   }).catch(function(){toast("사진을 저장하지 못했습니다. 휴대폰 저장 공간을 확인하세요")});
 }
 $("phList").addEventListener("click",function(e){var b=e.target.closest("[data-del]");if(b)delPhoto(b.dataset.del);var w=e.target.closest("[data-draw]");if(w)annOpen(w.dataset.draw)});
+$("phList").addEventListener("change",function(e){if(e.target.closest("[data-pick]")){e.stopPropagation();var n=$("phList").querySelectorAll("[data-pick]:checked").length;$("phDl").textContent="고른 사진 내려받기"+(n?" ("+n+"장)":"");$("phDl").disabled=!n}});
 $("phList").addEventListener("input",function(e){var t=e.target.closest("[data-cap]");if(!t||!cur)return;e.stopPropagation();cur.capt=cur.capt||{};var v=t.value.trim();if(v)cur.capt[t.dataset.cap]=t.value;else delete cur.capt[t.dataset.cap];touch()});
 function delPhoto(name){if(!cur)return;cur.photos=cur.photos.filter(function(p){return p!==name});pDel(name);pDel("orig_"+name);if(cur.capt)delete cur.capt[name];touch();refreshRec()}
 /* minimal ZIP (stored, UTF-8 names) */
@@ -767,6 +770,9 @@ function exportPhotos(recs,msgEl){
 function saveMany(files,key){[].slice.call(files||[]).forEach(function(f){savePhoto(f,key)})}
 $("phFile").addEventListener("change",function(e){saveMany(e.target.files,$("phItem").value);e.target.value=""});
 $("phMulti").addEventListener("change",function(e){var n=e.target.files.length;saveMany(e.target.files,$("phItem").value);if(n>1)toast(n+"장을 넣는 중입니다");e.target.value=""});
+$("phDl").addEventListener("click",function(){var ks=[].map.call($("phList").querySelectorAll("[data-pick]:checked"),function(c){return c.dataset.pick});if(!ks.length)return;
+  ks.reduce(function(pr,k,i){return pr.then(function(){return pGet(k).then(function(b){if(!b)return;var m=k.match(/_(\d\d|전경|현황|기타)[^_]*_(\d+)\.(\w+)$/),tag=m?(/^\d/.test(m[1])?"item"+m[1]:({"전경":"front","현황":"status","기타":"etc"})[m[1]])+"_"+m[2]:"photo"+(i+1);
+    download(b,fname("jpg","photo_"+tag));return new Promise(function(r){setTimeout(r,400)})})})},Promise.resolve()).then(function(){toast(ks.length+"장 내려받기를 요청했습니다")})});
 var icKey=null;
 $("items").addEventListener("click",function(e){var im=e.target.closest("[data-view]");if(!im)return;var k=im.dataset.view;objURL(k).then(function(u){$("phViewImg").src=u;$("phViewCap").textContent=photoLabel(k)+(((cur.capt||{})[k])?"\n"+cur.capt[k]:"");$("phView").hidden=false})});
 $("phView").addEventListener("click",function(){$("phView").hidden=true});
@@ -1029,6 +1035,7 @@ function pinned(r,d){return pGet(d.k).then(function(b){if(!b)return "";return ne
     x.fillStyle="#fff";x.font="bold "+Math.round(R*1.1)+"px sans-serif";x.textAlign="center";x.textBaseline="middle";x.fillText(typeof m.n==="number"?String(m.n):pinTxt(m.n),px,py+1)});
   URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",0.85))};im.onerror=function(){res("")};im.src=u})})}
 function photoLabel(n){var mo=n.match(/_해(\d+)(전|내부|후)_(\d+)\.\w+$/);if(mo)return "해체 확인 "+mo[1]+" "+({"전":"해체 전","내부":"안쪽","후":"복구 후"})[mo[2]]+" "+mo[3];var m=n.match(/_(\d\d)([^_]+)_(\d+)\.\w+$/);if(m)return CIRC[+m[1]-1]+" "+m[2]+" "+m[3];var m2=n.match(/_(전경|현황|기타)_(\d+)\.\w+$/);return m2?m2[1]+" "+m2[2]:n}
+function phOrd(n){var q=(n.match(/_(\d+)\.\w+$/)||[0,0])[1]*1;if(/_전경_/.test(n))return [0,q];if(/_현황_/.test(n))return [1,q];var m=n.match(/_(\d\d)[^_]*_\d+\.\w+$/);if(m)return [10+(+m[1]),q];if(/_해\d/.test(n))return [80,q];return [90,q]}
 function EB(t){return esc(String(t||"")).replace(/\r?\n/g,"<br>")}
 function docSection(r){
   var c=calc(r),f=c.filled?finalGrade(r,c):"",pr=c.filled?(r.prec||precDefault(f)):"",E=EB;
@@ -1065,7 +1072,6 @@ function docSection(r){
     '<p class="note">※ 점검결과 등급이 우수 ~ 보통 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 할 수 있음<br>※ 점검결과 등급이 미흡 ~ 불량 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 하지 않을 수 있음</p>');
     if(!k26&&(r.opens||[]).length)h+='<h2>■ 마감재 해체 확인</h2><table><tr><th>번호</th><th>위치</th><th>방법</th><th>안쪽 상태</th><th>메모</th><th>동의</th><th>복구</th></tr>'+r.opens.map(function(o,i){return '<tr><td class="c">'+(i+1)+'</td><td>'+E(o.loc||"")+'</td><td>'+E(o.how||"")+'</td><td>'+E((o.find||[]).join(", "))+'</td><td>'+E(o.memo||"")+'</td><td class="c">'+(o.consent?"○":"")+'</td><td class="c">'+(o.restored?"○":"")+'</td></tr>'}).join("")+'</table>';
     if(dw.length)h+='<div class="pb"></div><h2>■ 결함 위치도</h2>'+dw.map(function(d){return '<figure><img src="'+d.u+'"><figcaption>'+E(d.t)+'</figcaption></figure>'}).join("");
-    var phOrd=function(n){var q=(n.match(/_(\d+)\.\w+$/)||[0,0])[1]*1;if(/_전경_/.test(n))return [0,q];if(/_현황_/.test(n))return [1,q];var m=n.match(/_(\d\d)[^_]*_\d+\.\w+$/);if(m)return [10+(+m[1]),q];if(/_해\d/.test(n))return [80,q];return [90,q]};
     ph.sort(function(x,y){var a=phOrd(x.n),b=phOrd(y.n);return a[0]-b[0]||a[1]-b[1]});
     var slot=function(t){return '<figure><figcaption class="ph">'+t+'</figcaption><div class="empty"></div></figure>'},fig=ph.map(function(p){return '<figure><figcaption class="ph">'+(/_전경_/.test(p.n)?('전경'):/_현황_/.test(p.n)?'현황':/_기타_/.test(p.n)?'기타':(k26?'지적사항':'구조안전 결함'))+'</figcaption><img src="'+p.u+'"><figcaption>'+E(photoLabel(p.n))+((r.capt||{})[p.n]?'<br><span class="cpt">'+E(r.capt[p.n]).replace(/\n/g,"<br>")+'</span>':'')+'</figcaption></figure>'});
     if(!(ph[0]&&/_전경_/.test(ph[0].n)))fig.unshift(slot('전경'));while(fig.length<6)fig.push(slot(k26?'지적사항':'구조안전 결함'));
@@ -1168,6 +1174,10 @@ var SYNC=[["f_asg","asg","f_ext","ext",function(v){return v}],["f_visit","visit"
 SYNC.forEach(function(x){$(x[0]).addEventListener("input",function(e){if(!cur)return;var old=x[4](cur[x[1]]),nv=x[4](e.target.value);
   if(!cur[x[3]]||cur[x[3]]===old||(!old&&(cur.status==="new"||cur.status==="pre"))){cur[x[3]]=nv;$(x[2]).value=nv}})});
 ["f_mgrtel","f_mgrtel2"].forEach(function(id,i,a){$(id).addEventListener("input",function(e){$(a[1-i]).value=e.target.value})});
+/* 여러 줄 칸: 내용만큼 자동으로 늘어남 */
+function autoGrow(t){if(!t||t.tagName!=="TEXTAREA")return;t.style.height="auto";t.style.height=(t.scrollHeight+2)+"px"}
+document.addEventListener("input",function(e){autoGrow(e.target)});
+function growAll(){document.querySelectorAll("#vRec textarea").forEach(autoGrow)}
 function structX(){var v=$("f_struct").value;$("f_structx").hidden=v!=="복합구조";$("f_rctype").hidden=!(/철근콘크리트/.test(v)&&!/철골/.test(v))}
 $("f_struct").addEventListener("change",structX);
 function fillSet(){fillAsg();fillDay();$("s_gu").value=S.gu||"";$("s_role").value=S.role||"ext";$("s_form").value=S.form||"k26";roleField();$("s_adv").checked=!!S.adv;$("s_pii").checked=!!S.pii;$("s_org").value=S.org||"";$("s_insp").value=S.insp||"";$("s_dept").value=S.dept||"";$("s_tel").value=S.tel||""}
@@ -1305,7 +1315,7 @@ function mergeRec(o,n){
     if(f==="status"){var rk={new:0,pre:1,draft:2,noaccess:2,done:3};if((rk[b]||0)>(rk[a]||0))o[f]=b;return}
     var keep=newer?b:a,other=newer?a:b;o[f]=keep;cf.push(FLD[f]||f);note.push((FLD[f]||f)+"=「"+String(other).slice(0,60)+"」")});
   o.items=o.items||{};o.notes=o.notes||{};
-  if(n.capt){o.capt=o.capt||{};Object.keys(n.capt).forEach(function(k){var a=o.capt[k],b=n.capt[k];if(!b||a===b)return;if(!a||newer)o.capt[k]=b})}
+    if(n.capt){o.capt=o.capt||{};Object.keys(n.capt).forEach(function(k){var a=o.capt[k],b=n.capt[k];if(!b||a===b)return;if(!a||newer)o.capt[k]=b})}
   ["items","notes"].forEach(function(g){var A=o[g],B=n[g]||{};Object.keys(B).forEach(function(i){var a=A[i],b=B[i];if(!b)return;if(!a){A[i]=b;return}if(a===b)return;
     if(g==="notes"&&a.indexOf(b)>=0)return;if(g==="notes"&&b.indexOf(a)>=0){A[i]=b;return}
     var keep=newer?b:a,other=newer?a:b;A[i]=keep;var lb=CIRC[i-1]+(g==="items"?" 상태":" 내용");cf.push(lb);note.push(lb+"=「"+String(other).slice(0,60)+"」")})});
