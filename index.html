@@ -435,7 +435,9 @@ body.nopii .pii{display:none!important}
   </div>
 </div>
 
-<div id="phView" hidden style="position:fixed;inset:0;z-index:58;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px;cursor:zoom-out"><img id="phViewImg" alt="" style="max-width:100%;max-height:82vh;border-radius:4px"><p id="phViewCap" style="color:#fff;margin:0;font-size:14px;text-align:center;white-space:pre-wrap"></p></div>
+<div id="phView" hidden style="position:fixed;inset:0;z-index:58;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px max(12px,env(safe-area-inset-left,0px)) calc(12px + env(safe-area-inset-bottom,0px))"><img id="phViewImg" alt="" style="max-width:100%;max-height:58vh;border-radius:4px"><p id="phViewCap" style="color:#fff;margin:0;font-size:14px;text-align:center"></p>
+  <textarea id="phViewTxt" rows="2" placeholder="사진 설명 (점검표에 함께 나옴)" style="width:min(100%,560px);box-sizing:border-box;font:inherit;font-size:15px;padding:8px;border-radius:8px;border:1px solid #888"></textarea>
+  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button type="button" class="btn small" id="phViewDraw">선 그리기</button><button type="button" class="btn small" id="phViewDel">삭제</button><button type="button" class="btn primary small" id="phViewClose">확인</button></div></div>
 <div id="icSheet" hidden style="position:fixed;left:0;right:0;bottom:0;z-index:55;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(0,0,0,.25);padding:14px max(16px,env(safe-area-inset-left,0px)) calc(14px + env(safe-area-inset-bottom,0px))">
   <p id="icTitle" style="margin:0 0 10px;font-weight:700"></p>
   <div class="row" style="gap:8px;flex-wrap:wrap"><label class="btn primary" style="display:inline-block">촬영<input id="icCam" type="file" accept="image/*" capture="environment" hidden></label><label class="btn" style="display:inline-block">앨범에서 고르기<input id="icPick" type="file" accept="image/*" multiple hidden></label><button type="button" class="btn" id="icCancel">취소</button></div>
@@ -770,11 +772,18 @@ function saveMany(files,key){[].slice.call(files||[]).forEach(function(f){savePh
 $("phFile").addEventListener("change",function(e){saveMany(e.target.files,$("phItem").value);e.target.value=""});
 $("phMulti").addEventListener("change",function(e){var n=e.target.files.length;saveMany(e.target.files,$("phItem").value);if(n>1)toast(n+"장을 넣는 중입니다");e.target.value=""});
 var icKey=null;
-$("items").addEventListener("click",function(e){var im=e.target.closest("[data-view]");if(!im)return;var k=im.dataset.view;objURL(k).then(function(u){$("phViewImg").src=u;$("phViewCap").textContent=photoLabel(k)+(((cur.capt||{})[k])?"\n"+cur.capt[k]:"");$("phView").hidden=false})});
-$("phView").addEventListener("click",function(){$("phView").hidden=true});
+var pvKey=null;
+function phViewOpen(k){pvKey=k;objURL(k).then(function(u){$("phViewImg").src=u||"";$("phViewCap").textContent=photoLabel(k);$("phViewTxt").value=((cur.capt||{})[k])||"";$("phView").hidden=false})}
+$("items").addEventListener("click",function(e){var im=e.target.closest("[data-view]");if(im)phViewOpen(im.dataset.view)});
+$("phViewTxt").addEventListener("input",function(e){e.stopPropagation();if(!cur||!pvKey)return;cur.capt=cur.capt||{};if(e.target.value.trim())cur.capt[pvKey]=e.target.value;else delete cur.capt[pvKey];$("phList").dataset.v="";touch()});
+function phViewShut(){$("phView").hidden=true;pvKey=null;refreshRec()}
+$("phViewClose").addEventListener("click",phViewShut);
+$("phView").addEventListener("click",function(e){if(e.target===this)phViewShut()});
+$("phViewDraw").addEventListener("click",function(){var k=pvKey;phViewShut();annOpen(k)});
+$("phViewDel").addEventListener("click",function(){var k=pvKey;if(!k)return;if(!$("phViewDel").dataset.sure){$("phViewDel").dataset.sure="1";$("phViewDel").textContent="한 번 더 누르면 삭제";return}delete $("phViewDel").dataset.sure;$("phViewDel").textContent="삭제";phViewShut();delPhoto(k)});
 $("items").addEventListener("click",function(e){var b=e.target.closest("[data-cam]");if(!b)return;e.preventDefault();icKey=b.dataset.cam;var it=ITEMS.find(function(x){return x.n==icKey});$("icTitle").textContent=CIRC[icKey-1]+" "+(it?it.s:"")+" 사진 넣기";$("icSheet").hidden=false});
 $("icCancel").addEventListener("click",function(){$("icSheet").hidden=true});
-["icCam","icPick"].forEach(function(id){$(id).addEventListener("change",function(e){$("icSheet").hidden=true;if(icKey&&e.target.files&&e.target.files.length)saveMany(e.target.files,icKey);e.target.value=""})});
+["icCam","icPick"].forEach(function(id){$(id).addEventListener("change",function(e){$("icSheet").hidden=true;if(icKey&&e.target.files&&e.target.files.length){var n0=(cur.photos||[]).length,one=e.target.files.length===1;saveMany(e.target.files,icKey);if(one)queue=queue.then(function(){if(cur&&cur.photos.length>n0)phViewOpen(cur.photos[cur.photos.length-1])})}e.target.value=""})});
 
 
 /* ---------- 시 보고 양식(분기별 점검양식) xlsx ---------- */
