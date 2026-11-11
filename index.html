@@ -1029,8 +1029,9 @@ function pinned(r,d){return pGet(d.k).then(function(b){if(!b)return "";return ne
     x.fillStyle="#fff";x.font="bold "+Math.round(R*1.1)+"px sans-serif";x.textAlign="center";x.textBaseline="middle";x.fillText(typeof m.n==="number"?String(m.n):pinTxt(m.n),px,py+1)});
   URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",0.85))};im.onerror=function(){res("")};im.src=u})})}
 function photoLabel(n){var mo=n.match(/_해(\d+)(전|내부|후)_(\d+)\.\w+$/);if(mo)return "해체 확인 "+mo[1]+" "+({"전":"해체 전","내부":"안쪽","후":"복구 후"})[mo[2]]+" "+mo[3];var m=n.match(/_(\d\d)([^_]+)_(\d+)\.\w+$/);if(m)return CIRC[+m[1]-1]+" "+m[2]+" "+m[3];var m2=n.match(/_(전경|현황|기타)_(\d+)\.\w+$/);return m2?m2[1]+" "+m2[2]:n}
+function EB(t){return esc(String(t||"")).replace(/\r?\n/g,"<br>")}
 function docSection(r){
-  var c=calc(r),f=c.filled?finalGrade(r,c):"",pr=c.filled?(r.prec||precDefault(f)):"",E=esc;
+  var c=calc(r),f=c.filled?finalGrade(r,c):"",pr=c.filled?(r.prec||precDefault(f)):"",E=EB;
   var ck=function(on){return on?"☑":"☐"};
   return Promise.all([b2d(null),r.sig1?pGet("sig1_"+r.k).then(b2d):"",r.sig2?pGet("sig2_"+r.k).then(b2d):"",
     Promise.all((r.dwgs||[]).map(function(d){return pinned(r,d).then(function(u){return {t:d.t,u:u}})})),
@@ -1056,9 +1057,9 @@ function docSection(r){
     '<tr><th rowspan="4">질의내용</th><td>1) 최근 안전 우려가 있는 현상과 부위가 있는가?<br>'+E(r.q1||"")+'</td></tr><tr><td>2) 최근 하중 증가요인이 있는가?<br>'+E(r.q2||"")+'</td></tr>'+
     '<tr><td>3) 그간 점검실시 현황과 결과는?<br>'+E(r.q3||"")+'</td></tr><tr><td>4) 기타 의견<br>'+E(r.q4||"")+'</td></tr></table>')+
     (k26?'<h2>■ 점검현황 <small>(상태 등급 : 양호 / 보통 / 미흡 / 해당없음)</small></h2><table class="items"><tr><th>점 검 항 목</th><th style="width:4.5em">상태</th><th>상세 내용(지적사항 등)</th></tr>'+rows+'</table>'+
-     '<table><tr><td class="sum"><b>점검 총평</b> <small>(향후 조치사항 및 참고할 사항 등)</small><br>'+E(summary(r,c))+(r.sum?'<br>'+E(r.sum):'')+(r.act?'<br>조치: '+E(r.act)+(r.actst?' ('+E(r.actst)+')':''):'')+(r.memo?'<br>비고: '+E(r.memo):'')+'</td></tr></table>':
+     '<table><tr><td class="sum"><b>점검 총평</b> <small>(향후 조치사항 및 참고할 사항 등)</small><br>'+E(summary(r,c))+(r.sum?'<br>'+EB(r.sum):'')+(r.act?'<br>조치: '+EB(r.act)+(r.actst?' ('+E(r.actst)+')':''):'')+(r.memo?'<br>비고: '+EB(r.memo):'')+'</td></tr></table>':
     '<h2>■ 점검현황 <small>(상태 등급 : 상 - 양호한 상태, 중 - 보통 상태, 하 - 나쁜 상태 / 해당없음)</small></h2><table class="items"><tr><th>점 검 항 목</th><th style="width:4.5em">상태</th><th>상세 내용(위치, 상태 등)</th></tr>'+rows+'</table>'+
-    '<table><tr><td class="sum"><b>점검 총평</b> <small>(향후 추가 안전진단 등 참고할 사항 등)</small><br>'+E(summary(r,c))+(r.sum?'<br>'+E(r.sum):'')+'</td><td class="grade"><div>점검등급<br><small>5단계</small></div><b>'+E(f)+'</b><div style="font-size:8.5pt">환산 '+(c.filled?c.score.toFixed(1)+'점':'')+'</div></td></tr></table>'+
+    '<table><tr><td class="sum"><b>점검 총평</b> <small>(향후 추가 안전진단 등 참고할 사항 등)</small><br>'+E(summary(r,c))+(r.sum?'<br>'+EB(r.sum):'')+'</td><td class="grade"><div>점검등급<br><small>5단계</small></div><b>'+E(f)+'</b><div style="font-size:8.5pt">환산 '+(c.filled?c.score.toFixed(1)+'점':'')+'</div></td></tr></table>'+
     '<p class="note">※ 점검 시 유의사항 1. 항목별 해당 사항이 없으면 ‘해당없음’으로 표기<br>2. 외장재 및 내부 마감재로 인해 주요 구조체(보, 기둥 등)의 직접 확인이 불가한 경우, 마감 표면의 균열, 누수 흔적, 변색 등 간접 징후를 통해 구조 결함 여부를 판단하며, 점검구(천장텍스 마감 등)으로 점검이 가능한 경우 반드시 구조체 상태 확인 필요함<br>3. 육안으로 확인이 불가하더라도 마감재 결함이 심각하여 구조적 안전성이 우려될 경우, 본 점검(정밀안전점검, 정밀안전진단) 필요 의견을 제시함</p>'+
     '<table><tr><th colspan="3">정밀안전점검 또는 정밀안전진단 필요 여부 (☑)</th></tr><tr><td class="c">정밀안전점검 필요 '+ck(pr==="정밀안전점검 필요")+'<br><small>(건축물관리점검기관의 점검 필요)</small></td><td class="c">정밀안전진단 필요 '+ck(pr==="정밀안전진단 필요")+'</td><td class="c">불필요 '+ck(pr==="불필요")+'</td></tr><tr><td colspan="3">[ 비고 ] '+E(r.memo||"")+(r.grade&&r.grade!==c.grade?' / 등급 조정 사유: '+E(r.reason||""):'')+'</td></tr></table>'+
     '<p class="note">※ 점검결과 등급이 우수 ~ 보통 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 할 수 있음<br>※ 점검결과 등급이 미흡 ~ 불량 사이에 결정되었더라도 점검자의 의견에 따라 정밀안전점검 및 정밀안전진단을 실시 하지 않을 수 있음</p>');
