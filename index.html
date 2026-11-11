@@ -99,6 +99,7 @@ textarea{resize:vertical;min-height:64px}
 .seg button[aria-pressed="true"][data-v="미흡"]{background:var(--bad);color:var(--accent-ink);border-color:var(--bad)}
 .seg button[aria-pressed="true"][data-v="-"]{background:var(--na);color:var(--accent-ink);border-color:var(--na)}
 .cam{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 10px;font-size:13px;font-weight:600;white-space:nowrap;align-self:flex-start;cursor:pointer}
+.ithumbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.ithumbs:empty{display:none}.ithumbs img{width:72px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--line);cursor:zoom-in;background:var(--surface)}
 .cam.hot{background:var(--bad);color:var(--accent-ink);border-color:var(--bad)}
 .cam .k{font-variant-numeric:tabular-nums}
 .item .note{margin-top:6px;font-size:15px;min-height:40px}
@@ -433,6 +434,7 @@ body.nopii .pii{display:none!important}
   </div>
 </div>
 
+<div id="phView" hidden style="position:fixed;inset:0;z-index:58;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px;cursor:zoom-out"><img id="phViewImg" alt="" style="max-width:100%;max-height:82vh;border-radius:4px"><p id="phViewCap" style="color:#fff;margin:0;font-size:14px;text-align:center;white-space:pre-wrap"></p></div>
 <div id="icSheet" hidden style="position:fixed;left:0;right:0;bottom:0;z-index:55;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(0,0,0,.25);padding:14px max(16px,env(safe-area-inset-left,0px)) calc(14px + env(safe-area-inset-bottom,0px))">
   <p id="icTitle" style="margin:0 0 10px;font-weight:700"></p>
   <div class="row" style="gap:8px;flex-wrap:wrap"><label class="btn primary" style="display:inline-block">촬영<input id="icCam" type="file" accept="image/*" capture="environment" hidden></label><label class="btn" style="display:inline-block">앨범에서 고르기<input id="icPick" type="file" accept="image/*" multiple hidden></label><button type="button" class="btn" id="icCancel">취소</button></div>
@@ -602,7 +604,7 @@ function buildItems(){
     if(it.g){h+='<div class="grp">'+esc(it.g)+'</div>';return}
     h+='<div class="item" data-n="'+it.n+'"><div class="q"><span class="no">'+it.n+'</span><span>'+esc(it.t)+'</span><button type="button" class="cam" id="cam'+it.n+'" data-cam="'+it.n+'">사진 <span class="k"></span></button></div>'+
       '<div class="seg" role="group" aria-label="'+CIRC[it.n-1]+' 상태">'+FM.vals.map(function(v){return '<button type="button" data-v="'+v+'" aria-pressed="false">'+(v==="-"?"해당없음":v)+'</button>'}).join("")+'</div>'+
-      '<input class="inp note" id="note'+it.n+'" placeholder="'+(formKey()==="k26"?"상세 내용(지적사항 등)":"상세 내용(위치, 상태 등)")+'"></div>';
+      '<input class="inp note" id="note'+it.n+'" placeholder="'+(formKey()==="k26"?"상세 내용(지적사항 등)":"상세 내용(위치, 상태 등)")+'"><div class="ithumbs" id="ith'+it.n+'"></div></div>';
   });
   $("items").innerHTML=h;
   var opts='<option value="전경">전경 (건물 전체)</option><option value="현황">현황</option>';ITEMS.forEach(function(it){if(it.n)opts+='<option value="'+it.n+'">'+CIRC[it.n-1]+' '+it.s+'</option>'});
@@ -657,7 +659,9 @@ function refreshRec(){
   var hs=(cur.hist||[]).slice(-3);$("histLine").textContent=hs.length?"주고받은 기록: "+hs.map(function(h){return new Date(h.at).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})+" "+(h.by||"")+" "+h.act}).join(" · "):"";
   $("recTitle").textContent=cur.addr?label(cur):"새 건물";
   var dup=cur.addr&&S.recs.some(function(r){return r!==cur&&akey(r)===akey(cur)});$("dupWarn").hidden=!dup;$("dupWarn").textContent=dup?"같은 주소(동 구분 포함)의 건물이 목록에 이미 있습니다. 한 필지에 여러 동이면 동 구분을 적어 주세요.":"";
-  for(var n2=1;n2<=NI;n2++){var cm=$("cam"+n2),tg="_"+tagOf(n2)+"_",k2=(cur.photos||[]).filter(function(p){return p.indexOf(tg)>=0}).length;cm.classList.toggle("hot",cur.items[n2]===FM.bad&&!k2);cm.querySelector(".k").textContent=k2?k2:""}
+  for(var n2=1;n2<=NI;n2++){var cm=$("cam"+n2),tg="_"+tagOf(n2)+"_",pl2=(cur.photos||[]).filter(function(p){return p.indexOf(tg)>=0}),k2=pl2.length;
+    var th=$("ith"+n2);if(th){var sig=pl2.join("|");if(th.dataset.v!==sig){th.dataset.v=sig;th.innerHTML=pl2.map(function(p){return '<img alt="'+esc(photoLabel(p))+'" data-view="'+esc(p)+'" title="'+esc(((cur.capt||{})[p])||photoLabel(p))+'">'}).join("");
+      th.querySelectorAll("img").forEach(function(im){objURL(im.dataset.view).then(function(u){if(u)im.src=u})})}}cm.classList.toggle("hot",cur.items[n2]===FM.bad&&!k2);cm.querySelector(".k").textContent=k2?k2:""}
   var pl=$("phList"),want=(cur.photos||[]).join("|");
   if(pl.dataset.v!==want){pl.dataset.v=want;pl.innerHTML=(cur.photos||[]).map(function(p){return '<div class="ph"><img alt="" data-n="'+esc(p)+'"><span>'+esc(p)+'</span><textarea class="cap" rows="2" data-cap="'+esc(p)+'" placeholder="사진 설명 (점검표에 함께 나옴)">'+esc((cur.capt||{})[p]||"")+'</textarea><button type="button" data-draw="'+esc(p)+'">선 그리기</button><button type="button" data-del="'+esc(p)+'">삭제</button></div>'}).join("");
     pl.querySelectorAll("img").forEach(function(im){pGet(im.dataset.n).then(function(b){if(b)im.src=URL.createObjectURL(b)})})}
@@ -764,6 +768,8 @@ function saveMany(files,key){[].slice.call(files||[]).forEach(function(f){savePh
 $("phFile").addEventListener("change",function(e){saveMany(e.target.files,$("phItem").value);e.target.value=""});
 $("phMulti").addEventListener("change",function(e){var n=e.target.files.length;saveMany(e.target.files,$("phItem").value);if(n>1)toast(n+"장을 넣는 중입니다");e.target.value=""});
 var icKey=null;
+$("items").addEventListener("click",function(e){var im=e.target.closest("[data-view]");if(!im)return;var k=im.dataset.view;objURL(k).then(function(u){$("phViewImg").src=u;$("phViewCap").textContent=photoLabel(k)+(((cur.capt||{})[k])?"\n"+cur.capt[k]:"");$("phView").hidden=false})});
+$("phView").addEventListener("click",function(){$("phView").hidden=true});
 $("items").addEventListener("click",function(e){var b=e.target.closest("[data-cam]");if(!b)return;e.preventDefault();icKey=b.dataset.cam;var it=ITEMS.find(function(x){return x.n==icKey});$("icTitle").textContent=CIRC[icKey-1]+" "+(it?it.s:"")+" 사진 넣기";$("icSheet").hidden=false});
 $("icCancel").addEventListener("click",function(){$("icSheet").hidden=true});
 ["icCam","icPick"].forEach(function(id){$(id).addEventListener("change",function(e){$("icSheet").hidden=true;if(icKey&&e.target.files&&e.target.files.length)saveMany(e.target.files,icKey);e.target.value=""})});
