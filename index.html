@@ -1257,7 +1257,13 @@ $("expJson").addEventListener("click",function(){$("expMsg").textContent="백업
 var FS={dir:null,ok:false,timer:null,busy:false,again:false,done:{},last:""};
 function fsHandleSave(h){return db().then(function(d){return new Promise(function(res){try{var t=d.transaction("p","readwrite");t.objectStore("p").put(h,"__fsdir");t.oncomplete=res;t.onerror=res}catch(e){res()}})})}
 function fsSet(cls,txt,btn){var b=$("fsBar");b.hidden=false;b.className="fsbar "+cls;$("fsTxt").textContent=txt;$("fsBtn").textContent=btn;$("fsBtn").hidden=!btn}
-function fsName(k){var n=k.replace(/[\\/:*?"<>|]/g,"_");return /\.(jpe?g|png|webp|gif)$/i.test(n)?n:n+(/^sig/.test(k)?".png":".jpg")}
+function fsName(k){var safe=function(t){return String(t||"").replace(/[\\/:*?"<>|\s]+/g,"_")};
+  var m=k.match(/^sig([12])_(.+)$/);if(m){var r=S.recs.find(function(x){return x.k===m[2]});if(r)return safe(photoBase(r))+"_서명_"+(m[1]==="1"?"외부전문가":"공무원")+".png"}
+  if(/^dwg_/.test(k)){var r2=S.recs.find(function(x){return (x.dwgs||[]).some(function(d){return d.k===k})});if(r2){var di=r2.dwgs.findIndex(function(d){return d.k===k}),dd=r2.dwgs[di];return safe(photoBase(r2))+"_도면"+(di+1)+"_"+safe(dd.t||"")+".jpg"}}
+  return fsNameOld(k)}
+function fsRecOf(k){return S.recs.find(function(r){return recKeys(r).indexOf(k)>=0})}
+function fsSubDir(md,k){var r=fsRecOf(k);if(!r)return Promise.resolve(md);return md.getDirectoryHandle(photoBase(r).replace(/[\s.]+$/,""),{create:true})}
+function fsNameOld(k){var n=k.replace(/[\\/:*?"<>|]/g,"_");return /\.(jpe?g|png|webp|gif)$/i.test(n)?n:n+(/^sig/.test(k)?".png":".jpg")}
 function fsWrite(dir,name,data){return dir.getFileHandle(name,{create:true}).then(function(h){return h.createWritable()}).then(function(w){return w.write(data).then(function(){return w.close()})})}
 function fsRead(dir,name){return dir.getFileHandle(name).then(function(h){return h.getFile()})}
 function fsMediaDir(){return FS.dir.getDirectoryHandle("사진·도면·서명",{create:true})}
@@ -1266,7 +1272,7 @@ function fsSave(){if(!FS.ok)return Promise.resolve();if(FS.busy){FS.again=true;r
   var txt=JSON.stringify(S),day=new Date().toISOString().slice(0,10).replace(/-/g,"");
   return fsWrite(FS.dir,"기록.json",txt).then(function(){if(!S.recs.length)return;/* 빈 목록으로 그날 백업을 덮지 않음 */return FS.dir.getDirectoryHandle("일별백업",{create:true}).then(function(b){return fsWrite(b,"기록_"+day+".json",txt)})})
   .then(fsMediaDir).then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){if(!FS.done[fsName(k)])keys.push(k)})});
-    return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(!b)return;return fsWrite(md,fsName(k),b).then(function(){FS.done[fsName(k)]=1})})})},Promise.resolve())})
+    return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(!b)return;return fsSubDir(md,k).then(function(sd){return fsWrite(sd,fsName(k),b)}).then(function(){FS.done[fsName(k)]=1})})})},Promise.resolve())})
   .then(function(){FS.last=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});fsSet("on","기록 폴더 「"+FS.dir.name+"」에 자동 저장 중 · 마지막 저장 "+FS.last,"")})
   .catch(function(e){FS.ok=false;fsSet("warn","기록 폴더에 저장하지 못했습니다("+(e&&e.name||e)+"). 다시 연결해 주세요.","다시 연결")})
   .then(function(){FS.busy=false;if(FS.again){FS.again=false;fsSchedule()}})}
@@ -1275,10 +1281,10 @@ function fsLoad(){/* 폴더에 있던 기록을 앱에 합치고, 앱에 없는 
       (d.recs||[]).forEach(function(r){norm(r);var ex=S.recs.findIndex(function(x){return x.k===r.k||(r.addr&&akey(x)===akey(r))});if(ex<0){S.recs.push(r);add++}else{var cf=mergeRec(S.recs[ex],r);if(cf.length)conf.push(label(S.recs[ex])+": "+cf.join(", "))}});
       ["org","insp","dept","gu"].forEach(function(f){if(!S[f]&&d[f])S[f]=d[f]});return {add:add,conf:conf}},function(){return {add:0,conf:[],none:true}})
   .then(function(res){return fsMediaDir().then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){keys.push(k)})});
-      return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(b){return}return fsRead(md,fsName(k)).then(function(f){return pPut(k,f)},function(){})})})},Promise.resolve())
+      return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(b){return}return fsSubDir(md,k).then(function(sd){return fsRead(sd,fsName(k))}).catch(function(){return fsRead(md,fsName(k))}).catch(function(){return fsRead(md,fsNameOld(k))}).then(function(f){return pPut(k,f)},function(){})})})},Promise.resolve())
       .then(function(){return md.keys?(async function(){for await(const n of md.keys())FS.done[n]=1})().catch(function(){}):0})}).then(function(){return res})})}
 function fsPullMedia(){return fsMediaDir().then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){keys.push(k)})});
-  return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(b)return;return fsRead(md,fsName(k)).then(function(f){return pPut(k,f)},function(){})})})},Promise.resolve())}).catch(function(){})}
+  return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(b)return;return fsSubDir(md,k).then(function(sd){return fsRead(sd,fsName(k))}).catch(function(){return fsRead(md,fsName(k))}).catch(function(){return fsRead(md,fsNameOld(k))}).then(function(f){return pPut(k,f)},function(){})})})},Promise.resolve())}).catch(function(){})}
 /* PC: 기록 폴더 안 '받은' 이 들어간 폴더(예: 2. 받은파일)에 새로 넣은 .json을 자동으로 불러옴 */
 function fsScanInbox(){if(!FS.ok||!FS.dir||!FS.dir.values)return Promise.resolve();S.seen=S.seen||{};
   return (async function(){var inbox=null;for await(const h of FS.dir.values()){if(h.kind==="directory"&&/받은/.test(h.name)){inbox=h;break}}
