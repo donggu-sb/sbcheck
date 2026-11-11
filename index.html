@@ -146,7 +146,6 @@ body.nopii .pii{display:none!important}
 .ph{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);min-width:0}
 .ph img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;background:var(--na-soft);max-width:100%}
 .ph span{overflow-wrap:anywhere}
-.ph .pk{display:flex;align-items:center;gap:4px;font-size:12px;margin-top:4px;cursor:pointer}
 .ph .cap{font:inherit;font-size:13px;color:var(--ink);width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid var(--line);border-radius:6px;resize:vertical}
 .ph button{border:1px solid var(--line);background:var(--surface);border-radius:6px;font-size:12px;padding:3px}
 @media (min-width:900px){.wrap{max-width:1040px}#items{display:grid;grid-template-columns:1fr 1fr;column-gap:24px}#items .grp{grid-column:1/-1}.strip .in{max-width:1040px}}
@@ -329,7 +328,6 @@ body.nopii .pii{display:none!important}
         <label class="btn small" style="display:inline-block">사진첩에서 여러 장<input id="phMulti" type="file" accept="image/*" multiple hidden></label>
       </div>
       <div class="photos" id="phList"></div>
-      <div class="row" style="margin-top:8px"><button type="button" class="btn small" id="phDl" disabled>고른 사진 내려받기</button><span class="hint">공문 붙임 등에 쓸 사진을 골라 내려받습니다(선 그리기 한 사진은 그린 그대로).</span></div>
     </section>
 
     <section class="block">
@@ -665,7 +663,7 @@ function refreshRec(){
     var th=$("ith"+n2);if(th){var sig=pl2.join("|");if(th.dataset.v!==sig){th.dataset.v=sig;th.innerHTML=pl2.map(function(p){return '<img alt="'+esc(photoLabel(p))+'" data-view="'+esc(p)+'" title="'+esc(((cur.capt||{})[p])||photoLabel(p))+'">'}).join("");
       th.querySelectorAll("img").forEach(function(im){objURL(im.dataset.view).then(function(u){if(u)im.src=u})})}}cm.classList.toggle("hot",cur.items[n2]===FM.bad&&!k2);cm.querySelector(".k").textContent=k2?k2:""}
   var pl=$("phList"),want=(cur.photos||[]).join("|");
-  if(pl.dataset.v!==want){pl.dataset.v=want;pl.innerHTML=(cur.photos||[]).slice().sort(function(x,y){var a=phOrd(x),b=phOrd(y);return a[0]-b[0]||a[1]-b[1]}).map(function(p){return '<div class="ph"><img alt="" data-n="'+esc(p)+'"><span>'+esc(p)+'</span><textarea class="cap" rows="2" data-cap="'+esc(p)+'" placeholder="사진 설명 (점검표에 함께 나옴)">'+esc((cur.capt||{})[p]||"")+'</textarea><label class="pk"><input type="checkbox" data-pick="'+esc(p)+'"> 내려받기 선택</label><button type="button" data-draw="'+esc(p)+'">선 그리기</button><button type="button" data-del="'+esc(p)+'">삭제</button></div>'}).join("");
+  if(pl.dataset.v!==want){pl.dataset.v=want;pl.innerHTML=(cur.photos||[]).slice().sort(function(x,y){var a=phOrd(x),b=phOrd(y);return a[0]-b[0]||a[1]-b[1]}).map(function(p){return '<div class="ph"><img alt="" data-n="'+esc(p)+'"><span>'+esc(p)+'</span><textarea class="cap" rows="2" data-cap="'+esc(p)+'" placeholder="사진 설명 (점검표에 함께 나옴)">'+esc((cur.capt||{})[p]||"")+'</textarea><button type="button" data-draw="'+esc(p)+'">선 그리기</button><button type="button" data-del="'+esc(p)+'">삭제</button></div>'}).join("");
     pl.querySelectorAll("img").forEach(function(im){pGet(im.dataset.n).then(function(b){if(b)im.src=URL.createObjectURL(b)})})}
   $("stripTxt").innerHTML=k26?'미흡 <b>'+c.bad.length+'</b> · '+(cur.actst?esc(cur.actst):'조치 미입력')+' <span>('+c.filled+'/'+NI+')</span>':'하 <b>'+(c.a+c.b)+'</b> · '+(c.filled?'<span class="g g-'+finalGrade(cur,c)+'">'+finalGrade(cur,c)+'</span>':'미기록')+' <span>('+c.filled+'/'+NI+')</span>';
 }
@@ -739,7 +737,6 @@ function savePhoto(f,key){
   }).catch(function(){toast("사진을 저장하지 못했습니다. 휴대폰 저장 공간을 확인하세요")});
 }
 $("phList").addEventListener("click",function(e){var b=e.target.closest("[data-del]");if(b)delPhoto(b.dataset.del);var w=e.target.closest("[data-draw]");if(w)annOpen(w.dataset.draw)});
-$("phList").addEventListener("change",function(e){if(e.target.closest("[data-pick]")){e.stopPropagation();var n=$("phList").querySelectorAll("[data-pick]:checked").length;$("phDl").textContent="고른 사진 내려받기"+(n?" ("+n+"장)":"");$("phDl").disabled=!n}});
 $("phList").addEventListener("input",function(e){var t=e.target.closest("[data-cap]");if(!t||!cur)return;e.stopPropagation();cur.capt=cur.capt||{};var v=t.value.trim();if(v)cur.capt[t.dataset.cap]=t.value;else delete cur.capt[t.dataset.cap];touch()});
 function delPhoto(name){if(!cur)return;cur.photos=cur.photos.filter(function(p){return p!==name});pDel(name);pDel("orig_"+name);if(cur.capt)delete cur.capt[name];touch();refreshRec()}
 /* minimal ZIP (stored, UTF-8 names) */
@@ -770,9 +767,6 @@ function exportPhotos(recs,msgEl){
 function saveMany(files,key){[].slice.call(files||[]).forEach(function(f){savePhoto(f,key)})}
 $("phFile").addEventListener("change",function(e){saveMany(e.target.files,$("phItem").value);e.target.value=""});
 $("phMulti").addEventListener("change",function(e){var n=e.target.files.length;saveMany(e.target.files,$("phItem").value);if(n>1)toast(n+"장을 넣는 중입니다");e.target.value=""});
-$("phDl").addEventListener("click",function(){var ks=[].map.call($("phList").querySelectorAll("[data-pick]:checked"),function(c){return c.dataset.pick});if(!ks.length)return;
-  ks.reduce(function(pr,k,i){return pr.then(function(){return pGet(k).then(function(b){if(!b)return;var m=k.match(/_(\d\d|전경|현황|기타)[^_]*_(\d+)\.(\w+)$/),tag=m?(/^\d/.test(m[1])?"item"+m[1]:({"전경":"front","현황":"status","기타":"etc"})[m[1]])+"_"+m[2]:"photo"+(i+1);
-    download(b,fname("jpg","photo_"+tag));return new Promise(function(r){setTimeout(r,400)})})})},Promise.resolve()).then(function(){toast(ks.length+"장 내려받기를 요청했습니다")})});
 var icKey=null;
 $("items").addEventListener("click",function(e){var im=e.target.closest("[data-view]");if(!im)return;var k=im.dataset.view;objURL(k).then(function(u){$("phViewImg").src=u;$("phViewCap").textContent=photoLabel(k)+(((cur.capt||{})[k])?"\n"+cur.capt[k]:"");$("phView").hidden=false})});
 $("phView").addEventListener("click",function(){$("phView").hidden=true});
