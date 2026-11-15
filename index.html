@@ -394,7 +394,7 @@ body.nopii .pii{display:none!important}
         <button class="btn primary small" type="button" id="expCsv">결과 CSV 저장</button>
         <button class="btn small" type="button" id="cpCsv">CSV 복사</button>
         <button class="btn primary small" type="button" id="expZip">사진 묶음(ZIP) 저장</button>
-        <button class="btn small" type="button" id="expRep">시 보고 양식(엑셀) 저장</button>
+        <button class="btn small" type="button" id="expRep">시 보고 양식(엑셀) 저장</button><label class="btn small" id="cityWrap" style="display:inline-block">시 실적표에 채우기 (긴급점검)<input id="cityXlsx" type="file" accept=".xlsx" hidden></label>
         <button class="btn small" type="button" id="expDocs">점검표 문서 묶음 저장</button>
         <button class="btn small" type="button" id="expPkg">결과 묶음(사진·서명 포함) 저장</button>
         <button class="btn small" type="button" id="expJson">백업 파일 저장</button>
@@ -856,6 +856,50 @@ function rep26Rows(){
     var st=r.actst||(fl?"미조치":"조치완료");
     return {cells:[i+1,a,area+"\n"+fl2,jj,r.act||"",r.crew?Number(r.crew)||r.crew:"",st],flag:fl,st:st,crew:Number(r.crew)||0,date:r.date||"",ext:r.ext,off:r.offname}});
 }
+/* ---------- 시 실적표(관음동 천장 탈락사고 안전점검) 채우기: 시에서 받은 xlsx를 고르면 동구 행의 S~Z 빈 칸을 앱 기록으로 채워 새 파일로 저장 ---------- */
+function unzipAll(buf){var dv=new DataView(buf),u8=new Uint8Array(buf),e=u8.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)return Promise.reject("zip");
+  var n=dv.getUint16(e+10,true),o=dv.getUint32(e+16,true),out=[],dec=new TextDecoder();
+  for(var i=0;i<n;i++){var m=dv.getUint16(o+10,true),cs=dv.getUint32(o+20,true),nl=dv.getUint16(o+28,true),xl=dv.getUint16(o+30,true),cl=dv.getUint16(o+32,true),lo=dv.getUint32(o+42,true);
+    var name=dec.decode(u8.subarray(o+46,o+46+nl)),ln=dv.getUint16(lo+26,true),lx=dv.getUint16(lo+28,true),st=lo+30+ln+lx;out.push({name:name,m:m,raw:u8.slice(st,st+cs)});o+=46+nl+xl+cl}
+  return Promise.all(out.map(function(f){if(f.m===0)return {name:f.name,data:f.raw};
+    return new Response(new Blob([f.raw]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer().then(function(b){return {name:f.name,data:new Uint8Array(b)}})}))}
+function xEsc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function jibunKey(dongName,main,sub){var m=parseInt(main,10)||0,b=parseInt(sub,10)||0;return String(dongName||"").replace(/\s/g,"")+(m?m+(b?"-"+b:""):"")}
+function recJibun(r){var a=String(r.addr||"").replace(/\s+/g," ").trim(),m=a.match(/([가-힣0-9]+[동가로리])\s*(?:산\s*)?(\d+)(?:-(\d+))?\s*$/);return m?jibunKey(m[1],m[2],m[3]):""}
+function cityRow(r){var bad=FORMS.k26.bad,it=ITEMS26,p=function(x){return String(x).padStart(2,"0")};
+  var o={};/* 미점검(X)·미실시 사유는 담당자가 직접 적음 */
+  if(r.status!=="done"&&r.status!=="draft")return o;
+  o.S="O";var d=r.date||String(r.visit||"").slice(0,10),tm=(String(r.visit||"").slice(0,10)===d)?String(r.visit||"").slice(11,16):"";
+  if(d){var q=d.split("-");o.T=(+q[1])+". "+(+q[2])+"."+(tm?" "+tm:"")}
+  o.V=r.off?"O":"X";if(r.ext)o.W=r.ext;var f=r.extf||"";if(f)o.X=/구조/.test(f)?"구조":/건축/.test(f)?"건축":f;
+  var mi=it.filter(function(x){return r.items&&r.items[x.n]===bad}).map(function(x){var nt=r.notes&&r.notes[x.n];return CIRC[x.n-1]+" "+x.s+(nt?"("+nt+")":"")});
+  o.Y=mi.length?mi.join(", "):"없음";if(r.act)o.Z=r.act+(r.actst?" ("+r.actst+")":"");else if(r.actst)o.Z=r.actst;return o}
+function fillCityXlsx(file,msgEl){msgEl.textContent="시 실적표를 읽는 중입니다…";
+  file.arrayBuffer().then(unzipAll).then(function(files){var dec=new TextDecoder(),enc=new TextEncoder(),get=function(n){return files.find(function(f){return f.name===n})};
+    var wb=dec.decode(get("xl/workbook.xml").data),rels=dec.decode(get("xl/_rels/workbook.xml.rels").data);
+    var sm=wb.match(/<sheet[^>]*name="점검실적표"[^>]*r:id="([^"]+)"/)||wb.match(/<sheet[^>]*r:id="([^"]+)"[^>]*name="점검실적표"/);if(!sm)throw "점검실적표 시트를 찾지 못했습니다";
+    var tg=(rels.match(new RegExp('Id="'+sm[1]+'"[^>]*Target="([^"]+)"'))||rels.match(new RegExp('Target="([^"]+)"[^>]*Id="'+sm[1]+'"')))[1].replace(/^\/?(xl\/)?/,"");var sf=get("xl/"+tg);
+    var ss=[];var sst=get("xl/sharedStrings.xml");if(sst){var sx=dec.decode(sst.data);(sx.match(/<si>[\s\S]*?<\/si>/g)||[]).forEach(function(si){ss.push((si.match(/<t[^>]*>[\s\S]*?<\/t>/g)||[]).map(function(t){return t.replace(/<[^>]+>/g,"")}).join("").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">"))})}
+    var xml=dec.decode(sf.data);
+    var val=function(c){if(!c)return "";var v=(c.match(/<v>([\s\S]*?)<\/v>/)||[])[1];if(/t="s"/.test(c))return ss[+v]||"";if(/t="inlineStr"/.test(c))return (c.match(/<t[^>]*>([\s\S]*?)<\/t>/)||[])[1]||"";return v||""};
+    var recs=RECS(),byId={},byJ={},byJ0={};recs.forEach(function(r){var j0=recJibun(r),j=j0+"|"+nz(r.dong||"");if(r.id)byId[String(r.id).trim()]=r;(byJ[j]=byJ[j]||[]).push(r);(byJ0[j0]=byJ0[j0]||[]).push(r)});
+    var used={},rows=0,filled=0,cells=0,miss=[];
+    xml=xml.replace(/<row([^>]*)>([\s\S]*?)<\/row>/g,function(all,attr,body){var rn=+(attr.match(/r="(\d+)"/)||[])[1];if(rn<8)return all;
+      var cs={};(body.match(/<c [^>]*?(?:\/>|>[\s\S]*?<\/c>)/g)||[]).forEach(function(c){var ref=(c.match(/r="([A-Z]+)\d+"/)||[])[1];if(ref)cs[ref]=c});
+      if(val(cs.C)!=="대구시동구")return all;rows++;
+      var r=byId[String(val(cs.A)).trim()];if(!r){var j=jibunKey(val(cs.D),val(cs.E),val(cs.F)),c2=byJ[j+"|"+nz(val(cs.K))]||byJ[j+"|"]||byJ0[j]||[];r=c2.length===1?c2[0]:null}
+      if(!r)return all;used[r.k]=1;var o=cityRow(r),n0=cells;
+      Object.keys(o).forEach(function(col){if(!o[col])return;var cur0=cs[col];if(cur0&&val(cur0)!=="")return;var st=cur0?(cur0.match(/ s="(\d+)"/)||["",""])[1]:"";
+        cs[col]='<c r="'+col+rn+'"'+(st?' s="'+st+'"':'')+' t="inlineStr"><is><t xml:space="preserve">'+xEsc(o[col])+'</t></is></c>';cells++});
+      if(cells>n0)filled++;
+      var colN=function(x){var n=0;for(var i=0;i<x.length;i++)n=n*26+x.charCodeAt(i)-64;return n};
+      return '<row'+attr+'>'+Object.keys(cs).sort(function(a,b){return colN(a)-colN(b)}).map(function(k){return cs[k]}).join("")+'</row>'});
+    recs.forEach(function(r){if(!used[r.k]&&(r.status==="done"||r.status==="draft"))miss.push(r.addr+(r.dong?" "+r.dong:""))});
+    sf.data=enc.encode(xml);var cc=files.findIndex(function(f){return f.name==="xl/calcChain.xml"});
+    download(zip(files),fname("xlsx","city_report"));
+    msgEl.textContent="시 실적표 동구 "+rows+"행 중 "+filled+"행에 빈 칸 "+cells+"개를 채워 저장을 요청했습니다(이미 적힌 칸은 그대로 둠)."+(miss.length?" 실적표에서 찾지 못한 앱 기록 "+miss.length+"건: "+miss.join(", "):"")
+  }).catch(function(e){msgEl.textContent="시 실적표를 처리하지 못했습니다: "+(e&&e.message||e)})}
+$("cityXlsx").addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(f){if(formKey()!=="k26"){$("expMsg").textContent="첫 화면에서 「긴급점검」을 고른 뒤 사용하세요.";e.target.value="";return}fillCityXlsx(f,$("expMsg"))}e.target.value=""});
 function saveReport26(msgEl){
   var d=rep26Rows();if(!d.length){msgEl.textContent="점검 완료된 건물이 없어 결과 서식을 만들지 않았습니다.";return}
   var fl=d.filter(function(x){return x.flag}),done=fl.filter(function(x){return x.st==="조치완료"}).length,crew=d.reduce(function(a,x){return a+x.crew},0);
