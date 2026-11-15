@@ -157,7 +157,7 @@ body.nopii .pii{display:none!important}
   <div id="vList">
     <div class="top">
       <h1>대구시 소규모 노후<br>건축물 안전점검 <span class="sub" id="orgLabel"></span> <span class="sub" style="font-size:12px;font-weight:400">v1.0</span></h1>
-      <button class="iconbtn" id="toSettings" type="button">설정·내보내기</button>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end"><button class="iconbtn" id="toSettings" type="button">설정·내보내기</button><a class="iconbtn" id="manualLink" href="https://donggu-sb.github.io/sbcheck/manual.pdf" target="_blank" rel="noopener" download="안전점검앱_사용설명서.pdf" style="text-decoration:none;color:inherit;font-size:13px">사용설명서 받기</a></div>
     </div>
     <div class="fsbar" id="fsBar" hidden><span id="fsTxt"></span> <button class="btn small" type="button" id="fsBtn">기록 폴더 지정</button></div>
     <div class="formsel" id="formSel" role="group" aria-label="점검 구분"><button type="button" data-form="k26"><b>긴급점검</b><small>천장 탈락사고 · 20항목</small></button><button type="button" data-form="y24"><b>사전안전점검</b><small>안전점검표 · 19항목·등급</small></button></div>
@@ -170,7 +170,7 @@ body.nopii .pii{display:none!important}
       <li>하루가 끝나면 결과 CSV와 사진 묶음을 담당 기관에 보내고, 보낸 기록은 이 휴대폰에서 지웁니다.</li></ol></div>
     <div class="notice" id="sampleNote" hidden><b>예시 자료</b> 화면의 건물은 사용법을 보여 주는 예시입니다. 설정에서 실제 대상 목록(CSV)을 불러오면 바뀝니다.</div>
     <div class="prog">
-      <div class="nums"><span>전체 <b id="nAll">0</b></span><span>완료 <b id="nDone">0</b></span><span>작성중 <b id="nDraft">0</b></span><span>출입 불가 <b id="nNo">0</b></span><span>사전 확인 <b id="nPre">0</b></span><span>미착수 <b id="nNew">0</b></span></div>
+      <div class="nums"><span>전체 <b id="nAll">0</b></span><span>완료 <b id="nDone">0</b></span><span>작성중 <b id="nDraft">0</b></span><span>미점검 <b id="nNo">0</b></span><span>사전 확인 <b id="nPre">0</b></span><span>미착수 <b id="nNew">0</b></span></div>
       <div class="bar" id="bar"></div>
     </div>
     <div class="row" style="margin-top:12px">
@@ -336,7 +336,7 @@ body.nopii .pii{display:none!important}
       <div class="row">
         <button class="btn" type="button" id="saveDraft">작성중 저장</button>
         <button class="btn primary" type="button" id="saveDone">점검 완료</button>
-        <button class="btn" type="button" id="markNo">출입 불가</button>
+        <button class="btn" type="button" id="markNo">미점검</button>
       </div>
       <h3 style="font-size:14px;margin:14px 0 4px">서명</h3>
       <div class="grid2">
@@ -351,7 +351,7 @@ body.nopii .pii{display:none!important}
       <div class="row" style="margin-top:12px"><button class="btn small" type="button" id="docOne">점검표 문서 보기·인쇄</button><button class="btn small" type="button" id="pkgOne">이 건물 넘겨주기 파일</button></div>
       <p class="hint" id="pkgMsg" style="margin:6px 0 0">다음 사람이 이어서 고칠 수 있도록 이 건물의 기록·사진·도면·서명을 한 파일로 저장합니다. 받은 사람은 「설정·내보내기 → 백업 불러오기」로 엽니다.</p>
       <p class="hint" id="histLine" style="margin:4px 0 0"></p>
-      <label class="f" id="noWrap" style="margin-top:10px" hidden>출입 불가 사유<input id="f_noreason" placeholder="예: 소유자 부재, 출입 거부"></label>
+      <label class="f" id="noWrap" style="margin-top:10px" hidden>미점검 사유<input id="f_noreason" placeholder="예: 소유자 부재, 출입 거부"></label>
       <p class="warn" id="doneWarn" hidden></p>
       <div style="margin-top:14px"><button class="btn small danger" type="button" id="delRec">이 기록 삭제</button></div>
       <div class="confirm" id="delConfirm" hidden>이 건물의 기록과 대상 정보를 지웁니다. 되돌릴 수 없습니다.
@@ -389,12 +389,12 @@ body.nopii .pii{display:none!important}
     </section>
     <section class="block">
       <h2>내보내기</h2>
-      <p class="hint" style="margin:0 0 8px">하루 작업이 끝나면 결과 CSV와 사진 묶음(ZIP)을 저장해 담당 기관에 보냅니다. 파일 이름은 영문과 날짜로 붙습니다(예: inspect_result_20261023_1830.csv). 기관과 점검자는 파일 안에 들어 있습니다. 아이폰은 「파일」 앱의 다운로드 폴더, 안드로이드는 「내 파일」의 다운로드 폴더에 저장됩니다. 보낸 뒤에는 아래 버튼으로 완료·출입 불가 기록과 그 사진을 이 휴대폰에서 지우고, 다운로드 폴더의 파일도 지워 주세요.</p>
+      <p class="hint" style="margin:0 0 8px">하루 작업이 끝나면 결과 CSV와 사진 묶음(ZIP)을 저장해 담당 기관에 보냅니다. 파일 이름은 영문과 날짜로 붙습니다(예: inspect_result_20261023_1830.csv). 기관과 점검자는 파일 안에 들어 있습니다. 아이폰은 「파일」 앱의 다운로드 폴더, 안드로이드는 「내 파일」의 다운로드 폴더에 저장됩니다. 보낸 뒤에는 아래 버튼으로 완료·미점검 기록과 그 사진을 이 휴대폰에서 지우고, 다운로드 폴더의 파일도 지워 주세요.</p>
       <div class="row">
         <button class="btn primary small" type="button" id="expCsv">결과 CSV 저장</button>
         <button class="btn small" type="button" id="cpCsv">CSV 복사</button>
         <button class="btn primary small" type="button" id="expZip">사진 묶음(ZIP) 저장</button>
-        <button class="btn small" type="button" id="expRep">시 보고 양식(엑셀) 저장</button><label class="btn small" id="cityWrap" style="display:inline-block">시 실적표에 채우기 (긴급점검)<input id="cityXlsx" type="file" accept=".xlsx" hidden></label>
+        <button class="btn small" type="button" id="expRep">시 보고 양식(엑셀) 저장</button><label class="btn small" id="cityWrap" style="display:inline-block">시 실적표에 채우기 (긴급점검)<input id="cityXlsx" type="file" accept=".xlsx" hidden></label><input id="cityTpl" type="file" accept=".xlsx" hidden>
         <button class="btn small" type="button" id="expDocs">점검표 문서 묶음 저장</button>
         <button class="btn small" type="button" id="expPkg">결과 묶음(사진·서명 포함) 저장</button>
         <button class="btn small" type="button" id="expJson">백업 파일 저장</button>
@@ -512,7 +512,7 @@ function to26(r){if(r.form==="k26")return;var M={"상":"양호","중":"보통","
   (r.marks||[]).forEach(function(m){if(typeof m.n==="number"&&m.n>=16)m.n=m.n+1});
   r.items=it;r.notes=nt;r.form="k26"}
 var GRADES=[["우수",1.5],["양호",5.0],["보통",9.0],["미흡",14.0],["불량",Infinity]];
-var STATUS={new:"미착수",pre:"사전 확인",draft:"작성중",done:"완료",noaccess:"출입 불가"};
+var STATUS={new:"미착수",pre:"사전 확인",draft:"작성중",done:"완료",noaccess:"미점검"};
 var KEY="sbcheck.v1";
 
 /* ---------- storage ---------- */
@@ -577,7 +577,7 @@ function renderList(){
   $("nAll").textContent=RR.length;$("nDone").textContent=cnt.done;$("nDraft").textContent=cnt.draft;$("nNo").textContent=cnt.noaccess;$("nNew").textContent=cnt.new;$("nPre").textContent=cnt.pre;
   var tot=RR.length||1;
   $("bar").innerHTML='<i style="width:'+(cnt.done/tot*100)+'%;background:var(--ok)"></i><i style="width:'+(cnt.draft/tot*100)+'%;background:var(--mid)"></i><i style="width:'+(cnt.noaccess/tot*100)+'%;background:var(--bad)"></i><i style="width:'+(cnt.pre/tot*100)+'%;background:var(--accent);opacity:.45"></i>';
-  var fs=[["all","전체"],["new","미착수"],["pre","사전 확인"],["draft","작성중"],["done","완료"],["noaccess","출입 불가"]];
+  var fs=[["all","전체"],["new","미착수"],["pre","사전 확인"],["draft","작성중"],["done","완료"],["noaccess","미점검"]];
   $("filters").innerHTML=fs.map(function(f){return '<button type="button" class="chip" data-f="'+f[0]+'" aria-pressed="'+(filter===f[0])+'">'+f[1]+'</button>'}).join("");
   var q=$("q").value.trim().toLowerCase();
   var rows=RR.filter(function(r){return (filter==="all"||r.status===filter)&&(!q||[r.id,r.bid,r.addr,r.road,r.dong,r.name,r.use,r.asg].join(" ").toLowerCase().indexOf(q)>=0)});
@@ -710,7 +710,7 @@ $("saveDone").addEventListener("click",function(){
   if(miss.length){$("doneWarn").textContent="완료하려면 다음을 채워 주세요: "+miss.join(", ");$("doneWarn").hidden=false;return}
   $("doneWarn").hidden=true;cur.status="done";cur.prec=cur.prec||"";cur.upd=new Date().toISOString();saveNow("점검 완료로 저장했습니다");
 });
-$("markNo").addEventListener("click",function(){cur.status="noaccess";$("noWrap").hidden=false;$("f_noreason").focus();touch();saveNow("출입 불가로 표시했습니다")});
+$("markNo").addEventListener("click",function(){cur.status="noaccess";$("noWrap").hidden=false;$("f_noreason").focus();touch();saveNow("미점검으로 표시했습니다")});
 $("delRec").addEventListener("click",function(){$("delConfirm").hidden=false});
 $("delNo").addEventListener("click",function(){$("delConfirm").hidden=true});
 $("delYes").addEventListener("click",function(){recKeys(cur).forEach(pDel);S.recs=S.recs.filter(function(r){return r!==cur});cur=null;persist();show("list");toast("삭제했습니다")});
@@ -867,9 +867,10 @@ function xEsc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").rep
 function jibunKey(dongName,main,sub){var m=parseInt(main,10)||0,b=parseInt(sub,10)||0;return String(dongName||"").replace(/\s/g,"")+(m?m+(b?"-"+b:""):"")}
 function recJibun(r){var a=String(r.addr||"").replace(/\s+/g," ").trim(),m=a.match(/([가-힣0-9]+[동가로리])\s*(?:산\s*)?(\d+)(?:-(\d+))?\s*$/);return m?jibunKey(m[1],m[2],m[3]):""}
 function cityRow(r){var bad=FORMS.k26.bad,it=ITEMS26,p=function(x){return String(x).padStart(2,"0")};
-  var o={};/* 미점검(X)·미실시 사유는 담당자가 직접 적음 */
+  var o={};
+  if(r.status==="noaccess"){o.S="X";if(r.noreason)o.U=r.noreason;return o}/* 미점검 → 점검유무 X + 사유 */
   if(r.status!=="done"&&r.status!=="draft")return o;
-  o.S="O";var d=r.date||String(r.visit||"").slice(0,10),tm=(String(r.visit||"").slice(0,10)===d)?String(r.visit||"").slice(11,16):"";
+  o._ok=1;o.S="O";var d=r.date||String(r.visit||"").slice(0,10),tm=(String(r.visit||"").slice(0,10)===d)?String(r.visit||"").slice(11,16):"";
   if(d){var q=d.split("-");o.T=(+q[1])+". "+(+q[2])+"."+(tm?" "+tm:"")}
   o.V=r.off?"O":"X";if(r.ext)o.W=r.ext;var f=r.extf||"";if(f)o.X=/구조/.test(f)?"구조":/건축/.test(f)?"건축":f;
   var mi=it.filter(function(x){return r.items&&r.items[x.n]===bad}).map(function(x){var nt=r.notes&&r.notes[x.n];return CIRC[x.n-1]+" "+x.s+(nt?"("+nt+")":"")});
@@ -889,42 +890,85 @@ function fillCityXlsx(file,msgEl){msgEl.textContent="시 실적표를 읽는 중
       if(val(cs.C)!=="대구시동구")return all;rows++;
       var r=byId[String(val(cs.A)).trim()];if(!r){var j=jibunKey(val(cs.D),val(cs.E),val(cs.F)),c2=byJ[j+"|"+nz(val(cs.K))]||byJ[j+"|"]||byJ0[j]||[];r=c2.length===1?c2[0]:null}
       if(!r)return all;used[r.k]=1;var o=cityRow(r),n0=cells;
-      Object.keys(o).forEach(function(col){if(!o[col])return;var cur0=cs[col];if(cur0&&val(cur0)!=="")return;var st=cur0?(cur0.match(/ s="(\d+)"/)||["",""])[1]:"";
+      Object.keys(o).forEach(function(col){if(!o[col]||col[0]==="_")return;var cur0=cs[col];if(cur0&&val(cur0)!=="")return;var st=cur0?(cur0.match(/ s="(\d+)"/)||["",""])[1]:"";
         cs[col]='<c r="'+col+rn+'"'+(st?' s="'+st+'"':'')+' t="inlineStr"><is><t xml:space="preserve">'+xEsc(o[col])+'</t></is></c>';cells++});
       if(cells>n0)filled++;
       var colN=function(x){var n=0;for(var i=0;i<x.length;i++)n=n*26+x.charCodeAt(i)-64;return n};
       return '<row'+attr+'>'+Object.keys(cs).sort(function(a,b){return colN(a)-colN(b)}).map(function(k){return cs[k]}).join("")+'</row>'});
-    recs.forEach(function(r){if(!used[r.k]&&(r.status==="done"||r.status==="draft"))miss.push(r.addr+(r.dong?" "+r.dong:""))});
+    recs.forEach(function(r){if(!used[r.k]&&(r.status==="done"||r.status==="draft"||r.status==="noaccess"))miss.push(r.addr+(r.dong?" "+r.dong:""))});
     sf.data=enc.encode(xml);var cc=files.findIndex(function(f){return f.name==="xl/calcChain.xml"});
     download(zip(files),fname("xlsx","city_report"));
     msgEl.textContent="시 실적표 동구 "+rows+"행 중 "+filled+"행에 빈 칸 "+cells+"개를 채워 저장을 요청했습니다(이미 적힌 칸은 그대로 둠)."+(miss.length?" 실적표에서 찾지 못한 앱 기록 "+miss.length+"건: "+miss.join(", "):"")
   }).catch(function(e){msgEl.textContent="시 실적표를 처리하지 못했습니다: "+(e&&e.message||e)})}
-$("cityXlsx").addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(f){if(formKey()!=="k26"){$("expMsg").textContent="첫 화면에서 「긴급점검」을 고른 뒤 사용하세요.";e.target.value="";return}fillCityXlsx(f,$("expMsg"))}e.target.value=""});
-function saveReport26(msgEl){/* 시 실적표(관음동 천장 탈락사고 관련 안전점검) 양식: 동구 대상 전체 행, S~Z는 조서 내용 */
-  var recs=RECS().slice().sort(function(a,b){return String(a.appr||"9").localeCompare(String(b.appr||"9"))||String(a.addr||"").localeCompare(String(b.addr||""))});
-  if(!recs.length){msgEl.textContent="긴급점검 목록이 비어 있어 실적표를 만들지 않았습니다.";return}
-  var gu=S.gu||"동구",p4=function(x){return String(parseInt(x,10)||0).padStart(4,"0")};
-  var rows=[],r=function(n,arr,st,ht){rows.push('<row r="'+n+'"'+(ht?' ht="'+ht+'" customHeight="1"':'')+'>'+arr.map(function(v,i){return cellX(n,i,v,typeof st==="function"?st(i):st)}).join("")+'</row>')};
-  var E27=function(m){var a=[];for(var i=0;i<27;i++)a.push(m[i]==null?"":m[i]);return a};
-  r(1,E27({2:"○ 관음동 건축물 천장 탈락사고 관련 안전점검 결과"}),function(i){return i===2?4:0},24);
-  r(2,E27({0:"○ 근린생활시설, 판매시설 / 연면적 500~1000㎡ / 3층이하 / 1996년 이전 사용승인(준공 30년이상) 건축물"}),0);
-  r(3,E27({2:"점검대상",18:"점검개요",26:"비고"}),1);
-  r(4,E27({18:"점검유무",19:"점검일시",20:"점검미실시 사유",21:"점검자 정보",24:"점검 결과"}),1);
-  r(5,E27({21:"구.군 공무원\n현장점검 참여 여부",22:"외부 전문가"}),1,30);
-  r(6,E27(["건축물대장일련번호","시도코드명","시군구코드명","법정동코드명","주지번","부지번","대지위치주소","도로명주소","대장구분코드명","대장종류코드명","동명","주용도코드명","구조코드명","허가일자","착공일자","사용승인일자","연면적","지상층수",null,null,null,null,"성명","분야","지적사항","조치사항",null]),1,30);
-  var done=0;
-  recs.forEach(function(x,k){var a=String(x.addr||"").replace(/\s+/g," ").trim(),m=a.match(/([가-힣0-9]+[동가로리])\s*(?:산\s*)?(\d+)(?:-(\d+))?\s*$/)||[],dn=m[1]||"",mn=m[2]||"",sb=m[3]||"0";
-    var o=cityRow(x);if(o.S)done++;
-    var g=dn?"대구광역시 "+gu+" "+dn+" "+p4(mn)+(parseInt(sb,10)?"-"+p4(sb):""):a;
-    var road=x.road?(/^대구/.test(x.road)?x.road:"대구광역시 "+gu+" "+x.road.replace(/^동구\s*/,"")):"";
-    var area=parseFloat(String(x.area||"").replace(/[^0-9.]/g,"")),up=parseInt(x.up,10);
-    r(8+k,[x.id||"","대구광역시","대구시"+gu,dn,dn?p4(mn):"",dn?p4(sb):"",g,road,"","",x.dong||"",x.use||"",x.struct||"","","",x.appr||"",isNaN(area)?"":area,isNaN(up)?"":up,
-      o.S||"",o.T||"",o.U||"",o.V||"",o.W||"",o.X||"",o.Y||"",o.Z||"",""],function(c){return c===24||c===25||c===20?3:2})});
-  var merges=["S3:Z3","V5:V6","Y4:Z5","S4:S6","U4:U6","T4:T6","AA3:AA6","C3:R5","V4:X4","W5:X5"],widths=[12,10,11,10,7,7,30,34,9,10,9,16,14,9,9,11,9,7,8,12,26,14,10,8,40,24,10];
-  var sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane xSplit="0" ySplit="6" topLeftCell="A7" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>'+widths.map(function(w,i){return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'}).join("")+'</cols><sheetData>'+rows.join("")+'</sheetData><mergeCells count="'+merges.length+'">'+merges.map(function(m){return '<mergeCell ref="'+m+'"/>'}).join("")+'</mergeCells><pageSetup orientation="landscape" paperSize="9"/></worksheet>';
-  var b=xlsxFromSheet(sheet,"점검실적표"),n=fname("xlsx","result26");download(b,n);
-  msgEl.textContent="시 실적표 양식 "+n+"(동구 "+recs.length+"동, 점검 "+done+"동) 저장을 요청했습니다. 미점검(X)·점검미실시 사유는 직접 적고, 시 파일의 동구 행에 붙여 넣으면 됩니다.";
-}
+$("cityXlsx").addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(f){pPut("city_xlsx",f).catch(function(){});if(formKey()!=="k26"){$("expMsg").textContent="첫 화면에서 「긴급점검」을 고른 뒤 사용하세요.";e.target.value="";return}fillCityXlsx(f,$("expMsg"))}e.target.value=""});
+function saveReport26(msgEl){/* 시 실적표 양식 그대로: 앱에 넣어 둔 시 파일의 서식·행 순서를 써서, 앱에서 점검한 건물만 뽑아 S~Z를 채움 */
+  pGet("city_xlsx").then(function(f){if(!f){msgEl.textContent="시에서 받은 점검실적표 파일(.xlsx)을 한 번 골라 주세요. 앱에 보관해 두고 양식과 순서를 그대로 씁니다.";var i=$("cityTpl");if(i)i.click();return}
+    return f.arrayBuffer().then(unzipAll).then(function(files){buildCity26(files,msgEl)})}).catch(function(e){msgEl.textContent="시 보고 양식을 만들지 못했습니다: "+(e&&e.message||e)})}
+function buildCity26(files,msgEl){var dec=new TextDecoder(),enc=new TextEncoder(),get=function(n){return files.find(function(f){return f.name===n})};
+  var wb=dec.decode(get("xl/workbook.xml").data),rels=dec.decode(get("xl/_rels/workbook.xml.rels").data);
+  var sm=wb.match(/<sheet[^>]*name="점검실적표"[^>]*r:id="([^"]+)"/)||wb.match(/<sheet[^>]*r:id="([^"]+)"[^>]*name="점검실적표"/);if(!sm)throw "보관된 파일에서 점검실적표 시트를 찾지 못했습니다";
+  var tg=(rels.match(new RegExp('Id="'+sm[1]+'"[^>]*Target="([^"]+)"'))||rels.match(new RegExp('Target="([^"]+)"[^>]*Id="'+sm[1]+'"')))[1].replace(/^\/?(xl\/)?/,"");
+  var ss=[],sst=get("xl/sharedStrings.xml");if(sst){(dec.decode(sst.data).match(/<si>[\s\S]*?<\/si>/g)||[]).forEach(function(si){ss.push((si.match(/<t[^>]*>[\s\S]*?<\/t>/g)||[]).map(function(t){return t.replace(/<[^>]+>/g,"")}).join(""))})}
+  var unx=function(t){return t.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&amp;/g,"&")};
+  var xml=dec.decode(get("xl/"+tg).data),i0=xml.indexOf("<sheetData>"),i1=xml.indexOf("</sheetData>");
+  var head=xml.slice(0,i0),body=xml.slice(i0+11,i1),tail=xml.slice(i1+12);
+  var val=function(c){if(!c)return "";var v=(c.match(/<v>([\s\S]*?)<\/v>/)||[])[1];if(/t="s"/.test(c))return unx(ss[+v]||"");if(/t="inlineStr"/.test(c))return unx((c.match(/<t[^>]*>([\s\S]*?)<\/t>/)||[])[1]||"");return v||""};
+  var inl=function(c){/* 공유 문자열 → 셀 안 문자열 */if(!/t="s"/.test(c))return c;var v=(c.match(/<v>([\s\S]*?)<\/v>/)||[])[1];return c.replace(/ t="s"/,' t="inlineStr"').replace(/<v>[\s\S]*?<\/v>/,'<is><t xml:space="preserve">'+(ss[+v]||"")+'</t></is>')};
+  var colN=function(x){var n=0;for(var i=0;i<x.length;i++)n=n*26+x.charCodeAt(i)-64;return n};
+  var cellsOf=function(rb){var cs={};(rb.match(/<c [^>]*?(?:\/>|>[\s\S]*?<\/c>)/g)||[]).forEach(function(c){var ref=(c.match(/r="([A-Z]+)\d+"/)||[])[1];if(ref)cs[ref]=c});return cs};
+  var recs=RECS().filter(function(r){return r.status==="done"||r.status==="draft"||r.status==="noaccess"});
+  if(!recs.length){msgEl.textContent="점검했거나 미점검으로 표시한 건물이 없어 시 보고 양식을 만들지 않았습니다.";return}
+  var byId={},byJ={},byJ0={};recs.forEach(function(r){var j0=recJibun(r),j=j0+"|"+nz(r.dong||"");if(r.id)byId[String(r.id).trim()]=r;(byJ[j]=byJ[j]||[]).push(r);(byJ0[j0]=byJ0[j0]||[]).push(r)});
+  var out=[],used={},proto=null,hdr=[],tgt={},nT=0;
+  (body.match(/<row[^>]*>[\s\S]*?<\/row>|<row[^>]*\/>/g)||[]).forEach(function(rw){var attr=(rw.match(/^<row([^>]*?)\/?>/)||[])[1]||"",rn=+(attr.match(/r="(\d+)"/)||[])[1],rb=rw.replace(/^<row[^>]*>/,"").replace(/<\/row>$/,"");
+    if(rn<8){var cs=cellsOf(rb);Object.keys(cs).forEach(function(k){cs[k]=inl(cs[k]).replace(/<v>[\s\S]*?<\/v>/,function(m){return /<f>/.test(cs[k])?"":m})});
+      if(rn===7&&cs.C)cs.C=cs.C.replace(/SUBTOTAL\(3,C9:/,"SUBTOTAL(3,C8:");
+      hdr.push({attr:attr,cs:cs});return}
+    var cs=cellsOf(rb);if(val(cs.C)!=="대구시동구")return;if(!proto)proto={attr:attr,cs:cs};var tk=String(val(cs.A)).trim()||jibunKey(val(cs.D),val(cs.E),val(cs.F))+"|"+val(cs.K);if(!tgt[tk]){tgt[tk]=1;nT++}
+    var r=byId[String(val(cs.A)).trim()];if(!r){var j=jibunKey(val(cs.D),val(cs.E),val(cs.F)),c2=byJ[j+"|"+nz(val(cs.K))]||byJ[j+"|"]||byJ0[j]||[];r=c2.length===1?c2[0]:null}
+    if(!r||used[r.k])return;used[r.k]=1;out.push({attr:attr,cs:cs,r:r})});
+  if(!proto)throw "보관된 파일에 동구 행이 없습니다";
+  /* 시 목록에서 찾지 못한 앱 기록은 맨 아래(사용승인일 순) */
+  var gu=S.gu||"동구",p4=function(x){return String(parseInt(x,10)||0).padStart(4,"0")},extra=recs.filter(function(r){return !used[r.k]}).sort(function(a,b){return String(a.appr||"9").localeCompare(String(b.appr||"9"))});
+  extra.forEach(function(x){var a=String(x.addr||"").replace(/\s+/g," ").trim(),m=a.match(/([가-힣0-9]+[동가로리])\s*(?:산\s*)?(\d+)(?:-(\d+))?\s*$/)||[],dn=m[1]||"",mn=m[2]||"",sb=m[3]||"0";
+    var area=parseFloat(String(x.area||"").replace(/[^0-9.]/g,""));
+    var v={A:x.id||"",B:"대구광역시",C:"대구시"+gu,D:dn,E:dn?p4(mn):"",F:dn?p4(sb):"",G:dn?"대구광역시 "+gu+" "+dn+" "+p4(mn)+"-"+p4(sb):a,H:x.road?(/^대구/.test(x.road)?x.road:"대구광역시 "+gu+" "+x.road.replace(/^동구\s*/,"")):"",K:x.dong||"",L:x.use||"",M:x.struct||"",P:x.appr||"",Q:isNaN(area)?"":area,R:x.up||""};
+    var cs={};Object.keys(proto.cs).forEach(function(k){var st=(proto.cs[k].match(/ s="(\d+)"/)||["",""])[1],w=v[k];
+      cs[k]=w===""||w==null?'<c r="'+k+'1"'+(st?' s="'+st+'"':'')+'/>':typeof w==="number"?'<c r="'+k+'1"'+(st?' s="'+st+'"':'')+'><v>'+w+'</v></c>':'<c r="'+k+'1"'+(st?' s="'+st+'"':'')+' t="inlineStr"><is><t xml:space="preserve">'+xEsc(w)+'</t></is></c>'});
+    out.push({attr:proto.attr,cs:cs,r:x})});
+  var put=function(cs,col,w){var c=cs[col]||'<c r="'+col+'1"/>',st=(c.match(/ s="(\d+)"/)||["",""])[1];cs[col]='<c r="'+col+'1"'+(st?' s="'+st+'"':'')+' t="inlineStr"><is><t xml:space="preserve">'+xEsc(w)+'</t></is></c>'};
+  var rowX=function(o,rn){var cs=o.cs;Object.keys(cs).forEach(function(k){cs[k]=inl(cs[k]).replace(/ r="[A-Z]+\d+"/,' r="'+k+rn+'"')});
+    var at=o.attr.replace(/ r="\d+"/,' r="'+rn+'"').replace(/ hidden="1"/,"");
+    return '<row'+at+'>'+Object.keys(cs).sort(function(a,b){return colN(a)-colN(b)}).map(function(k){return cs[k]}).join("")+'</row>'};
+  var rowsX=hdr.map(function(h,i){return rowX(h,+(h.attr.match(/r="(\d+)"/)||[])[1])}),done=0,nx=0;
+  out.forEach(function(o,i){var c=cityRow(o.r);if(c._ok)done++;else if(c.S==="X")nx++;Object.keys(c).forEach(function(col){if(c[col]&&col[0]!=="_")put(o.cs,col,c[col])});rowsX.push(rowX(o,8+i))});
+  var last=7+out.length;
+  head=head.replace(/ filterMode="1"/,"").replace(/<dimension[^>]*\/>/,'<dimension ref="A1:AA'+last+'"/>').replace(/<pane [^>]*\/>/,'<pane ySplit="7" topLeftCell="A8" activePane="bottomLeft" state="frozen"/>').replace(/<selection [^>]*\/>/g,"");
+  tail=tail.replace(/<autoFilter[\s\S]*?<\/autoFilter>|<autoFilter[^>]*\/>/,'<autoFilter ref="A7:AA'+last+'"/>').replace(/<dataValidations[\s\S]*?<\/dataValidations>/,"").replace(/<pageSetup([^>]*?) r:id="[^"]*"/,"<pageSetup$1").replace(/<(legacyDrawing|drawing)[^>]*\/>/g,"");
+  var sheet=head+"<sheetData>"+rowsX.join("")+"</sheetData>"+tail;
+  /* 개요(누계): 시 파일 개요 시트 서식 그대로, 기간 행은 누계 한 줄 — 동구 점검 = 점검실적표 점검유무 O 개수(연동), 미점검 = 대상 − 점검 */
+  var gx=null,gm=wb.match(/<sheet[^>]*name="개요"[^>]*r:id="([^"]+)"/)||wb.match(/<sheet[^>]*r:id="([^"]+)"[^>]*name="개요"/);
+  if(gm){var gt=(rels.match(new RegExp('Id="'+gm[1]+'"[^>]*Target="([^"]+)"'))||rels.match(new RegExp('Target="([^"]+)"[^>]*Id="'+gm[1]+'"')))[1].replace(/^\/?(xl\/)?/,"");
+    var g=dec.decode(get("xl/"+gt).data),j0=g.indexOf("<sheetData>"),j1=g.indexOf("</sheetData>"),gh=g.slice(0,j0),gb=g.slice(j0+11,j1),gtl=g.slice(j1+12),grs={};
+    (gb.match(/<row[^>]*>[\s\S]*?<\/row>|<row[^>]*\/>/g)||[]).forEach(function(rw){grs[+(rw.match(/r="(\d+)"/)||[])[1]]=rw});
+    var lastP=0;Object.keys(grs).forEach(function(k){if(+k>=6&&/<f>/.test(grs[k]))lastP=Math.max(lastP,+k)});
+    var fix=function(rw){var a=(rw.match(/^<row([^>]*?)\/?>/)||[])[1]||"",b=rw.replace(/^<row[^>]*>/,"").replace(/<\/row>$/,""),cs=cellsOf(b);Object.keys(cs).forEach(function(k){cs[k]=inl(cs[k]).replace(/<v>[\s\S]*?<\/v>/,function(m){return /<f>/.test(cs[k])?"":m})});return {attr:a,cs:cs}};
+    var gr=[];for(var q=1;q<=5;q++)if(grs[q]){var h=fix(grs[q]);gr.push(rowX(h,q))}
+    if(lastP){var t=fix(grs[6]),lp=fix(grs[lastP]),d0=new Date(),md=(d0.getMonth()+1)+"/"+d0.getDate();t.attr=lp.attr;/* 내용은 첫 기간 행(식이 온전함), 서식(아래 굵은 선)은 마지막 기간 행 */
+      Object.keys(t.cs).forEach(function(k){var ls=lp.cs[k]&&(lp.cs[k].match(/ s="(\d+)"/)||[])[1];t.cs[k]=t.cs[k].replace(/<f[^>]*\/>/,"").replace(/<f [^>]*>/,"<f>");if(ls)t.cs[k]=t.cs[k].replace(/ s="\d+"/,' s="'+ls+'"')});
+      put(t.cs,"A","누계 (~"+md+")");var sI=(t.cs.I.match(/ s="(\d+)"/)||["",""])[1],sJ=(t.cs.J.match(/ s="(\d+)"/)||["",""])[1];
+      t.cs.I='<c r="I1"'+(sI?' s="'+sI+'"':'')+'><f>COUNTIF(점검실적표!$S$8:$S$'+Math.max(last,8)+',"O")</f></c>';t.cs.J='<c r="J1"'+(sJ?' s="'+sJ+'"':'')+'><f>'+nT+'-I6</f></c>';gr.push(rowX(t,6))}
+    Object.keys(grs).forEach(function(k){if(+k>lastP&&lastP){gr.push(rowX(fix(grs[k]),+k))}});
+    gx=gh.replace(/<dimension[^>]*\/>/,"").replace(/ tabSelected="1"/,"").replace(/<selection [^>]*\/>/g,"")+"<sheetData>"+gr.join("")+"</sheetData>"+gtl.replace(/<pageSetup([^>]*?) r:id="[^"]*"/,"<pageSetup$1").replace(/<(legacyDrawing|drawing)[^>]*\/>/g,"")}
+  var F=function(n,t){return {name:n,data:enc.encode(t)}},th=get("xl/theme/theme1.xml"),st=get("xl/styles.xml");
+  var parts=[F("[Content_Types].xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'+(gx?'<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>':'')+'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+(th?'<Override PartName="/xl/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>':'')+'</Types>'),
+    F("_rels/.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'),
+    F("xl/workbook.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+(gx?'<sheet name="개요" sheetId="2" r:id="rId4"/>':'')+'<sheet name="점검실적표" sheetId="1" r:id="rId1"/></sheets><definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="'+(gx?1:0)+'" hidden="1">점검실적표!$A$7:$AA$'+last+'</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>'),
+    F("xl/_rels/workbook.xml.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+(th?'<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>':'')+(gx?'<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>':'')+'</Relationships>'),
+    F("xl/worksheets/sheet1.xml",sheet),{name:"xl/styles.xml",data:st.data}];if(gx)parts.push(F("xl/worksheets/sheet2.xml",gx));if(th)parts.push({name:"xl/theme/theme1.xml",data:th.data});
+  var n=fname("xlsx","result26");download(new Blob([zip(parts)],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),n);
+  msgEl.textContent="시 실적표 양식 그대로 "+n+"(점검 "+done+"동·미점검 "+nx+"동, 시 순서"+(extra.length?" · 시 목록에 없는 "+extra.length+"동은 맨 아래":"")+")"+(gx?", 개요(누계: 대상 "+nT+"동, 점검 수는 점검유무 O와 연동)":"")+" 저장을 요청했습니다. 미점검으로 표시한 건물은 점검유무 X와 사유가 들어갑니다."}
+$("cityTpl").addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];e.target.value="";if(!f)return;pPut("city_xlsx",f).then(function(){saveReport26($("expMsg"))}).catch(function(){$("expMsg").textContent="파일을 보관하지 못했습니다."})});
 /* ---------- 마감재 해체 확인 ---------- */
 var OPEN_FIND=["구조체 균열","철근 노출","콘크리트 박리","누수 흔적","달대·행어 부식","고정 불량","처짐","이상 없음"];
 function pinTxt(n){return typeof n==="number"?CIRC[n-1]:n==="기타"?"기":String(n)}
@@ -1282,7 +1326,7 @@ $("impCsv").addEventListener("change",function(e){
 });
 var COLS=null;
 function header(){
-  var h=["자치구","기관","기기사용자","외부전문가","전문가분야","시자문단","공무원참여","공동점검자","위치","동구분","시설물명","관리번호","건물ID","고유번호","도로명주소","사전확인메모","배정점검자","사전확인자","주용도","사용승인일","연면적","지상층수","지하층수","구조형식","관리자","관리자연락처","조사일시","상태","출입불가사유",
+  var h=["자치구","기관","기기사용자","외부전문가","전문가분야","시자문단","공무원참여","공동점검자","위치","동구분","시설물명","관리번호","건물ID","고유번호","도로명주소","사전확인메모","배정점검자","사전확인자","주용도","사용승인일","연면적","지상층수","지하층수","구조형식","관리자","관리자연락처","조사일시","상태","미점검사유",
     "면담자","면담자구분","의견1_안전우려","의견2_하중증가","의견3_점검이력","의견4_기타"];
   for(var n=1;n<=NI;n++)h.push("항목"+String(n).padStart(2,"0"));
   for(n=1;n<=NI;n++)h.push("상세"+String(n).padStart(2,"0"));
@@ -1431,7 +1475,7 @@ $("purge").addEventListener("click",function(){
   var n=purgeable().length,c=$("purgeConfirm");
   if(!S.lastExport){$("expMsg").textContent="아직 내보낸 적이 없습니다. 먼저 결과 CSV를 저장하거나 복사하세요.";return}
   if(!n){$("expMsg").textContent="지울 기록이 없습니다. 마지막 내보내기 이후 고친 기록은 다시 내보낸 뒤 지울 수 있습니다.";return}
-  $("purgeTxt").textContent="마지막 내보내기("+new Date(S.lastExport).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})+") 때 포함된 완료·출입 불가 "+n+"건을 이 휴대폰에서 지웁니다. 미착수·작성중 건물은 남습니다.";c.hidden=false});
+  $("purgeTxt").textContent="마지막 내보내기("+new Date(S.lastExport).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})+") 때 포함된 완료·미점검 "+n+"건을 이 휴대폰에서 지웁니다. 미착수·작성중 건물은 남습니다.";c.hidden=false});
 $("purgeNo").addEventListener("click",function(){$("purgeConfirm").hidden=true});
 $("purgeYes").addEventListener("click",function(){var del=purgeable();del.forEach(function(r){recKeys(r).forEach(pDel)});S.recs=S.recs.filter(function(r){return del.indexOf(r)<0});persist();$("purgeConfirm").hidden=true;$("expMsg").textContent=del.length+"건을 지웠습니다.";toast(del.length+"건 지움")});
 $("resetAll").addEventListener("click",function(){$("resetConfirm").hidden=false});
