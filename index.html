@@ -900,26 +900,30 @@ function fillCityXlsx(file,msgEl){msgEl.textContent="시 실적표를 읽는 중
     msgEl.textContent="시 실적표 동구 "+rows+"행 중 "+filled+"행에 빈 칸 "+cells+"개를 채워 저장을 요청했습니다(이미 적힌 칸은 그대로 둠)."+(miss.length?" 실적표에서 찾지 못한 앱 기록 "+miss.length+"건: "+miss.join(", "):"")
   }).catch(function(e){msgEl.textContent="시 실적표를 처리하지 못했습니다: "+(e&&e.message||e)})}
 $("cityXlsx").addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(f){if(formKey()!=="k26"){$("expMsg").textContent="첫 화면에서 「긴급점검」을 고른 뒤 사용하세요.";e.target.value="";return}fillCityXlsx(f,$("expMsg"))}e.target.value=""});
-function saveReport26(msgEl){
-  var d=rep26Rows();if(!d.length){msgEl.textContent="점검 완료된 건물이 없어 결과 서식을 만들지 않았습니다.";return}
-  var fl=d.filter(function(x){return x.flag}),done=fl.filter(function(x){return x.st==="조치완료"}).length,crew=d.reduce(function(a,x){return a+x.crew},0);
-  var dates=d.map(function(x){return x.date}).filter(Boolean).sort(),ex={},of={};d.forEach(function(x){if(x.ext)ex[x.ext]=1;if(x.off)of[x.off]=1});
-  var ne=Object.keys(ex).length,no=Object.keys(of).length,gu=S.gu||"";
+function saveReport26(msgEl){/* 시 실적표(관음동 천장 탈락사고 관련 안전점검) 양식: 동구 대상 전체 행, S~Z는 조서 내용 */
+  var recs=RECS().slice().sort(function(a,b){return String(a.appr||"9").localeCompare(String(b.appr||"9"))||String(a.addr||"").localeCompare(String(b.addr||""))});
+  if(!recs.length){msgEl.textContent="긴급점검 목록이 비어 있어 실적표를 만들지 않았습니다.";return}
+  var gu=S.gu||"동구",p4=function(x){return String(parseInt(x,10)||0).padStart(4,"0")};
   var rows=[],r=function(n,arr,st,ht){rows.push('<row r="'+n+'"'+(ht?' ht="'+ht+'" customHeight="1"':'')+'>'+arr.map(function(v,i){return cellX(n,i,v,typeof st==="function"?st(i):st)}).join("")+'</row>')};
-  r(1,["관음동 건축물 천장 탈락사고 관련 안전점검 결과"+(gu?" ("+gu+")":""),"","","","","",""],4,28);
-  r(3,["□ 점검개요"],0);
-  r(4,[" ㅇ (기    간) "+(dates.length?dotDate(dates[0],true)+" ~ "+dotDate(dates[dates.length-1],true):"")],0);
-  r(5,[" ㅇ (점 검 자) 총 "+(ne+no)+"명(공무원 "+no+", 민간전문가 "+ne+")"],0);
-  r(6,[" ㅇ (점검실적) "+d.length+"개소"],0);
-  r(8,["□ 점검 및 조치결과"],0);
-  r(9,[" ㅇ 지적사항 "+fl.length+"건 / 조치완료 "+done+"건 / 미조치 "+(fl.length-done)+"건"],0);
-  r(11,["연번","소재지","연면적(층수)","지적사항","조치내용","점검인원","비고"],1,22);
-  r(12,["계","","",fl.length+"건",d.filter(function(x){return x.cells[4]}).length+"건",crew+"명",""],1);
-  d.forEach(function(x,i){r(13+i,x.cells,function(c){return c===3||c===4?3:2})});
-  var merges=["A1:G1","A12:C12"],widths=[6,22,16,40,30,9,10];
-  var sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols>'+widths.map(function(w,i){return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'}).join("")+'</cols><sheetData>'+rows.join("")+'</sheetData><mergeCells count="'+merges.length+'">'+merges.map(function(m){return '<mergeCell ref="'+m+'"/>'}).join("")+'</mergeCells></worksheet>';
-  var b=xlsxFromSheet(sheet,"점검결과"),n=fname("xlsx","result26");download(b,n);
-  msgEl.textContent="결과 제출 서식 "+n+"(점검 "+d.length+"개소, 지적 "+fl.length+"건) 저장을 요청했습니다. 지적사항 건수는 '미흡' 항목이 1개 이상인 건물 수입니다.";
+  var E27=function(m){var a=[];for(var i=0;i<27;i++)a.push(m[i]==null?"":m[i]);return a};
+  r(1,E27({2:"○ 관음동 건축물 천장 탈락사고 관련 안전점검 결과"}),function(i){return i===2?4:0},24);
+  r(2,E27({0:"○ 근린생활시설, 판매시설 / 연면적 500~1000㎡ / 3층이하 / 1996년 이전 사용승인(준공 30년이상) 건축물"}),0);
+  r(3,E27({2:"점검대상",18:"점검개요",26:"비고"}),1);
+  r(4,E27({18:"점검유무",19:"점검일시",20:"점검미실시 사유",21:"점검자 정보",24:"점검 결과"}),1);
+  r(5,E27({21:"구.군 공무원\n현장점검 참여 여부",22:"외부 전문가"}),1,30);
+  r(6,E27(["건축물대장일련번호","시도코드명","시군구코드명","법정동코드명","주지번","부지번","대지위치주소","도로명주소","대장구분코드명","대장종류코드명","동명","주용도코드명","구조코드명","허가일자","착공일자","사용승인일자","연면적","지상층수",null,null,null,null,"성명","분야","지적사항","조치사항",null]),1,30);
+  var done=0;
+  recs.forEach(function(x,k){var a=String(x.addr||"").replace(/\s+/g," ").trim(),m=a.match(/([가-힣0-9]+[동가로리])\s*(?:산\s*)?(\d+)(?:-(\d+))?\s*$/)||[],dn=m[1]||"",mn=m[2]||"",sb=m[3]||"0";
+    var o=cityRow(x);if(o.S)done++;
+    var g=dn?"대구광역시 "+gu+" "+dn+" "+p4(mn)+(parseInt(sb,10)?"-"+p4(sb):""):a;
+    var road=x.road?(/^대구/.test(x.road)?x.road:"대구광역시 "+gu+" "+x.road.replace(/^동구\s*/,"")):"";
+    var area=parseFloat(String(x.area||"").replace(/[^0-9.]/g,"")),up=parseInt(x.up,10);
+    r(8+k,[x.id||"","대구광역시","대구시"+gu,dn,dn?p4(mn):"",dn?p4(sb):"",g,road,"","",x.dong||"",x.use||"",x.struct||"","","",x.appr||"",isNaN(area)?"":area,isNaN(up)?"":up,
+      o.S||"",o.T||"",o.U||"",o.V||"",o.W||"",o.X||"",o.Y||"",o.Z||"",""],function(c){return c===24||c===25||c===20?3:2})});
+  var merges=["S3:Z3","V5:V6","Y4:Z5","S4:S6","U4:U6","T4:T6","AA3:AA6","C3:R5","V4:X4","W5:X5"],widths=[12,10,11,10,7,7,30,34,9,10,9,16,14,9,9,11,9,7,8,12,26,14,10,8,40,24,10];
+  var sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane xSplit="0" ySplit="6" topLeftCell="A7" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>'+widths.map(function(w,i){return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'}).join("")+'</cols><sheetData>'+rows.join("")+'</sheetData><mergeCells count="'+merges.length+'">'+merges.map(function(m){return '<mergeCell ref="'+m+'"/>'}).join("")+'</mergeCells><pageSetup orientation="landscape" paperSize="9"/></worksheet>';
+  var b=xlsxFromSheet(sheet,"점검실적표"),n=fname("xlsx","result26");download(b,n);
+  msgEl.textContent="시 실적표 양식 "+n+"(동구 "+recs.length+"동, 점검 "+done+"동) 저장을 요청했습니다. 미점검(X)·점검미실시 사유는 직접 적고, 시 파일의 동구 행에 붙여 넣으면 됩니다.";
 }
 /* ---------- 마감재 해체 확인 ---------- */
 var OPEN_FIND=["구조체 균열","철근 노출","콘크리트 박리","누수 흔적","달대·행어 부식","고정 불량","처짐","이상 없음"];
@@ -1045,7 +1049,7 @@ function annUp(){if(!AN.cs)return;var a=AN.cs,b=AN.ce,c=$("annCv"),m=c.width/60;
 $("annCv").addEventListener("pointerup",annUp);$("annCv").addEventListener("pointercancel",annUp);
 $("annUndo").addEventListener("click",function(){if(AN.cur){AN.cur.pts.pop();if(!AN.cur.pts.length)AN.cur=null}else AN.strokes.pop();annDraw()});
 $("annCancel").addEventListener("click",function(){$("ann").hidden=true;AN.k=null});
-function annStore(k,blob){if(urlCache[k]){URL.revokeObjectURL(urlCache[k]);delete urlCache[k]}if(FS.done)delete FS.done[fsName(k)];return pPut(k,blob).then(function(){$("phList").dataset.v="";touch();refreshRec();if(typeof fsSchedule==="function")fsSchedule()})}
+function annStore(k,blob){if(urlCache[k]){URL.revokeObjectURL(urlCache[k]);delete urlCache[k]}if(FS.done)delete FS.done[fsKeyPath(k)];return pPut(k,blob).then(function(){$("phList").dataset.v="";touch();refreshRec();if(typeof fsSchedule==="function")fsSchedule()})}
 $("annSave").addEventListener("click",function(){var k=AN.k;if(!k)return;annFinish();annDraw();if(!AN.strokes.length){$("ann").hidden=true;return}
   pGet("orig_"+k).then(function(o){return o?0:pGet(k).then(function(b){return pPut("orig_"+k,b)})}).then(function(){
     $("annCv").toBlob(function(bl){annStore(k,bl).then(function(){$("ann").hidden=true;AN.k=null;toast("선을 그린 사진으로 저장했습니다")})},"image/jpeg",0.88)})});
@@ -1317,7 +1321,11 @@ function fsName(k){var safe=function(t){return String(t||"").replace(/[\\/:*?"<>
   if(/^dwg_/.test(k)){var r2=S.recs.find(function(x){return (x.dwgs||[]).some(function(d){return d.k===k})});if(r2){var di=r2.dwgs.findIndex(function(d){return d.k===k}),dd=r2.dwgs[di];return safe(photoBase(r2))+"_도면"+(di+1)+"_"+safe(dd.t||"")+".jpg"}}
   return fsNameOld(k)}
 function fsRecOf(k){return S.recs.find(function(r){return recKeys(r).indexOf(k)>=0})}
-function fsSubDir(md,k){var r=fsRecOf(k);if(!r)return Promise.resolve(md);return md.getDirectoryHandle(photoBase(r).replace(/[\s.]+$/,""),{create:true})}
+function fsDateOf(r){var d=String(r.date||String(r.visit||"").slice(0,10)||"");return d?d.replace(/-/g,"."):"날짜미입력"}
+function fsSubDir(md,k){var r=fsRecOf(k);if(!r)return Promise.resolve(md);/* 시 제출 구조: 날짜 폴더 / 현장(지번) 폴더 */
+  return md.getDirectoryHandle(fsDateOf(r),{create:true}).then(function(dd){return dd.getDirectoryHandle(photoBase(r).replace(/[\s.]+$/,""),{create:true})})}
+function fsKeyPath(k){var r=fsRecOf(k);return (r?fsDateOf(r)+"/"+photoBase(r)+"/":"")+fsName(k)}
+function fsOldSub(md,k){var r=fsRecOf(k);if(!r)return Promise.reject();return md.getDirectoryHandle(photoBase(r).replace(/[\s.]+$/,""))}
 function fsNameOld(k){var n=k.replace(/[\\/:*?"<>|]/g,"_");return /\.(jpe?g|png|webp|gif)$/i.test(n)?n:n+(/^sig/.test(k)?".png":".jpg")}
 function fsWrite(dir,name,data){return dir.getFileHandle(name,{create:true}).then(function(h){return h.createWritable()}).then(function(w){return w.write(data).then(function(){return w.close()})})}
 function fsRead(dir,name){return dir.getFileHandle(name).then(function(h){return h.getFile()})}
@@ -1326,8 +1334,8 @@ function fsSchedule(){if(!FS.ok)return;clearTimeout(FS.timer);FS.timer=setTimeou
 function fsSave(){if(!FS.ok)return Promise.resolve();if(FS.busy){FS.again=true;return Promise.resolve()}FS.busy=true;
   var txt=JSON.stringify(S),day=new Date().toISOString().slice(0,10).replace(/-/g,"");
   return fsWrite(FS.dir,"기록.json",txt).then(function(){if(!S.recs.length)return;/* 빈 목록으로 그날 백업을 덮지 않음 */return FS.dir.getDirectoryHandle("일별백업",{create:true}).then(function(b){return fsWrite(b,"기록_"+day+".json",txt)})})
-  .then(fsMediaDir).then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){if(!FS.done[fsName(k)])keys.push(k)})});
-    return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(!b)return;return fsSubDir(md,k).then(function(sd){return fsWrite(sd,fsName(k),b)}).then(function(){FS.done[fsName(k)]=1})})})},Promise.resolve())})
+  .then(fsMediaDir).then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){if(!FS.done[fsKeyPath(k)])keys.push(k)})});
+    return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(!b)return;return fsSubDir(md,k).then(function(sd){return fsWrite(sd,fsName(k),b)}).then(function(){FS.done[fsKeyPath(k)]=1})})})},Promise.resolve())})
   .then(function(){FS.last=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});fsSet("on","기록 폴더 「"+FS.dir.name+"」에 자동 저장 중 · 마지막 저장 "+FS.last,"")})
   .catch(function(e){FS.ok=false;fsSet("warn","기록 폴더에 저장하지 못했습니다("+(e&&e.name||e)+"). 다시 연결해 주세요.","다시 연결")})
   .then(function(){FS.busy=false;if(FS.again){FS.again=false;fsSchedule()}})}
@@ -1336,10 +1344,10 @@ function fsLoad(){/* 폴더에 있던 기록을 앱에 합치고, 앱에 없는 
       (d.recs||[]).forEach(function(r){norm(r);var ex=S.recs.findIndex(function(x){return x.k===r.k||(r.addr&&akey(x)===akey(r))});if(ex<0){S.recs.push(r);add++}else{var cf=mergeRec(S.recs[ex],r);if(cf.length)conf.push(label(S.recs[ex])+": "+cf.join(", "))}});
       ["org","insp","dept","gu"].forEach(function(f){if(!S[f]&&d[f])S[f]=d[f]});return {add:add,conf:conf}},function(){return {add:0,conf:[],none:true}})
   .then(function(res){return fsMediaDir().then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){keys.push(k)})});
-      return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(b){return}return fsSubDir(md,k).then(function(sd){return fsRead(sd,fsName(k))}).catch(function(){return fsRead(md,fsName(k))}).catch(function(){return fsRead(md,fsNameOld(k))}).then(function(f){return pPut(k,f)},function(){})})})},Promise.resolve())
+      return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(b){return}return fsSubDir(md,k).then(function(sd){return fsRead(sd,fsName(k))}).catch(function(){return fsOldSub(md,k).then(function(sd){return fsRead(sd,fsName(k))})}).catch(function(){return fsRead(md,fsName(k))}).catch(function(){return fsRead(md,fsNameOld(k))}).then(function(f){return pPut(k,f)},function(){})})})},Promise.resolve())
       .then(function(){return md.keys?(async function(){for await(const n of md.keys())FS.done[n]=1})().catch(function(){}):0})}).then(function(){return res})})}
 function fsPullMedia(){return fsMediaDir().then(function(md){var keys=[];S.recs.forEach(function(r){recKeys(r).forEach(function(k){keys.push(k)})});
-  return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(b)return;return fsSubDir(md,k).then(function(sd){return fsRead(sd,fsName(k))}).catch(function(){return fsRead(md,fsName(k))}).catch(function(){return fsRead(md,fsNameOld(k))}).then(function(f){return pPut(k,f)},function(){})})})},Promise.resolve())}).catch(function(){})}
+  return keys.reduce(function(p,k){return p.then(function(){return pGet(k).then(function(b){if(b)return;return fsSubDir(md,k).then(function(sd){return fsRead(sd,fsName(k))}).catch(function(){return fsOldSub(md,k).then(function(sd){return fsRead(sd,fsName(k))})}).catch(function(){return fsRead(md,fsName(k))}).catch(function(){return fsRead(md,fsNameOld(k))}).then(function(f){return pPut(k,f)},function(){})})})},Promise.resolve())}).catch(function(){})}
 /* PC: 기록 폴더 안 '받은' 이 들어간 폴더(예: 2. 받은파일)에 새로 넣은 .json을 자동으로 불러옴 */
 function fsScanInbox(){if(!FS.ok||!FS.dir||!FS.dir.values)return Promise.resolve();S.seen=S.seen||{};
   return (async function(){var inbox=null;for await(const h of FS.dir.values()){if(h.kind==="directory"&&/받은/.test(h.name)){inbox=h;break}}
@@ -1386,7 +1394,7 @@ function mergeRec(o,n){
 $("impQuick").addEventListener("click",function(){$("impJson").click()});
 function importText(t){var d=JSON.parse(t);if(!d.recs)throw 0;var k=0,conf=[];if(S.sample){S.recs=[];S.sample=false}
     d.recs.forEach(function(r){norm(r);var ex=S.recs.findIndex(function(x){return x.k===r.k||(r.addr&&akey(x)===akey(r))});r.hist=r.hist||[];r.hist.push({by:S.insp||"",at:new Date().toISOString(),act:"받음"});if(ex<0){S.recs.push(r);k++}else{var cf=mergeRec(S.recs[ex],r);if(cf.length)conf.push(label(S.recs[ex])+": "+cf.join(", "));k++}});
-    if(d.files)Object.keys(d.files).forEach(function(k){try{pPut(k,d2b(d.files[k]));if(urlCache[k]){URL.revokeObjectURL(urlCache[k]);delete urlCache[k]}if(FS.done)delete FS.done[fsName(k)]}catch(e){}});
+    if(d.files)Object.keys(d.files).forEach(function(k){try{pPut(k,d2b(d.files[k]));if(urlCache[k]){URL.revokeObjectURL(urlCache[k]);delete urlCache[k]}if(FS.done)delete FS.done[fsKeyPath(k)]}catch(e){}});
     ["org","insp","dept","gu"].forEach(function(f){if(!S[f]&&d[f])S[f]=d[f]});return {k:k,conf:conf}}
 function importDone(n,k,conf,bad){persist();fillSet();renderList();if(FS.ok)fsPullMedia().then(function(){if(cur)renderDwg()});
   var m=(n>1?"파일 "+n+"개에서 ":"")+k+"건을 반영했습니다."+(bad.length?" 읽지 못한 파일: "+bad.join(", ")+" (이 앱에서 만든 .json인지 확인)":"")+(conf.length?" 서로 다르게 적힌 칸 "+conf.length+"건 — 최근 수정한 쪽을 남기고 다른 쪽 내용은 각 건물의 「주고받은 기록」에 남겼습니다: "+conf.join(" / "):"");
