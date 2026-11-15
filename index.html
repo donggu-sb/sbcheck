@@ -946,7 +946,7 @@ function buildCity26(files,msgEl){var dec=new TextDecoder(),enc=new TextEncoder(
   head=head.replace(/ filterMode="1"/,"").replace(/<dimension[^>]*\/>/,'<dimension ref="A1:AA'+last+'"/>').replace(/<pane [^>]*\/>/,'<pane ySplit="7" topLeftCell="A8" activePane="bottomLeft" state="frozen"/>').replace(/<selection [^>]*\/>/g,"");
   tail=tail.replace(/<autoFilter[\s\S]*?<\/autoFilter>|<autoFilter[^>]*\/>/,'<autoFilter ref="A7:AA'+last+'"/>').replace(/<dataValidations[\s\S]*?<\/dataValidations>/,"").replace(/<pageSetup([^>]*?) r:id="[^"]*"/,"<pageSetup$1").replace(/<(legacyDrawing|drawing)[^>]*\/>/g,"");
   var sheet=head+"<sheetData>"+rowsX.join("")+"</sheetData>"+tail;
-  /* 개요(누계): 시 파일 개요 시트 서식 그대로, 기간 행은 누계 한 줄 — 동구 점검 = 점검실적표 점검유무 O 개수(연동), 미점검 = 대상 − 점검 */
+  /* 개요(누계): 시 파일 개요 시트 서식 그대로, 기간 행은 누계 한 줄 — 점검실적표에 점검유무가 적힌 행만 셈: 점검 = O 개수, 미점검 = X 개수(연동) */
   var gx=null,gm=wb.match(/<sheet[^>]*name="개요"[^>]*r:id="([^"]+)"/)||wb.match(/<sheet[^>]*r:id="([^"]+)"[^>]*name="개요"/);
   if(gm){var gt=(rels.match(new RegExp('Id="'+gm[1]+'"[^>]*Target="([^"]+)"'))||rels.match(new RegExp('Target="([^"]+)"[^>]*Id="'+gm[1]+'"')))[1].replace(/^\/?(xl\/)?/,"");
     var g=dec.decode(get("xl/"+gt).data),j0=g.indexOf("<sheetData>"),j1=g.indexOf("</sheetData>"),gh=g.slice(0,j0),gb=g.slice(j0+11,j1),gtl=g.slice(j1+12),grs={};
@@ -957,7 +957,7 @@ function buildCity26(files,msgEl){var dec=new TextDecoder(),enc=new TextEncoder(
     if(lastP){var t=fix(grs[6]),lp=fix(grs[lastP]),d0=new Date(),md=(d0.getMonth()+1)+"/"+d0.getDate();t.attr=lp.attr;/* 내용은 첫 기간 행(식이 온전함), 서식(아래 굵은 선)은 마지막 기간 행 */
       Object.keys(t.cs).forEach(function(k){var ls=lp.cs[k]&&(lp.cs[k].match(/ s="(\d+)"/)||[])[1];t.cs[k]=t.cs[k].replace(/<f[^>]*\/>/,"").replace(/<f [^>]*>/,"<f>");if(ls)t.cs[k]=t.cs[k].replace(/ s="\d+"/,' s="'+ls+'"')});
       put(t.cs,"A","누계 (~"+md+")");var sI=(t.cs.I.match(/ s="(\d+)"/)||["",""])[1],sJ=(t.cs.J.match(/ s="(\d+)"/)||["",""])[1];
-      t.cs.I='<c r="I1"'+(sI?' s="'+sI+'"':'')+'><f>COUNTIF(점검실적표!$S$8:$S$'+Math.max(last,8)+',"O")</f></c>';t.cs.J='<c r="J1"'+(sJ?' s="'+sJ+'"':'')+'><f>'+nT+'-I6</f></c>';gr.push(rowX(t,6))}
+      t.cs.I='<c r="I1"'+(sI?' s="'+sI+'"':'')+'><f>COUNTIF(점검실적표!$S$8:$S$'+Math.max(last,8)+',"O")</f></c>';t.cs.J='<c r="J1"'+(sJ?' s="'+sJ+'"':'')+'><f>COUNTIF(점검실적표!$S$8:$S$'+Math.max(last,8)+',"X")</f></c>';gr.push(rowX(t,6))}
     Object.keys(grs).forEach(function(k){if(+k>lastP&&lastP){gr.push(rowX(fix(grs[k]),+k))}});
     gx=gh.replace(/<dimension[^>]*\/>/,"").replace(/ tabSelected="1"/,"").replace(/<selection [^>]*\/>/g,"")+"<sheetData>"+gr.join("")+"</sheetData>"+gtl.replace(/<pageSetup([^>]*?) r:id="[^"]*"/,"<pageSetup$1").replace(/<(legacyDrawing|drawing)[^>]*\/>/g,"")}
   var F=function(n,t){return {name:n,data:enc.encode(t)}},th=get("xl/theme/theme1.xml"),st=get("xl/styles.xml");
@@ -967,7 +967,7 @@ function buildCity26(files,msgEl){var dec=new TextDecoder(),enc=new TextEncoder(
     F("xl/_rels/workbook.xml.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+(th?'<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>':'')+(gx?'<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>':'')+'</Relationships>'),
     F("xl/worksheets/sheet1.xml",sheet),{name:"xl/styles.xml",data:st.data}];if(gx)parts.push(F("xl/worksheets/sheet2.xml",gx));if(th)parts.push({name:"xl/theme/theme1.xml",data:th.data});
   var n=fname("xlsx","result26");download(new Blob([zip(parts)],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),n);
-  msgEl.textContent="시 실적표 양식 그대로 "+n+"(점검 "+done+"동·미점검 "+nx+"동, 시 순서"+(extra.length?" · 시 목록에 없는 "+extra.length+"동은 맨 아래":"")+")"+(gx?", 개요(누계: 대상 "+nT+"동, 점검 수는 점검유무 O와 연동)":"")+" 저장을 요청했습니다. 미점검으로 표시한 건물은 점검유무 X와 사유가 들어갑니다."}
+  msgEl.textContent="시 실적표 양식 그대로 "+n+"(점검 "+done+"동·미점검 "+nx+"동, 시 순서"+(extra.length?" · 시 목록에 없는 "+extra.length+"동은 맨 아래":"")+")"+(gx?", 개요(누계: 점검유무 O·X 개수와 연동)":"")+" 저장을 요청했습니다. 미점검으로 표시한 건물은 점검유무 X와 사유가 들어갑니다."}
 $("cityTpl").addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];e.target.value="";if(!f)return;pPut("city_xlsx",f).then(function(){saveReport26($("expMsg"))}).catch(function(){$("expMsg").textContent="파일을 보관하지 못했습니다."})});
 /* ---------- 마감재 해체 확인 ---------- */
 var OPEN_FIND=["구조체 균열","철근 노출","콘크리트 박리","누수 흔적","달대·행어 부식","고정 불량","처짐","이상 없음"];
