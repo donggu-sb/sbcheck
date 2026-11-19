@@ -133,6 +133,7 @@ pre.out{white-space:pre-wrap;word-break:break-all;font-family:var(--mono);font-s
 .open .chips{margin-top:0}
 .open .row label.btn{display:inline-block}
 .dwgtabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.dwglist img{cursor:zoom-in}
 .dwglist{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}
 .modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}
 .modal .in{background:var(--surface);border-radius:var(--r);padding:14px;width:100%;max-width:560px}
@@ -144,6 +145,15 @@ pre.out{white-space:pre-wrap;word-break:break-all;font-family:var(--mono);font-s
 .sigs .sg{border:1px dashed var(--line);border-radius:8px;padding:8px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
 .sigs img{height:60px;object-fit:contain;background:#fff;border-radius:4px}
 body.nopii .pii{display:none!important}
+#bigView{position:fixed;inset:0;z-index:9000;background:rgba(15,20,20,.94);display:flex;flex-direction:column}
+#bigView[hidden]{display:none}
+#bigView .bigbar{display:flex;gap:6px;align-items:center;padding:8px 10px;color:#fff;flex-wrap:wrap}
+#bigView .bigbar b{flex:1;min-width:120px;font-size:15px;overflow-wrap:anywhere}
+#bigView .bigbar button{background:#fff;color:#111;border:0;border-radius:8px;padding:7px 11px;font-size:14px;font-weight:600}
+#bigBox{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex}
+#bigImg{margin:auto;background:#fff;display:block;max-width:100%;max-height:calc(100vh - 64px);object-fit:contain}
+#bigView .bigbar{flex:none}
+#bigView.zoomed #bigImg{max-width:none;max-height:none;margin:0}
 body:not(.pcsort) .pconly{display:none!important}
 .guide{background:var(--accent-soft);border-radius:var(--r);padding:12px 14px;margin-top:12px;font-size:14px}
 .guide ol{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:2px}
@@ -216,6 +226,8 @@ body:not(.pcsort) .pconly{display:none!important}
       <p class="hint" style="margin:0 0 6px">대장에 현황도가 있으면 배치도·평면도 그림을 넣어 둡니다. 현장 점검자가 도면 위에 결함 위치를 표시할 수 있습니다.</p>
       <label class="btn small" style="display:inline-block">도면·사진 넣기<input id="dwgFile" type="file" accept="image/*" multiple hidden></label>
       <div class="dwglist" id="dwgList"></div>
+      <p class="hint" style="margin:4px 0 0">도면 그림을 누르면 크게 열어 확대해 볼 수 있습니다.</p>
+      <div id="bigView" hidden role="dialog" aria-label="도면 크게 보기"><div class="bigbar"><b id="bigName"></b><button type="button" id="bigPrev">◀ 이전</button><button type="button" id="bigNext">다음 ▶</button><button type="button" id="bigOut">－ 축소</button><button type="button" id="bigIn">＋ 확대</button><button type="button" id="bigFit">화면 맞춤</button><button type="button" id="bigClose">닫기 ✕</button></div><div id="bigBox"><img id="bigImg" alt=""></div></div>
       <div class="row" style="margin-top:10px"><button class="btn small" type="button" id="preDone">사전 확인 완료</button></div>
     </section>
 
@@ -858,13 +870,13 @@ function ledgerApply(r,o,imgs){
   var nm=dwgOrderNames(o);
   return imgs.reduce(function(p,im,i){return p.then(function(){return shrinkTo(new Blob([im.b],{type:im.t}),2200,0.85).then(function(bl){var k="dwg_"+r.k+"_"+Date.now()+"_L"+i;return pPut(k,bl).then(function(){r.dwgs.push({k:k,t:"대장 "+(nm[i]||"현황도 "+(i+1))})})})})},Promise.resolve())
     .then(function(){r.upd=new Date().toISOString();return imgs.length})}
-/* 현황도 이름: 대장에는 배치도 → 지하층 평면도 → 1층부터 각 층 평면도 순으로 들어 있음. 층이 비어 있는 '평면도'는 이 순서로 층을 붙임 */
+/* 현황도 이름: 대장에 적힌 도면 종류를 씀(층이 적힌 평면도는 '2층 평면도'처럼). 층이 비어 있으면 '평면도(층 확인)' */
 function dwgOrderNames(o){var D=parseInt(o.down,10)||0,U=parseInt(o.up,10)||0,seq=[],i;
   if(D===1)seq.push("지하1층");else for(i=1;i<=D;i++)seq.push("지하층 "+i);for(i=1;i<=U;i++)seq.push(i+"층");
   var ptr=0,seen={};return (o.dwgNames||[]).map(function(t){var n,m=t.match(/평면도\s*\(?\s*(지하\s*\d*\s*층|\d+\s*층)\s*\)?/);
     if(/배치도/.test(t))n="배치도";
     else if(m){var fl=m[1].replace(/\s/g,"");n=fl+" 평면도";var ix=seq.indexOf(fl);if(ix>=0)ptr=ix+1}
-    else if(/평면도/.test(t)){n=(seq[ptr]?seq[ptr]+" 평면도(추정)":"평면도");ptr++}/* 대장에 층이 안 적힌 평면도는 순서로 짐작한 것이라 (추정)을 붙임 */
+    else if(/평면도/.test(t))n="평면도(층 확인)";/* 대장에 층이 안 적힌 평면도는 순서가 대장마다 달라 짐작하지 않음 — 크게 보기로 도면 제목을 보고 이름을 고침 */
     else n=t||"현황도";seen[n]=(seen[n]||0)+1;return n+(seen[n]>1?" "+seen[n]:"")})}
 /* .xlsx 대장: 압축 안의 시트 XML에서 칸 글자, 시트별 그림 연결을 따라 현황도를 시트 순서대로 */
 function xlsxRead(buf){return unzipAll(buf).then(function(fs){var dec=new TextDecoder(),F=function(n){var f=fs.find(function(x){return x.name===n});return f?dec.decode(f.data):""},B=function(n){var f=fs.find(function(x){return x.name===n});return f?f.data:null};
@@ -1190,6 +1202,19 @@ function renderDwg(){
 }
 (function(){var o='';ITEMS.forEach(function(it){if(it.n)o+='<option value="'+it.n+'">'+CIRC[it.n-1]+' '+it.s+'</option>'});o+='<option value="기타">기타</option>';$("markItem").innerHTML=o})();
 $("dwgList").addEventListener("click",function(e){var b=e.target.closest("[data-ddel]");if(!b)return;var d=cur.dwgs.splice(+b.dataset.ddel,1)[0];pDel(d.k);cur.marks=(cur.marks||[]).filter(function(m){return m.d!==d.k});cur.lines=(cur.lines||[]).filter(function(l){return l.d!==d.k});touch();renderDwg()});
+/* 사전 확인 도면 크게 보기: 누르면 열고, 확대(최대 4배)·이전/다음·닫기 */
+var bigI=0,bigZ=1;document.body.appendChild($("bigView"));/* 다른 화면 층 위에 뜨도록 body 바로 아래로 옮김 */
+function bigShow(){var ds=(cur&&cur.dwgs)||[];if(!ds.length){$("bigView").hidden=true;return}bigI=(bigI+ds.length)%ds.length;var d=ds[bigI];$("bigName").textContent=(bigI+1)+"/"+ds.length+"  "+(d.t||"");
+  objURL(d.k).then(function(u){$("bigImg").src=u||""});bigZoom(1)}
+function bigZoom(z){bigZ=Math.max(1,Math.min(4,z));var v=$("bigView"),im=$("bigImg"),bx=$("bigBox");v.classList.toggle("zoomed",bigZ>1);
+  if(bigZ>1){var cx=(bx.scrollLeft+bx.clientWidth/2)/Math.max(1,bx.scrollWidth),cy=(bx.scrollTop+bx.clientHeight/2)/Math.max(1,bx.scrollHeight);im.style.width=(bx.clientWidth*bigZ)+"px";im.style.height="auto";
+    bx.scrollLeft=cx*bx.scrollWidth-bx.clientWidth/2;bx.scrollTop=cy*bx.scrollHeight-bx.clientHeight/2}else{im.style.width="";im.style.height=""}}
+$("dwgList").addEventListener("click",function(e){var im=e.target.closest("img[data-dk]");if(!im||!cur)return;bigI=(cur.dwgs||[]).findIndex(function(d){return d.k===im.dataset.dk});$("bigView").hidden=false;bigShow()});
+$("bigClose").addEventListener("click",function(){$("bigView").hidden=true});
+$("bigPrev").addEventListener("click",function(){bigI--;bigShow()});$("bigNext").addEventListener("click",function(){bigI++;bigShow()});
+$("bigIn").addEventListener("click",function(){bigZoom(bigZ+1)});$("bigOut").addEventListener("click",function(){bigZoom(bigZ-1)});$("bigFit").addEventListener("click",function(){bigZoom(1)});
+$("bigImg").addEventListener("dblclick",function(){bigZoom(bigZ>1?1:2)});
+document.addEventListener("keydown",function(e){if($("bigView").hidden)return;if(e.key==="Escape")$("bigView").hidden=true;else if(e.key==="ArrowLeft"){bigI--;bigShow()}else if(e.key==="ArrowRight"){bigI++;bigShow()}else if(e.key==="+"||e.key==="=")bigZoom(bigZ+1);else if(e.key==="-")bigZoom(bigZ-1)});
 $("dwgList").addEventListener("input",function(e){var i=e.target.dataset.dn;if(i==null)return;cur.dwgs[+i].t=e.target.value;touch();
   var t=$("dwgTabs").querySelector('[data-dt="'+i+'"]');if(t)t.textContent=e.target.value});
 $("dwgTabs").addEventListener("click",function(e){var b=e.target.closest("[data-dt]");if(!b)return;lineFinish();curD=+b.dataset.dt;renderDwg()});
